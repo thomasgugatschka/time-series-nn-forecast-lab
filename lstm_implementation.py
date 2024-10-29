@@ -177,12 +177,13 @@ print(f"LSTM mse loss: {lstm_mse_loss}")
 # Test model
 lstm_prediction = best_model(x_test[-1].unsqueeze(0))
 lstm_prediction = lstm_prediction.detach().numpy()
-lstm_prediction = lstm_prediction * z_std[selected_feature] + z_mean[selected_feature]    # Remove z-score normalization
+lstm_prediction = lstm_prediction * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature] # Remove z-score normalization using iloc
+
 lstm_prediction = lstm_prediction[0].tolist()
 
 # Test target
 test_target = y_arr_test[-1,:]
-test_target = test_target * z_std[selected_feature] + z_mean[selected_feature]  # Remove z-score normalization
+test_target = test_target * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
 test_target = test_target.tolist()
 
 # Plot prediction
@@ -225,7 +226,7 @@ plt.title('LSTM predictions with context')
 start_plot = len(y_arr_test) - 2*TS_PAST
 y = df.iloc[:,selected_feature]
 y = y[-len(y_arr_test):]
-y = y * z_std[selected_feature] + z_mean[selected_feature]  # Remove z-score normalization
+y = y * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
 a = [x for x in range(start_plot, len(y))]
 plt.plot(a, y[start_plot:], label='Actual data')
 c = [x for x in range(len(y)-TS_FUTURE, len(y))]

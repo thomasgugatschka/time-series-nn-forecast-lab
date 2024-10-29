@@ -14,3 +14,11 @@ __pycache__/
 *.log
 *.sqlite3
 .DS_Store
+/models/GRU/Results/
+/models/GRU/trained_models/
+/models/LSTM/Results/
+/models/LSTM/trained_models/
+/models/RNN/Results/
+/models/RNN/trained_models/
+/models/TCN/Results/
+/models/TCN/trained_models/

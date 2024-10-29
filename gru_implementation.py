@@ -178,12 +178,14 @@ print(f"GRU mse loss: {gru_mse_loss}")
 # Test model
 gru_prediction = best_model(x_test[-1].unsqueeze(0))
 gru_prediction = gru_prediction.detach().numpy()
-gru_prediction = gru_prediction * z_std[selected_feature] + z_mean[selected_feature]    # Remove z-score normalization
+#gru_prediction = gru_prediction * z_std[selected_feature] + z_mean[selected_feature]    # Remove z-score normalization
+gru_prediction = gru_prediction * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
 gru_prediction = gru_prediction[0].tolist()
 
 # Test target
 test_target = y_arr_test[-1,:]
-test_target = test_target * z_std[selected_feature] + z_mean[selected_feature]  # Remove z-score normalization
+#test_target = test_target * z_std[selected_feature] + z_mean[selected_feature]  # Remove z-score normalization
+test_target = test_target * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
 test_target = test_target.tolist()
 
 # Plot prediction
@@ -226,7 +228,8 @@ plt.title('GRU predictions with context')
 start_plot = len(y_arr_test) - 2*TS_PAST
 y = df.iloc[:,selected_feature]
 y = y[-len(y_arr_test):]
-y = y * z_std[selected_feature] + z_mean[selected_feature]  # Remove z-score normalization
+#y = y * z_std[selected_feature] + z_mean[selected_feature]  # Remove z-score normalization
+y = y * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
 a = [x for x in range(start_plot, len(y))]
 plt.plot(a, y[start_plot:], label='Actual data')
 c = [x for x in range(len(y)-TS_FUTURE, len(y))]

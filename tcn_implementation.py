@@ -174,12 +174,12 @@ print(f"TCN mse loss: {tcn_mse_loss}")
 # Test model
 tcn_prediction = best_model(x_test[-1].unsqueeze(0))
 tcn_prediction = tcn_prediction.detach().numpy()
-tcn_prediction = tcn_prediction * z_std[selected_feature] + z_mean[selected_feature]    # Remove z-score normalization
+tcn_prediction = tcn_prediction * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]    # Remove z-score normalization
 tcn_prediction = tcn_prediction[0].tolist()
 
 # Test target
 test_target = y_arr_test[-1,:]
-test_target = test_target * z_std[selected_feature] + z_mean[selected_feature]  # Remove z-score normalization
+test_target = test_target * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]  # Remove z-score normalization
 test_target = test_target.tolist()
 
 # Plot prediction
@@ -221,7 +221,7 @@ plt.title('TCN predictions with context')
 start_plot = len(y_arr_test) - 2*TS_PAST
 y = df.iloc[:,selected_feature]
 y = y[-len(y_arr_test):]
-y = y * z_std[selected_feature] + z_mean[selected_feature]  # Remove z-score normalization
+y = y * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]  # Remove z-score normalization
 a = [x for x in range(start_plot, len(y))]
 plt.plot(a, y[start_plot:], label='Actual data')
 c = [x for x in range(len(y)-TS_FUTURE, len(y))]
