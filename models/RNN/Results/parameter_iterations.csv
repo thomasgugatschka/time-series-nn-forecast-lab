@@ -1,0 +1,5 @@
+STATION_FORECASTED,selected_feature,model_type,epochs,learning_rate,num_classes,input_size,hidden_size,num_layers,train_time,rnn_mse_loss
+0,0,RNN,10,0.005,24,15,32,1,21.1,0.2133
+0,1,RNN,200,0.005,24,15,32,1,136.3,0.4026
+0,1,RNN,350,0.005,48,15,32,2,917.7,0.542
+0,1,RNN,10,0.005,48,15,32,2,149.5,0.6338

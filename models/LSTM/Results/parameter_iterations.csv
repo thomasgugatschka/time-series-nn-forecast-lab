@@ -1,0 +1,2 @@
+STATION_FORECASTED,selected_feature,model_type,epochs,learning_rate,num_classes,input_size,hidden_size,num_layers,train_time,lstm_mse_loss
+0,0,LSTM,10,0.005,24,15,64,1,96.0,0.3709

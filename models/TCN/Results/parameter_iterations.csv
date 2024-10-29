@@ -1,0 +1,2 @@
+STATION_FORECASTED,selected_feature,epochs,learning_rate,channel_sizes,kernel_size,dropout,dilation,train_time,tcn_mse_loss
+0,0,10,0.005,"[15, 15, 15]",4,0.4,2,9.3,0.5349

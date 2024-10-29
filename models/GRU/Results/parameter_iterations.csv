@@ -1,0 +1,3 @@
+STATION_FORECASTED,selected_feature,model_type,epochs,learning_rate,num_classes,input_size,hidden_size,num_layers,train_time,gru_mse_loss
+0,0,GRU,10,0.005,24,15,32,6,206.9,0.5509
+0,0,GRU,10,0.005,24,15,32,6,229.0,0.6686

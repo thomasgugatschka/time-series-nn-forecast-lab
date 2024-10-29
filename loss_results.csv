@@ -1,0 +1,6 @@
+Feature,TCN_MSE,TCN_MAE,TCN_R2,LSTM_MSE,LSTM_MAE,LSTM_R2,GRU_MSE,GRU_MAE,GRU_R2
+Temp (degC),0.5349,0.590499997138977,-0.658,0.3709,0.498,-0.1495,0.6686,0.6848,-1.0726
+Rel Hum (%),,,,,,,,,
+Precip. Amount (mm),,,,,,,,,
+Stn Press (kPa),,,,,,,,,
+Wind Spd (km/h),,,,,,,,,
