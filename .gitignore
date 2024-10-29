@@ -1,0 +1,16 @@
+# Ignore virtual environment directories
+venv/
+env/
+.venv/
+
+# Ignore PyCharm project files
+.idea/
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore other common files
+*.log
+*.sqlite3
+.DS_Store
