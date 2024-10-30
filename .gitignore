@@ -14,6 +14,8 @@ __pycache__/
 *.log
 *.sqlite3
 .DS_Store
+
+# Ignore trained models and results
 /models/GRU/Results/
 /models/GRU/trained_models/
 /models/LSTM/Results/

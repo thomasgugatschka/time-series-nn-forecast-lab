@@ -20,6 +20,8 @@ class RNN(nn.Module):
             batch_first=self.batch_first,
             dropout=dropout,
             nonlinearity='tanh'  # You can change this to 'relu' if needed
+                                # TODO check if makes sense with relu -> another implementation / activation function
+                                # TODO -> have them in config file
         )
         self.fc_1 = nn.Linear(hidden_size, 128)
         self.fc_2 = nn.Linear(128, num_classes)

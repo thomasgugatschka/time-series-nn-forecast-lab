@@ -1,0 +1,49 @@
+import torch
+import copy
+
+# TODO - add logger
+
+class RNNWrapper:
+    def __init__(self, model, optimizer, loss_fn):
+        self.model = model
+        self.optimizer = optimizer
+        self.loss_fn = loss_fn
+
+    def fit(self, x_train, y_train, x_val, y_val, epochs):
+        training_loss = []
+        validation_loss = []
+        best_params = None
+        min_val_loss = float('inf')
+
+        for epoch in range(epochs):
+            # Training step
+            self.model.train()
+            prediction = self.model(x_train)
+            loss = self.loss_fn(prediction, y_train)
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+
+            # Validation step
+            self.model.eval()
+            with torch.no_grad():
+                val_prediction = self.model(x_val)
+                val_loss = self.loss_fn(val_prediction, y_val)
+
+            training_loss.append(loss.item())
+            validation_loss.append(val_loss.item())
+
+            if val_loss.item() < min_val_loss:
+                best_params = copy.deepcopy(self.model.state_dict())
+                min_val_loss = val_loss.item()
+
+            if epoch % 10 == 0:
+                print(f'epoch {epoch}. train: {round(loss.item(), 4)}, val: {round(val_loss.item(), 4)}')
+
+        self.model.load_state_dict(best_params)
+        return training_loss, validation_loss
+
+    def predict(self, x):
+        self.model.eval()
+        with torch.no_grad():
+            return self.model(x)

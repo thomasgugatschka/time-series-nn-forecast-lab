@@ -6,9 +6,13 @@ import os
 import torch
 import pandas as pd
 import time
+import logging
 
+from configs.logging_config import setup_logging
 from utilities.utilities import split_sequences
 from models.LSTM.lstm_model import LSTM
+
+setup_logging()
 
 # Record the start time
 start_time = time.time()
@@ -38,9 +42,9 @@ output_dim = TS_FUTURE
 
 # Import time-series from stored pickles
 df_list = []
-files = os.listdir(os.path.join(".", "data\\pickles"))
+files = os.listdir(os.path.join("..", "data", "pickles"))
 for file in files:
-    target_file = ".\\data\\pickles\\" + file
+    target_file = os.path.join("..", "data", "pickles", file)
     df = pd.read_pickle(target_file)
     df = df.drop(columns='Date/Time (LST)')
     df_list.append(df)
@@ -155,7 +159,7 @@ plt.plot(validation_loss, label = 'validation')
 plt.ylabel("Loss")
 plt.xlabel("Epoch")
 plt.legend()
-plot_results_directory = os.path.dirname(os.path.abspath(__file__)) + "\\models\\LSTM\\Results"
+plot_results_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "LSTM", "Results")
 figure_path = os.path.join(plot_results_directory, "Training_progress.png")
 plt.savefig(figure_path)
 plt.show()
@@ -163,8 +167,7 @@ plt.show()
 # Load best trained model
 best_model = LSTM(**model_params)
 best_model.load_state_dict(best_params)
-
-trained_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),'models', 'LSTM', 'trained_models', f'lstm_trained_model_{FEATURE_FORECASTED}.pt')
+trained_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'models', 'LSTM', 'trained_models', f'lstm_trained_model_{FEATURE_FORECASTED}.pt')
 torch.save(best_model, trained_model_path)
 best_model.eval()
 

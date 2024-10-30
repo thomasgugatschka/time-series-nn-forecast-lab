@@ -6,10 +6,13 @@ import os
 import torch
 import pandas as pd
 import time
+import logging
 
-# from TCN.tcn_model import TCN
-from models.TCN.tcn_model import TCN
+from configs.logging_config import setup_logging
 from utilities.utilities import split_sequences
+from models.TCN.tcn_model import TCN
+
+setup_logging()
 
 # Record the start time
 start_time = time.time()
@@ -38,9 +41,9 @@ learning_rate = 0.005               # Learning rate
 
 # Import time-series from stored pickles
 df_list = []
-files = os.listdir(os.path.join(".", "data\\pickles"))
+files = os.listdir(os.path.join("..", "data", "pickles"))
 for file in files:
-    target_file = ".\\data\\pickles\\" + file
+    target_file = os.path.join("..", "data", "pickles", file)
     df = pd.read_pickle(target_file)
     df = df.drop(columns='Date/Time (LST)')
     df_list.append(df)
@@ -154,7 +157,7 @@ plt.plot(validation_loss, label = 'validation')
 plt.ylabel("Loss")
 plt.xlabel("Epoch")
 plt.legend()
-plot_results_directory = os.path.dirname(os.path.abspath(__file__)) + "\\models\\TCN\\Results"
+plot_results_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "TCN", "Results")
 figure_path = os.path.join(plot_results_directory, "Training_progress.png")
 plt.savefig(figure_path)
 plt.show()
@@ -162,7 +165,7 @@ plt.show()
 # Load best trained model
 best_model = TCN(**model_params)
 best_model.load_state_dict(best_params)
-trained_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),'models', 'TCN', 'trained_models', f'tcn_trained_model_{FEATURE_FORECASTED}.pt')
+trained_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'models', 'TCN', 'trained_models', f'tcn_trained_model_{FEATURE_FORECASTED}.pt')
 torch.save(best_model.state_dict(), trained_model_path)
 best_model.eval()
 

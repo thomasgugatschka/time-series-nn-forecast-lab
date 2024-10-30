@@ -6,15 +6,30 @@ import os
 import torch
 import pandas as pd
 import time
+import logging
+import random
 
+from configs.logging_config import setup_logging
 from utilities.utilities import split_sequences
 from models.RNN.rnn_model import RNN
+
+def set_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+set_seed(42)  # Set the seed to ensure reproducibility
+
+setup_logging()
 
 # Record the start time
 start_time = time.time()
 
 # Station and feature that we want to forecast
-stations = [30165, 48374, 49608]
+stations = [30165,48374,49608]
 STATION_FORECASTED = 0
 feature_list = ['Temp (degC)', 'Rel Hum (%)', 'Precip. Amount (mm)', 'Stn Press (kPa)', 'Wind Spd (km/h)']
 FEATURE_FORECASTED = 1
@@ -22,12 +37,12 @@ selected_feature = len(feature_list) * STATION_FORECASTED + FEATURE_FORECASTED
 num_features = len(stations) * len(feature_list)
 
 # Context and forecast length#
-TS_PAST = 240   # Time steps to look into the past (context) [h]
-TS_FUTURE = 48  # Time steps to look into the future (forecast) [h]
+TS_PAST = 120   # Time steps to look into the past (context) [h]
+TS_FUTURE = 24  # Time steps to look into the future (forecast) [h]
 
 # Global nn parameters
 chosen_model = "RNN"              # Choose which model structure to use
-epochs = 10                      # Training epochs
+epochs = 200                      # Training epochs
 dropout = .0                      # Dropout
 learning_rate = 0.005             # Learning rate
 num_classes = TS_FUTURE
@@ -38,12 +53,13 @@ output_dim = TS_FUTURE
 
 # Import time-series from stored pickles
 df_list = []
-files = os.listdir(os.path.join(".", "data\\pickles"))
+files = os.listdir(os.path.join("..", "data", "pickles"))
 for file in files:
-    target_file = ".\\data\\pickles\\" + file
+    target_file = os.path.join("..", "data", "pickles", file)
     df = pd.read_pickle(target_file)
     df = df.drop(columns='Date/Time (LST)')
     df_list.append(df)
+
 nb_stations = len(files)
 df = pd.concat(df_list, axis=1)
 df = df.iloc[40000:60000, :]  # crop df to lower calc time
@@ -94,6 +110,7 @@ model_params = {
     'dropout': dropout,
 }
 model = RNN(**model_params)
+
 print(model)
 
 # Define optimizer and loss functions
@@ -101,11 +118,10 @@ optimizer = torch.optim.Adam(params=model.parameters(), lr=learning_rate)
 mse_loss = torch.nn.MSELoss()
 
 # Training
-best_params = None
-min_val_loss = sys.maxsize
-
 training_loss = []
 validation_loss = []
+best_params = None
+min_val_loss = sys.maxsize
 
 for epoch in range(epochs):
     # Calculate training loss
@@ -132,8 +148,7 @@ for epoch in range(epochs):
     # Print results for every 10th epoch
     if epoch % 10 == 0:
         diff = (y_train - prediction).view(-1).abs_().tolist()
-        print(f'epoch {epoch}. train: {round(loss.item(), 4)}, '
-              f'val: {round(val_loss.item(), 4)}')
+        print(f'epoch {epoch}. train: {round(loss.item(), 4)}, 'f'val: {round(val_loss.item(), 4)}')
 
 # Record the end time
 end_time = time.time()
@@ -151,7 +166,8 @@ plt.ylabel("Loss")
 plt.xlabel("Epoch")
 plt.legend()
 # TODO - fix path building, should be defined in config file or on top not in the middle of the code
-plot_results_directory = os.path.dirname(os.path.abspath(__file__)) + "\\models\\RNN\\Results"
+#plot_results_directory = os.path.dirname(os.path.abspath(__file__)) + "\\models\\RNN\\Results"
+plot_results_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "RNN", "Results")
 figure_path = os.path.join(plot_results_directory, "Training_progress.png")
 plt.savefig(figure_path)
 plt.show()
@@ -160,7 +176,7 @@ plt.show()
 best_model = RNN(**model_params)
 best_model.load_state_dict(best_params)
 
-trained_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', 'RNN', 'trained_models', f'rnn_trained_model_{FEATURE_FORECASTED}.pt')
+trained_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'models', 'RNN', 'trained_models', f'rnn_trained_model_{FEATURE_FORECASTED}.pt')
 torch.save(best_model, trained_model_path)
 
 best_model.eval()
