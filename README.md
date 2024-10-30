@@ -3,6 +3,8 @@
 
 This project is focused on implementing and experimenting with various neural network models for time series forecasting. It is part of my master's thesis.
 
+# TODO: ADAPT TO NEW STRUCTURE AND SETUP!!!!
+
 ## Table of Contents
 
 - [Project Structure](#project-structure)

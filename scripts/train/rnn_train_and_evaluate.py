@@ -1,36 +1,23 @@
 import torch
-import sys
-import copy
 import time
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import logging
-import numpy as np
-import random
 from configs.logging_config import setup_logging
-from utilities.utilities import split_sequences
 from configs.paths import get_path
-from utilities.plotting.plot_training_progress import plot_training_progress
+from utilities.utilities import split_sequences
+from utilities.seed_utils import set_seed
+from utilities.plot_utils import plot_training_progress, plot_prediction, plot_prediction_with_context
 from models.RNN.rnn_model import RNN
 from models.RNN.rnn_wrapper import RNNWrapper
 
-def set_seed(seed):
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
 
-# <editor-fold desc="Setup">
 set_seed(42)
 setup_logging()
-logging.info("Start training RNN model")
-# </editor-fold>
 
-
-
+model_name = 'RNN'
+logging.info(f"Start training {model_name} model")
 
 # Station and feature that we want to forecast
 stations = [30165,48374,49608]
@@ -139,19 +126,19 @@ train_time = round(end_time - start_time, 1)
 logging.info(f"Execution time: {train_time} seconds")
 
 # Plot training progress
-plot_training_progress(training_loss, validation_loss, 'RNN')
+plot_training_progress(training_loss, validation_loss, model_name)
 
 # Load best trained model
 best_model = RNN(**model_params)
 best_model.load_state_dict(model.state_dict())
-trained_model_path = get_path('model_dir', 'RNN', 'trained_models',f'rnn_trained_model_{epochs}_{FEATURE_FORECASTED}.pt')
+trained_model_path = get_path('model_dir', model_name, 'trained_models',f'{model_name}_trained_model_{epochs}_{FEATURE_FORECASTED}.pt')
 torch.save(best_model, trained_model_path)
 best_model.eval()
 
 # Calculate test loss
 rnn_prediction = rnn_wrapper.predict(x_test)
 rnn_mse_loss = round(loss_fn(rnn_prediction, y_test).item(), 4)
-logging.info(f"RNN mse loss: {rnn_mse_loss}") #TODO - change to to variable instead of RNN
+logging.info(f"{model_name} mse loss: {rnn_mse_loss}")
 
 # Test model
 rnn_prediction = rnn_wrapper.predict(x_test[-1].unsqueeze(0))
@@ -165,19 +152,10 @@ test_target = test_target * z_std.iloc[selected_feature] + z_mean.iloc[selected_
 test_target = test_target.tolist()
 
 # Plot prediction
-plt.plot(test_target, label="Actual Data")
-plt.plot(rnn_prediction, label="RNN Predictions")
-plt.title('RNN predictions')
-plt.ylabel(f"{feature_list[selected_feature % 5]}")
-plt.xlabel("Time")
-plt.legend()
+plot_prediction(test_target, rnn_prediction, feature_list, selected_feature, model_name)
 
-plot_results_directory = get_path('result_dir', 'RNN')
 
-figure_path = os.path.join(plot_results_directory, "RNN_predictions.png")
-plt.savefig(figure_path)
-plt.show()
-
+plot_results_directory = get_path('result_dir', model_name)
 # Save parameters and results to csv
 csv_file_path = os.path.join(plot_results_directory, "parameter_iterations.csv")
 if not os.path.isfile(csv_file_path):
@@ -195,28 +173,17 @@ new_row = {'STATION_FORECASTED': STATION_FORECASTED,
            'num_layers': num_layers,
            'train_time': train_time,
            'rnn_mse_loss': rnn_mse_loss}
-df_params_iter = pd.concat([df_params_iter, pd.DataFrame([new_row])], ignore_index=True)
+
+# Check if df_params_iter is empty or contains only NA entries
+if df_params_iter.empty or df_params_iter.isna().all().all():
+    df_params_iter = pd.DataFrame([new_row])
+else:
+    df_params_iter = pd.concat([df_params_iter, pd.DataFrame([new_row])], ignore_index=True)
 df_params_iter.to_csv(csv_file_path, index=False)
 
-# Plot prediction and context
-plt.figure(figsize=(10, 6))
-plt.title('RNN predictions with context')
-start_plot = len(y_arr_test) - 2 * TS_PAST
-y = df.iloc[:, selected_feature]
-y = y[-len(y_arr_test):]
-y = y * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
-a = [x for x in range(start_plot, len(y))]
-plt.plot(a, y[start_plot:], label='Actual data')
-c = [x for x in range(len(y) - TS_FUTURE, len(y))]
-plt.plot(c, rnn_prediction, label=f'One-shot multi-step prediction ({TS_FUTURE}h)')
-plt.axvline(x=len(y) - TS_FUTURE, c='r', linestyle='--')
-plt.ylabel(f"{feature_list[selected_feature % 5]}")
-plt.xlabel("Time")
-plt.legend(loc='upper left')
-figure_path = os.path.join(plot_results_directory, "RNN_predictions_context.png")
-text_content = '\n'.join([f'{key}: {value}' for key, value in new_row.items()])
-plt.text(0.05, 0.05, text_content, transform=plt.gca().transAxes, bbox=dict(facecolor='white', alpha=0.8), verticalalignment='bottom', horizontalalignment='left')
-plt.savefig(figure_path)
-plt.show()
 
-print("Done")
+# Plot prediction and context
+plot_prediction_with_context(df, y_arr_test, rnn_prediction, feature_list, selected_feature, model_name, TS_PAST, TS_FUTURE, z_mean, z_std, new_row)
+
+
+logging.info(f"Done training {model_name} model")

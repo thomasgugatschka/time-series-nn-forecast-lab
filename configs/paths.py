@@ -10,6 +10,10 @@ paths = {
     'data_dir': base_dir / 'data',
     'log_dir': base_dir / 'logs',
     'result_dir': base_dir / 'results',
+    'experiment_dir': base_dir / 'experiments',
+    'script_dir': base_dir / 'scripts',
+    'script_train_dir': base_dir / 'scripts' / 'train',
+    'script_eval_dir': base_dir / 'scripts' / 'evaluate',
     'config_file': base_dir / 'configs' / 'config.yaml'
 }
 

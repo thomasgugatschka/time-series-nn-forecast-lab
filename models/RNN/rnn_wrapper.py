@@ -1,7 +1,9 @@
 import torch
 import copy
+import logging
+from configs.logging_config import setup_logging
 
-# TODO - add logger
+setup_logging()
 
 class RNNWrapper:
     def __init__(self, model, optimizer, loss_fn):
@@ -38,7 +40,7 @@ class RNNWrapper:
                 min_val_loss = val_loss.item()
 
             if epoch % 10 == 0:
-                print(f'epoch {epoch}. train: {round(loss.item(), 4)}, val: {round(val_loss.item(), 4)}')
+                logging.info(f'epoch {epoch}. train: {round(loss.item(), 4)}, val: {round(val_loss.item(), 4)}')
 
         self.model.load_state_dict(best_params)
         return training_loss, validation_loss
