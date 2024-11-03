@@ -11,7 +11,7 @@ import random
 
 from configs.logging_config import setup_logging
 from utilities.utilities import split_sequences
-from models.RNN.rnn_model import RNN
+from models.rnn.rnn_model import RNN
 
 def set_seed(seed):
     torch.manual_seed(seed)
@@ -41,7 +41,7 @@ TS_PAST = 120   # Time steps to look into the past (context) [h]
 TS_FUTURE = 24  # Time steps to look into the future (forecast) [h]
 
 # Global nn parameters
-chosen_model = "RNN"              # Choose which model structure to use
+chosen_model = "rnn"              # Choose which model structure to use
 epochs = 200                      # Training epochs
 dropout = .0                      # Dropout
 learning_rate = 0.005             # Learning rate
@@ -166,8 +166,8 @@ plt.ylabel("Loss")
 plt.xlabel("Epoch")
 plt.legend()
 # TODO - fix path building, should be defined in config file or on top not in the middle of the code
-#plot_results_directory = os.path.dirname(os.path.abspath(__file__)) + "\\models\\RNN\\Results"
-plot_results_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "RNN", "Results")
+#plot_results_directory = os.path.dirname(os.path.abspath(__file__)) + "\\models\\rnn\\Results"
+plot_results_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "rnn", "Results")
 figure_path = os.path.join(plot_results_directory, "Training_progress.png")
 plt.savefig(figure_path)
 plt.show()
@@ -176,7 +176,7 @@ plt.show()
 best_model = RNN(**model_params)
 best_model.load_state_dict(best_params)
 
-trained_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'models', 'RNN', 'trained_models', f'rnn_trained_model_{FEATURE_FORECASTED}.pt')
+trained_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'models', 'rnn', 'trained_models', f'rnn_trained_model_{FEATURE_FORECASTED}.pt')
 torch.save(best_model, trained_model_path)
 
 best_model.eval()
@@ -184,7 +184,7 @@ best_model.eval()
 # Calculate test loss
 rnn_prediction = best_model(x_test)
 rnn_mse_loss = round(mse_loss(rnn_prediction, y_test).item(), 4)
-print(f"RNN mse loss: {rnn_mse_loss}")
+print(f"rnn mse loss: {rnn_mse_loss}")
 
 # Test model
 rnn_prediction = best_model(x_test[-1].unsqueeze(0))
@@ -199,8 +199,8 @@ test_target = test_target.tolist()
 
 # Plot prediction
 plt.plot(test_target, label="Actual Data")
-plt.plot(rnn_prediction, label="RNN Predictions")
-plt.title('RNN predictions')
+plt.plot(rnn_prediction, label="rnn Predictions")
+plt.title('rnn predictions')
 plt.ylabel(f"{feature_list[selected_feature % 5]}")
 plt.xlabel("Time")
 plt.legend()
@@ -233,7 +233,7 @@ df_params_iter.to_csv(csv_file_path, index=False)
 
 # Plot prediction and context
 plt.figure(figsize=(10, 6))  # plotting
-plt.title('RNN predictions with context')
+plt.title('rnn predictions with context')
 start_plot = len(y_arr_test) - 2 * TS_PAST
 y = df.iloc[:, selected_feature]
 y = y[-len(y_arr_test):]

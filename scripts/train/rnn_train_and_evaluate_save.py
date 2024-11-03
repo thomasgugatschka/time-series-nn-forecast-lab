@@ -1,6 +1,5 @@
 import torch
 import time
-import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import logging
@@ -9,8 +8,8 @@ from configs.paths import get_path
 from utilities.utilities import split_sequences
 from utilities.seed_utils import set_seed
 from utilities.plot_utils import plot_training_progress, plot_prediction, plot_prediction_with_context
-from models.RNN.rnn_model import RNN
-from models.RNN.rnn_wrapper import RNNWrapper
+from models.rnn.rnn_model import RNN
+from models.rnn.rnn_wrapper import RNNWrapper
 
 
 set_seed(42)
@@ -18,6 +17,9 @@ setup_logging()
 
 model_name = 'RNN'
 logging.info(f"Start training {model_name} model")
+
+# TODO - use both ETTh and ETTm sets to train the model like below !!!
+# TODO --> so use both sets to train and calculate the features / shape / ...
 
 # Station and feature that we want to forecast
 stations = [30165,48374,49608]
@@ -32,7 +34,7 @@ TS_PAST = 120   # Time steps to look into the past (context) [h]
 TS_FUTURE = 24  # Time steps to look into the future (forecast) [h]
 
 # Global nn parameters
-chosen_model = "RNN"              # Choose which model structure to use
+chosen_model = "rnn"              # Choose which model structure to use
 epochs = 10                      # Training epochs
 dropout = .0                      # Dropout
 learning_rate = 0.005             # Learning rate

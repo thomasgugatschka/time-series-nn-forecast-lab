@@ -12,7 +12,7 @@ class RNN(nn.Module):
         self.hidden_size = hidden_size
         self.batch_first = True
 
-        # Unidirectional RNN model with dropout
+        # Unidirectional rnn model with dropout
         self.rnn = nn.RNN(
             input_size=input_size,
             hidden_size=hidden_size,
@@ -31,7 +31,7 @@ class RNN(nn.Module):
         # Initialize hidden state for each layer and batch
         h_0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
 
-        # Propagate input through Unidirectional RNN with dropout
+        # Propagate input through Unidirectional rnn with dropout
         output, h_n = self.rnn(x, h_0)
 
         # Reshape hidden states for Dense layer

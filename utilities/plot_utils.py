@@ -5,6 +5,7 @@ from configs.paths import get_path
 
 # TODO -> REFACTOR and REMOVE anything MODEL related e.g. rnn_prediction
 
+# TODO -> Refactor the model_name should be in all CAPS
 
 def plot_training_progress(training_loss, validation_loss, model_name):
     """
@@ -29,18 +30,18 @@ def plot_training_progress(training_loss, validation_loss, model_name):
 
 def plot_prediction(test_target, rnn_prediction, feature_list, selected_feature, model_name):
     """
-    Plots the actual data and RNN predictions and saves the figure.
+    Plots the actual data and rnn predictions and saves the figure.
 
     Parameters:
     - test_target: Actual data.
-    - rnn_prediction: RNN predictions.
+    - rnn_prediction: rnn predictions.
     - feature_list: List of features.
     - selected_feature: Index of the selected feature.
     - model_name: Name of the model (used for saving the figure).
     """
     plt.plot(test_target, label="Actual Data")
-    plt.plot(rnn_prediction, label="RNN Predictions")
-    plt.title('RNN predictions')
+    plt.plot(rnn_prediction, label="rnn Predictions")
+    plt.title('rnn predictions')
     plt.ylabel(f"{feature_list[selected_feature % 5]}")
     plt.xlabel("Time")
     plt.legend()
@@ -51,12 +52,12 @@ def plot_prediction(test_target, rnn_prediction, feature_list, selected_feature,
 
 def plot_prediction_with_context(df, y_arr_test, rnn_prediction, feature_list, selected_feature, model_name, TS_PAST, TS_FUTURE, z_mean, z_std, new_row):
     """
-    Plots the actual data, RNN predictions with context, and saves the figure.
+    Plots the actual data, rnn predictions with context, and saves the figure.
 
     Parameters:
     - df: DataFrame containing the data.
     - y_arr_test: Array of test target values.
-    - rnn_prediction: RNN predictions.
+    - rnn_prediction: rnn predictions.
     - feature_list: List of features.
     - selected_feature: Index of the selected feature.
     - model_name: Name of the model (used for saving the figure).

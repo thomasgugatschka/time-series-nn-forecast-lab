@@ -1,0 +1,7 @@
+ts_past: 120
+ts_future: 24
+epochs: 70
+dropout: 0.0
+learning_rate: 0.005
+hidden_size: 32
+num_layers: 2

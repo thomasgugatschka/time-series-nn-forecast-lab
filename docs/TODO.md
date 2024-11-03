@@ -5,14 +5,36 @@ A checklist of tasks to accomplish for the project.
 - [ ] **Move Implementation to New Subdirectory**
   - Organize project files for improved structure and readability.
 
+- [ ] detailed naming convention for trained models (ts-futur/past/ ...)
+
 - [ ] GPU enabled Training -> if OPTION
+
+-[ ] add pandas. Describe for data check (statistics)
+
+- [ ] Add ETT Dataset -> cite paper
+  - https://github.com/zhouhaoyi/ETDataset
+  - also create plots like autocorreclation between the variables
+  - preprocessing check script -> and fix?
 
 - [ ] Change paths to be base everything off of the root directory
 
-- [ ] **Refactor Code Structure**
+- [ ] Implement model_factory.py
 
-- [ ] **Create Functions in New Python Script for Metric Calculation**
-  - Refactor existing code and separate metric calculations into a dedicated Python file.
+- [ ] Check how to properly set up a data pipeline
+
+- [ ] Check if it makes sense to have clean entry point for scripts ##if __name__ == "__main__":##
+  - check what standard is for such scripts
+  - so pack the scripts in "def" and a starting point
+
+- [ ] Check what makes sense to make a package out of it --> __init__.py 
+
+- [ ] the scripts/analysis -> write section within README.md (or new .md file which is integrated into the main README.md)
+  - In this section make it that the analysis scripts can be started directly from the readme
+  - and explain how the commandline arguments work
+- [ ] Check if analyis folder is okay or if notebooks (jypiter) should be used instead for data analysis and intial review
+  - for inital review jupyter makes maybe more sense
+
+- [ ] check if the __init__.py files are necessary -> or more are needed? they indicate python packages?!
 
 - [ ] **Refactor Code Structure**
 

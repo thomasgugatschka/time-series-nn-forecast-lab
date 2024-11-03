@@ -17,4 +17,8 @@ __pycache__/
 
 # Ignore trained models and results
 *.pt
+*.pth
 /results/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/

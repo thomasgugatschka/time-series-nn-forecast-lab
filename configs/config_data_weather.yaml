@@ -1,0 +1,12 @@
+stations:
+  - 30165
+  - 48374
+  - 49608
+station_forecasted: 0
+feature_list:
+  - Temp (degC)
+  - Rel Hum (%)
+  - Precip. Amount (mm)
+  - Stn Press (kPa)
+  - Wind Spd (km/h)
+feature_forecasted: 1
