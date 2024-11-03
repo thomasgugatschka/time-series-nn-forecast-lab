@@ -2,6 +2,8 @@
 
 A checklist of tasks to accomplish for the project.
 
+- [ ] Add to ReadMe or new *md file which is linked to the README how to add new models -> all relevant changes including model_factory... 
+
 - [ ] **Move Implementation to New Subdirectory**
   - Organize project files for improved structure and readability.
 
