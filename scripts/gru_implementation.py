@@ -33,13 +33,13 @@ TS_FUTURE   = 24    # Time steps to look into the future (forecast) [h]
 
 # Global nn parameters
 chosen_model = "GRU"               # Choose which model structure to use
-epochs = 10                        # Training epochs
+epochs = 200                        # Training epochs
 dropout = .0                        # Dropout
 learning_rate = 0.005               # Learning rate
 num_classes =   TS_FUTURE
 input_size = num_features
 hidden_size = 32
-num_layers = 6
+num_layers = 4
 output_dim = TS_FUTURE
 
 # Import time-series from stored pickles

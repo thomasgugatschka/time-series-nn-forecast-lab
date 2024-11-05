@@ -4,6 +4,7 @@ import os
 from utilities.data_split_utils import split_and_convert_data
 from utilities.plot_utils import plot_prediction, plot_prediction_with_context
 from utilities.save_utils import save_parameters_and_results
+from utilities.metrics_utils import calculate_metrics
 from models.rnn.rnn_model import RNN
 from models.rnn.rnn_wrapper import RNNWrapper
 from scripts.preprocessing.data_preprocessing import load_and_preprocess_data
@@ -53,6 +54,52 @@ def evaluate_model(config_data, config_train, model_name, dataset):
     rnn_mse_loss = round(loss_fn(rnn_prediction, y_test).item(), 4)
     logging.info(f"{model_name} mse loss: {rnn_mse_loss}")
 
+    # TODO those are the normalized ones also need UNNORMALIZED
+
+    # rnn_prediction = rnn_prediction * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
+    # y_test = y_test * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
+
+    metrics = calculate_metrics(rnn_prediction, y_test)
+    logging.warning(f"{model_name} metrics: {metrics}")
+
+    # TODO make method for normalization and denormalization
+    #
+    # import matplotlib.pyplot as plt
+    # import mplcursors
+    #
+    # # Denormalize the entire y_test and rnn_prediction arrays
+    # y_test_denorm = y_test * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
+    # rnn_prediction_denorm = rnn_prediction * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
+    #
+    # # Select the last 120 hours of y_test and the last 24 hours of rnn_prediction
+    # y_test_last_120h = y_test_denorm[-120:]
+    # rnn_prediction_last_24h = rnn_prediction_denorm[-24:]
+    #
+    # # Plot the true values for the last 120 hours
+    # plt.figure(figsize=(10, 6))
+    # line1 = plt.plot(y_test_last_120h, label='Actuals', color='blue')
+    #
+    # # Plot the predicted values for the last 24 hours
+    # line2 = plt.plot(range(96, 120), rnn_prediction_last_24h, label='Predictions', color='red', linestyle='--')
+    #
+    # plt.xlabel('Time Steps')
+    # plt.ylabel('Values')
+    # plt.title('True vs Predicted Values')
+    # plt.legend()
+    #
+    # # Add interactive cursor
+    # cursor = mplcursors.cursor([line1[0], line2[0]], hover=True)
+    # cursor.connect("add", lambda sel: sel.annotation.set_text(f'Value: {sel.target[1]:.2f}'))
+    #
+    # plt.show()
+    #
+
+
+
+
+
+
+    # TODO move this to training ?
     # Save training results
     training_results = {
         'STATION_FORECASTED': config_data['station_forecasted'],
@@ -74,15 +121,22 @@ def evaluate_model(config_data, config_train, model_name, dataset):
     rnn_prediction = rnn_prediction * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]  # Remove z-score normalization using iloc
     rnn_prediction = rnn_prediction[0].tolist()
 
+    # Log the number of predicted values
+    logging.info(f"Number of predicted values: {len(rnn_prediction)}")
+
     # Test target
     test_target = y_arr_test[-1, :]
     test_target = test_target * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
     test_target = test_target.tolist()
 
+
+
+
     # Plot prediction
     plot_prediction(test_target, rnn_prediction, config_data['feature_list'], selected_feature, model_name)
 
     # Plot prediction and context
+    # TODO check if this works corredt -> it always assumes it's prediction the last TS_PAST points
     plot_prediction_with_context(df, y_arr_test, rnn_prediction, config_data['feature_list'], selected_feature, model_name, config_train['ts_past'], config_train['ts_future'], z_mean, z_std, training_results)
 
 if __name__ == "__main__":

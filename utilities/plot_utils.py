@@ -70,6 +70,7 @@ def plot_prediction_with_context(df, y_arr_test, rnn_prediction, feature_list, s
     plt.figure(figsize=(10, 6))
     plt.title(f'{model_name} predictions with context')
     start_plot = len(y_arr_test) - 2 * TS_PAST
+
     y = df.iloc[:, selected_feature]
     y = y[-len(y_arr_test):]
     y = y * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]

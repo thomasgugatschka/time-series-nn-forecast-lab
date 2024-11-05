@@ -1,0 +1,19 @@
+# List of data sources (files must have the same number of data points, start time, and features)
+sources:
+  - 30165 # TODO - some sort of convention ? which files should be merged
+# Index of the source to forecast (keep at 0 if only one source) relates a bit to training but kept in here for simplicity
+source_forecasted: 0
+# List of features to use in the model
+feature_list:
+  - feature_1
+  - feature_2
+  - feature_3
+  - feature_4
+  - feature_5
+# Index of the feature to forecast (keep at 0 if only one feature) relates a bit to training but kept in here for simplicity
+feature_forecasted: 0
+# List of columns to drop from the data
+columns_to_drop:
+# Indices for cropping the DataFrame for lower calc time // disable set to null
+crop_start: 40000
+crop_end: 60000

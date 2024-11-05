@@ -40,7 +40,7 @@ class LSTM(nn.Module):
         out = self.fc_2(out)
 
         return out
-    
+
 
 class BiLSTM(nn.Module):
     def __init__(self, num_classes, input_size, hidden_size, num_layers, dropout=0.2):
@@ -72,12 +72,13 @@ class BiLSTM(nn.Module):
         # Propagate input through Bi-LSTM with one dropout layer
         output, (hn, cn) = self.lstm(x, (h_0, c_0))  # (input, hidden, and internal state)
         output = self.dropout_lstm(output)
-        hn = hn.view(self.num_layers, -1, self.hidden_size * 2)  # reshape hidden states for Dense layer, multiply by 2 for bidirectional
+        hn = hn.view(self.num_layers, -1,
+                     self.hidden_size * 2)  # reshape hidden states for Dense layer, multiply by 2 for bidirectional
         out = self.relu(hn[-1])  # take the output from the last layer
         out = self.fc_1(out)  # first dense
         out = self.relu(out)  # relu
         out = self.fc_2(out)  # final output
         return out
-    
+
 # Bi-LSTM alternatives tried:
 # Add dropout after each layer, lower learning rate, add gradient clipping, implement mini-batch learning

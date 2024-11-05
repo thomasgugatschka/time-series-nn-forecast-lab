@@ -10,6 +10,9 @@ from configs.logging_config import setup_logging
 
 # TODO -> check if it makes more sense to move to "utilities"
 
+# TODO -> REWRITE WITH NEW DATA YAML IN MIND!!!!
+
+
 def load_and_preprocess_data(config_data, config_train):
     stations = config_data['stations']
     station_forecasted = config_data['station_forecasted']

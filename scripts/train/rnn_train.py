@@ -45,7 +45,9 @@ learning_rate = config_train['learning_rate']
 hidden_size = config_train['hidden_size']
 num_layers = config_train['num_layers']
 
-stations = config_data['stations']
+stations = config_data['stations']  # TODO -> not stations rather "data sources" which depend on each other -> maybe unnecessary complicated...
+                                    # TODO -> delete not NEEDED -> remove from all CALCULATIONS!!!!
+
 station_forecasted = config_data['station_forecasted']
 feature_list = config_data['feature_list']
 feature_forecasted = config_data['feature_forecasted']

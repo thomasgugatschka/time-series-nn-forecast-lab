@@ -45,6 +45,7 @@ class RNNWrapper:
         self.model.load_state_dict(best_params)
         return training_loss, validation_loss
 
+    # TODO: maybe to basic? has no splitting of input etc.
     def predict(self, x):
         self.model.eval()
         with torch.no_grad():
