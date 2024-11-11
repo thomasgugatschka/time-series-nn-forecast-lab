@@ -1,13 +1,17 @@
-stations:
-  - 30165
-  - 48374
-  - 49608
-station_forecasted: 0
+sources:
+  - all_data_30165
+  - all_data_48374
+  - all_data_49608
+source_forecasted: 0
 feature_list:
   - Temp (degC)
   - Rel Hum (%)
   - Precip. Amount (mm)
   - Stn Press (kPa)
   - Wind Spd (km/h)
-feature_forecasted: 1
-
+feature_forecasted: 0
+columns_to_drop:
+  - Date/Time (LST)
+  - Index
+crop_start: 20000
+crop_end: 40000

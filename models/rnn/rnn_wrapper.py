@@ -2,6 +2,7 @@ import torch
 import copy
 import logging
 from configs.logging_config import setup_logging
+from utilities.plot_utils import plot_performance_during_training
 
 setup_logging()
 
@@ -11,7 +12,8 @@ class RNNWrapper:
         self.optimizer = optimizer
         self.loss_fn = loss_fn
 
-    def fit(self, x_train, y_train, x_val, y_val, epochs):
+    #def fit(self, x_train, y_train, x_val, y_val, epochs):
+    def fit(self, x_train, y_train, x_val, y_val, epochs, z_mean, z_std, selected_feature):
         training_loss = []
         validation_loss = []
         best_params = None
@@ -39,14 +41,17 @@ class RNNWrapper:
                 best_params = copy.deepcopy(self.model.state_dict())
                 min_val_loss = val_loss.item()
 
-            if epoch % 10 == 0:
+            if epoch % 1 == 0:
                 logging.info(f'epoch {epoch}. train: {round(loss.item(), 4)}, val: {round(val_loss.item(), 4)}')
+                plot_performance_during_training(self, x_val, y_val, z_mean, z_std, selected_feature)
 
         self.model.load_state_dict(best_params)
         return training_loss, validation_loss
 
-    # TODO: maybe to basic? has no splitting of input etc.
     def predict(self, x):
         self.model.eval()
         with torch.no_grad():
             return self.model(x)
+
+
+

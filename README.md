@@ -91,6 +91,12 @@ python scripts/predict.py --model_path trained_models/gru_trained_model_1.pt --c
 
 Results from training, evaluation, and experiments are stored in the `results/` directory. This includes plots, evaluation metrics, and experiment summaries.
 
+## Unit Tests
+To run all unit tests, execute the following command:
+\```
+python -m unittest discover -s tests
+\```
+
 
 ## License
 

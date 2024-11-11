@@ -17,7 +17,7 @@ def generate_multivariate_sinusoidal_data(num_samples=1000, num_features=5, stop
 def save_data_to_csv(data, filename):
     feature_names = [f'feature_{i+1}' for i in range(data.shape[1])]
     df = pd.DataFrame(data, columns=feature_names)
-    df.to_csv(filename, index=False)
+    df.to_csv(filename, index=False, encoding='utf-8')
 
 def plot_data(data, t, plot_filename):
     feature_names = [f'feature_{i+1}' for i in range(data.shape[1])]
@@ -32,11 +32,11 @@ def plot_data(data, t, plot_filename):
     plt.close()
 
 if __name__ == "__main__":
-    num_samples = 100000
+    num_samples = 20_000
     num_features = 5
-    stop = 25
+    stop = 100
     data, t = generate_multivariate_sinusoidal_data(num_samples, num_features, stop)
-    output_path = os.path.join(get_path('data_dir', 'sinus'), f'multivariate_sinusoidal_ns{num_samples}_nf{num_features}_st{stop}.csv')
+    output_path = os.path.join(get_path('data_dir', 'sinusoidal'), f'multivariate_sinusoidal_ns{num_samples}_nf{num_features}_st{stop}.csv')
     save_data_to_csv(data, output_path)
-    plot_filename = os.path.join(get_path('data_dir', 'sinus'), f'multivariate_sinusoidal_ns{num_samples}_nf{num_features}_st{stop}.png')
+    plot_filename = os.path.join(get_path('data_dir', 'sinusoidal'), f'multivariate_sinusoidal_ns{num_samples}_nf{num_features}_st{stop}.png')
     plot_data(data, t, plot_filename)

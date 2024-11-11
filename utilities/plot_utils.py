@@ -1,7 +1,9 @@
 import os
 import matplotlib.pyplot as plt
-from configs.paths import get_path
+import torch
 
+from configs.paths import get_path
+from utilities.data_processing_utils import z_score_denormalize
 
 # TODO -> REFACTOR and REMOVE anything MODEL related e.g. rnn_prediction
 
@@ -50,7 +52,7 @@ def plot_prediction(test_target, rnn_prediction, feature_list, selected_feature,
     plt.savefig(figure_path)
     plt.show()
 
-def plot_prediction_with_context(df, y_arr_test, rnn_prediction, feature_list, selected_feature, model_name, TS_PAST, TS_FUTURE, z_mean, z_std, new_row):
+def plot_prediction_with_context(df, y_arr_test, rnn_prediction, feature_list, selected_feature, model_name, ts_past, ts_future, z_mean, z_std, new_row):
     """
     Plots the actual data, rnn predictions with context, and saves the figure.
 
@@ -69,16 +71,16 @@ def plot_prediction_with_context(df, y_arr_test, rnn_prediction, feature_list, s
     """
     plt.figure(figsize=(10, 6))
     plt.title(f'{model_name} predictions with context')
-    start_plot = len(y_arr_test) - 2 * TS_PAST
+    start_plot = len(y_arr_test) - 2 * ts_past
 
     y = df.iloc[:, selected_feature]
     y = y[-len(y_arr_test):]
     y = y * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
     a = [x for x in range(start_plot, len(y))]
     plt.plot(a, y[start_plot:], label='Actual data')
-    c = [x for x in range(len(y) - TS_FUTURE, len(y))]
-    plt.plot(c, rnn_prediction, label=f'One-shot multi-step prediction ({TS_FUTURE}h)')
-    plt.axvline(x=len(y) - TS_FUTURE, c='r', linestyle='--')
+    c = [x for x in range(len(y) - ts_future, len(y))]
+    plt.plot(c, rnn_prediction, label=f'One-shot multi-step prediction ({ts_future}h)')
+    plt.axvline(x=len(y) - ts_future, c='r', linestyle='--')
     plt.ylabel(f"{feature_list[selected_feature % 5]}")
     plt.xlabel("Time")
     plt.legend(loc='upper left')
@@ -87,4 +89,17 @@ def plot_prediction_with_context(df, y_arr_test, rnn_prediction, feature_list, s
     text_content = '\n'.join([f'{key}: {value}' for key, value in new_row.items()])
     plt.text(0.05, 0.05, text_content, transform=plt.gca().transAxes, bbox=dict(facecolor='white', alpha=0.8), verticalalignment='bottom', horizontalalignment='left')
     plt.savefig(figure_path)
+    plt.show()
+
+def plot_performance_during_training(wrapper, x_val, y_val, z_mean, z_std, selected_feature):
+    prediction = wrapper.predict(x_val).detach().numpy()
+    prediction_denorm = z_score_denormalize(prediction, z_mean.iloc[selected_feature], z_std.iloc[selected_feature])
+    y_val_denorm = z_score_denormalize(y_val.detach().numpy(), z_mean.iloc[selected_feature], z_std.iloc[selected_feature])
+
+    # Plot denormalized values
+    plt.figure(figsize=(10, 5))
+    plt.plot(y_val_denorm[:, 0], label='Actual')
+    plt.plot(prediction_denorm[:, 0], label='Prediction')
+    plt.title('Denormalized Prediction vs Actual')
+    plt.legend()
     plt.show()

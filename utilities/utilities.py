@@ -4,8 +4,10 @@ import pandas as pd
 import csv
 
 
-# TODO -> REFACTOR naming etc. and
+# TODO -> REFACTOR naming etc.
+# TODO -> only use maybe for storing?
 
+# TODO -> move this to data_processing_util or something
 def split_sequences(input_sequences, output_sequence, n_steps_in, n_steps_out):
     # Splits a multivariate input sequence into past and future samples
     # input_sequences   : multivariate sequence inputed (x)

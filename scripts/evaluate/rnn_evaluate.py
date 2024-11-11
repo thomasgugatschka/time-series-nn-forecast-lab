@@ -1,7 +1,7 @@
 import torch
 import logging
 import os
-from utilities.data_split_utils import split_and_convert_data
+from utilities.data_processing_utils import split_and_convert_data
 from utilities.plot_utils import plot_prediction, plot_prediction_with_context
 from utilities.save_utils import save_parameters_and_results
 from utilities.metrics_utils import calculate_metrics

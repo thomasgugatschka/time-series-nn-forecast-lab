@@ -1,4 +1,4 @@
-,Date/Time (LST),Temp (degC),Rel Hum (%),Precip. Amount (mm),Stn Press (kPa),Wind Spd (km/h)
+Index,Date/Time (LST),Temp (degC),Rel Hum (%),Precip. Amount (mm),Stn Press (kPa),Wind Spd (km/h)
 0,2014-06-01 00:00,10.1,87.0,0.0,102.29,5.0
 1,2014-06-01 01:00,9.1,92.0,0.0,102.29,4.0
 2,2014-06-01 02:00,8.7,90.0,0.0,102.26,0.0
