@@ -1,0 +1,23 @@
+from models.rnn.rnn_wrapper import RNNWrapper
+# from models.lstm.lstm_wrapper import LSTMWrapper
+# from models.gru.gru_wrapper import GRUWrapper
+# from models.transformer.transformer_wrapper import TransformerWrapper
+# from models.tcn.tcn_wrapper import TCNWrapper
+# from models.cnn.cnn_wrapper import CNNWrapper
+
+# or create_factory
+def wrapper_factory(model_type, model, optimizer, loss_fn):
+    if model_type == 'RNN':
+        return RNNWrapper(model, optimizer, loss_fn)
+    # elif model_type == 'LSTM':
+    #     return LSTMWrapper(model, optimizer, loss_fn)
+    # elif model_type == 'GRU':
+    #     return GRUWrapper(model, optimizer, loss_fn)
+    # elif model_type == 'Transformer':
+    #     return TransformerWrapper(model, optimizer, loss_fn)
+    # elif model_type == 'TCN':
+    #     return TCNWrapper(model, optimizer, loss_fn)
+    # elif model_type == 'CNN':
+    #     return CNNWrapper(model, optimizer, loss_fn)
+    else:
+        raise ValueError(f"Unknown model type: {model_type}")

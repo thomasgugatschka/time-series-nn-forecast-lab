@@ -11,7 +11,7 @@ class RNN(nn.Module):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.batch_first = True
-        self.model_name = 'rnn'
+        self.model_name = 'RNN'
 
         # Unidirectional rnn model with dropout
         self.rnn = nn.RNN(
