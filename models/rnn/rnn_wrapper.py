@@ -12,6 +12,9 @@ class RNNWrapper:
         self.optimizer = optimizer
         self.loss_fn = loss_fn
 
+    def get_model_name(self):
+        return self.model.get_model_name()
+
     #def fit(self, x_train, y_train, x_val, y_val, epochs):
     def fit(self, x_train, y_train, x_val, y_val, epochs, z_mean, z_std, selected_feature):
         training_loss = []
@@ -43,7 +46,9 @@ class RNNWrapper:
 
             if epoch % 1 == 0:
                 logging.info(f'epoch {epoch}. train: {round(loss.item(), 4)}, val: {round(val_loss.item(), 4)}')
-                plot_performance_during_training(self, x_val, y_val, z_mean, z_std, selected_feature)
+                #plot_performance_during_training(self, x_val, y_val, z_mean, z_std, selected_feature, epoch)
+                plot_performance_during_training(self, x_val, y_val, z_mean, z_std, selected_feature, epoch, self.get_model_name())
+
 
         self.model.load_state_dict(best_params)
         return training_loss, validation_loss

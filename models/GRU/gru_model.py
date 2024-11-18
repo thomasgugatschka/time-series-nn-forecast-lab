@@ -4,9 +4,9 @@ import torch
 # https://pytorch.org/docs/stable/generated/torch.nn.GRU.html
 
 class GRU(nn.Module):
-    def __init__(self, num_classes, input_size, hidden_size, num_layers, dropout=0.2):
+    def __init__(self, output_size, input_size, hidden_size, num_layers, dropout=0.2):
         super(GRU, self).__init__()
-        self.num_classes = num_classes
+        self.output_size = output_size
         self.num_layers = num_layers
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -21,7 +21,7 @@ class GRU(nn.Module):
             dropout=dropout,
         )
         self.fc_1 = nn.Linear(hidden_size, 128)
-        self.fc_2 = nn.Linear(128, num_classes)
+        self.fc_2 = nn.Linear(128, output_size)
         self.relu = nn.ReLU()
 
     def forward(self, x):

@@ -7,7 +7,8 @@ import torch
 import pandas as pd
 import csv
 
-from utilities.utilities import split_sequences, update_results_in_csv
+from utilities.data_utils import split_sequences
+from utilities.save_utils import update_results_in_csv
 from models.LSTM.lstm_model import LSTM
 from models.TCN.tcn_model import TCN
 from sklearn.metrics import mean_absolute_error, r2_score

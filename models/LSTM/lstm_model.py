@@ -4,9 +4,9 @@ import torch
 # https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html
 
 class LSTM(nn.Module):
-    def __init__(self, num_classes, input_size, hidden_size, num_layers, dropout=0.2):
+    def __init__(self, output_size, input_size, hidden_size, num_layers, dropout=0.2):
         super().__init__()
-        self.num_classes = num_classes
+        self.output_size = output_size
         self.num_layers = num_layers
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -21,7 +21,7 @@ class LSTM(nn.Module):
             dropout=dropout,
         )
         self.fc_1 = nn.Linear(hidden_size, 128)
-        self.fc_2 = nn.Linear(128, num_classes)
+        self.fc_2 = nn.Linear(128, output_size)
         self.relu = nn.ReLU()
 
     def forward(self, x):
@@ -43,9 +43,9 @@ class LSTM(nn.Module):
 
 
 class BiLSTM(nn.Module):
-    def __init__(self, num_classes, input_size, hidden_size, num_layers, dropout=0.2):
+    def __init__(self, output_size, input_size, hidden_size, num_layers, dropout=0.2):
         super().__init__()
-        self.num_classes = num_classes  # output size
+        self.output_size = output_size  # output size
         self.num_layers = num_layers  # number of recurrent layers in the lstm
         self.input_size = input_size  # input size
         self.hidden_size = hidden_size  # neurons in each lstm layer
@@ -61,7 +61,7 @@ class BiLSTM(nn.Module):
         )
         self.dropout_lstm = nn.Dropout(p=dropout)
         self.fc_1 = nn.Linear(hidden_size * 2, 128)  # fully connected, multiply by 2 for bidirectional
-        self.fc_2 = nn.Linear(128, num_classes)  # fully connected last layer
+        self.fc_2 = nn.Linear(128, output_size)  # fully connected last layer
         self.relu = nn.ReLU()
 
     def forward(self, x):

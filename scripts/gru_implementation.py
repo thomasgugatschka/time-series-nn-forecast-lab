@@ -9,7 +9,7 @@ import time
 import logging
 
 from configs.logging_config import setup_logging
-from utilities.utilities import split_sequences
+from utilities.data_utils import split_sequences
 from models.GRU.gru_model import GRU
 
 setup_logging()
@@ -36,7 +36,7 @@ chosen_model = "GRU"               # Choose which model structure to use
 epochs = 200                        # Training epochs
 dropout = .0                        # Dropout
 learning_rate = 0.005               # Learning rate
-num_classes =   TS_FUTURE
+output_size =   TS_FUTURE
 input_size = num_features
 hidden_size = 32
 num_layers = 4
@@ -95,7 +95,7 @@ print(f"\nTensor shapes (y):\n{y_train.shape}\n{y_val.shape}\n{y_test.shape}\n")
 
 # Initialize model
 model_params = {
-        'num_classes':  num_classes,
+        'output_size':  output_size,
         'input_size':   input_size,
         'hidden_size':  hidden_size,
         'num_layers':   num_layers,
@@ -208,7 +208,7 @@ csv_file_path = os.path.join(plot_results_directory, "parameter_iterations.csv")
 # Check if the CSV file exists
 if not os.path.isfile(csv_file_path):
     # If the file does not exist, create a new DataFrame
-    df_params_iter = pd.DataFrame(columns=['STATION_FORECASTED', 'selected_feature', 'model_type', 'epochs', 'learning_rate', 'num_classes', 'input_size', 'hidden_size','num_layers', 'train_time', 'gru_mse_loss'])
+    df_params_iter = pd.DataFrame(columns=['STATION_FORECASTED', 'selected_feature', 'model_type', 'epochs', 'learning_rate', 'output_size', 'input_size', 'hidden_size','num_layers', 'train_time', 'gru_mse_loss'])
 else:
     # If the file exists, load the existing DataFrame
     df_params_iter = pd.read_csv(csv_file_path)
@@ -217,7 +217,7 @@ new_row = {'STATION_FORECASTED': STATION_FORECASTED,
            'model_type' : chosen_model,
            'epochs': epochs,
            'learning_rate': learning_rate,
-           'num_classes':   num_classes,
+           'output_size':   output_size,
            'input_size':  input_size,
            'hidden_size': hidden_size,
            'num_layers':  num_layers,

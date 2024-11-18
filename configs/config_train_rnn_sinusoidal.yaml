@@ -1,7 +1,6 @@
-ts_past: 1000
-ts_future: 200
-epochs: 200
+epochs: 50
 dropout: 0.0
 learning_rate: 0.005
 hidden_size: 32
 num_layers: 4
+batch_size: 64 # NOT USED YET

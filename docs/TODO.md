@@ -7,11 +7,15 @@ A checklist of tasks to accomplish for the project.
 - [ ] **Move Implementation to New Subdirectory**
   - Organize project files for improved structure and readability.
 
+- [ ] Cleanup for Plot_Training -> pngs so they are not merged together from different training runs
+
 - [ ] detailed naming convention for trained models (ts-futur/past/ ...)
 
 - [ ] GPU enabled Training -> if OPTION
 
 -[ ] add pandas. Describe for data check (statistics)
+
+- [ ] add masterthesis.support_files - to this project, if it makes sense..
 
 - [ ] Add ETT Dataset -> cite paper
   - https://github.com/zhouhaoyi/ETDataset

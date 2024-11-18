@@ -22,3 +22,5 @@ columns_to_drop:
 # Indices for cropping the DataFrame for lower calc time // disable set to null
 crop_start: null
 crop_end: null
+ts_past: 500
+ts_future: 200

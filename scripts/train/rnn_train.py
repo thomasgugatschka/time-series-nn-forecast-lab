@@ -4,44 +4,34 @@ import os
 import pandas as pd
 import logging
 import yaml
+
 from configs.logging_config import setup_logging
 from configs.paths import get_path
+
+from utilities.device_utils import get_device
 from utilities.seed_utils import set_seed
 from utilities.save_utils import save_parameters_and_results
-from utilities.data_processing_utils import z_score_denormalize, split_and_convert_data
-from utilities.plot_utils import plot_training_progress, plot_prediction, plot_prediction_with_context
+from utilities.data_utils import preprocess_data, split_and_convert_data, z_score_denormalize, load_config
+from utilities.plot_utils import plot_training_progress, plot_prediction, plot_prediction_with_context, create_gif_from_plots
+
 from models.rnn.rnn_model import RNN
 from models.rnn.rnn_wrapper import RNNWrapper
-from scripts.preprocessing.data_preprocessing import load_and_preprocess_data # TODO - move to utilities
 
-def main():
+def main(dataset, model_name):
 
     # region ### INITIAL SETUP ###
     set_seed(42)
     setup_logging()
-
-    #dataset = 'sinusoidal'
-    dataset = 'weather'
-    model_name = 'rnn'
+    device = get_device()
+    logging.info(f"Device: {device}")
     # endregion
 
     # region ### LOAD CONFIGURATION ###
-    config_data_file = get_path('config_dir', f'config_data_{dataset}.yaml')
-    with open(config_data_file, 'r') as file:
-        config_data = yaml.safe_load(file)
-    logging.info(f"Loaded configuration from {config_data_file}")
-    logging.info(f"Configuration:\n{yaml.dump(config_data, default_flow_style=False)}")
-
-    config_train_file = get_path('config_dir', f'config_train_{model_name}_{dataset}.yaml')
-    with open(config_train_file, 'r') as file:
-        config_train = yaml.safe_load(file)
-    logging.info(f"Loaded configuration from {config_train_file}")
-    logging.info(f"Configuration:\n{yaml.dump(config_train, default_flow_style=False)}")
+    config_data = load_config(get_path('config_dir', f'config_data_{dataset}.yaml'))
+    config_train = load_config(get_path('config_dir', f'config_train_{model_name}_{dataset}.yaml'))
     # endregion
 
     # region ### SET VARIABLES from CONFIGS ###
-    ts_past = config_train['ts_past']
-    ts_future = config_train['ts_future']
     epochs = config_train['epochs']
     dropout = config_train['dropout']
     learning_rate = config_train['learning_rate']
@@ -49,14 +39,15 @@ def main():
     num_layers = config_train['num_layers']
 
     sources = config_data['sources']
-
     source_forecasted = config_data['source_forecasted']
     feature_list = config_data['feature_list']
     feature_forecasted = config_data['feature_forecasted']
+    ts_past = config_data['ts_past']
+    ts_future = config_data['ts_future']
     # endregion
 
     # region ### LOAD and PREPROCESS DATA ###
-    df, x_arr, y_arr, z_mean, z_std, selected_feature, num_features = (load_and_preprocess_data(config_data, config_train, dataset))
+    df, x_arr, y_arr, z_mean, z_std, selected_feature, num_features = (preprocess_data(config_data, dataset))
     # endregion
 
     # region ### SPLIT and CONVERT DATA ###
@@ -65,13 +56,14 @@ def main():
 
     # region ### INITIALIZE MODEL ###
     model_params = {
-        'num_classes':ts_future,
+        'output_size':ts_future,
         'input_size': num_features,
         'hidden_size': hidden_size,
         'num_layers': num_layers,
         'dropout': dropout
     }
     model = RNN(**model_params)
+    model.to(device) # GPU or CPU
     logging.info(model)
     # endregion
 
@@ -138,27 +130,32 @@ def main():
         'rnn_mse_loss': rnn_mse_loss
     }
     save_parameters_and_results(training_results, model_name)
+
+    create_gif_from_plots(model_name)
     # endregion
 
 
     # Test model
-    prediction = rnn_wrapper.predict(x_test[-1].unsqueeze(0))
-    prediction = prediction.detach().numpy()
-    prediction = z_score_denormalize(prediction, z_mean.iloc[selected_feature], z_std.iloc[selected_feature])
-    prediction = prediction[0].tolist()
+ #   prediction = rnn_wrapper.predict(x_test[-1].unsqueeze(0))
+ #   prediction = prediction.detach().numpy()
+ #   prediction = z_score_denormalize(prediction, z_mean.iloc[selected_feature], z_std.iloc[selected_feature])
+ #   prediction = prediction[0].tolist()
 
     # Test target
-    test_target = y_arr_test[-1, :]
-    test_target = z_score_denormalize(test_target, z_mean.iloc[selected_feature], z_std.iloc[selected_feature])
-    test_target = test_target.tolist()
-
+ #   test_target = y_arr_test[-1, :]
+ #   test_target = z_score_denormalize(test_target, z_mean.iloc[selected_feature], z_std.iloc[selected_feature])
+ #   test_target = test_target.tolist()
 
     # Plot prediction
-    plot_prediction(test_target, prediction, feature_list, selected_feature, model_name)
-
+#    plot_prediction(test_target, prediction, feature_list, selected_feature, model_name)
 
     # Plot prediction and context
-    plot_prediction_with_context(df, y_arr_test, prediction, feature_list, selected_feature, model_name, ts_past, ts_future, z_mean, z_std, training_results)
+#    plot_prediction_with_context(df, y_arr_test, prediction, feature_list, selected_feature, model_name, ts_past, ts_future, z_mean, z_std, training_results)
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+
+    #dataset = 'weather_station'
+    dataset = 'sinusoidal'
+    model_name = 'rnn'
+
+    main(dataset, model_name)

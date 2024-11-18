@@ -9,7 +9,7 @@ import time
 import logging
 
 from configs.logging_config import setup_logging
-from utilities.utilities import split_sequences
+from utilities.data_utils import split_sequences
 from models.TCN.tcn_model import TCN
 
 setup_logging()

@@ -1,46 +1,79 @@
 import torch
 import logging
+import yaml
 import os
-from utilities.data_processing_utils import split_and_convert_data
+
+from utilities.data_utils import preprocess_data, load_config, split_and_convert_data, z_score_denormalize
 from utilities.plot_utils import plot_prediction, plot_prediction_with_context
-from utilities.save_utils import save_parameters_and_results
 from utilities.metrics_utils import calculate_metrics
-from models.rnn.rnn_model import RNN
-from models.rnn.rnn_wrapper import RNNWrapper
-from scripts.preprocessing.data_preprocessing import load_and_preprocess_data
+from utilities.device_utils import get_device
 from configs.paths import get_path
 
-# Add RNN class to safe globals
-torch.serialization.add_safe_globals([RNN])
+from models.rnn.rnn_model import RNN
+from models.rnn.rnn_wrapper import RNNWrapper
 
-def evaluate_model(config_data, config_train, model_name, dataset):
-    # Load and preprocess data
-    df, x_arr, y_arr, z_mean, z_std, selected_feature, num_features = load_and_preprocess_data(config_data, config_train)
+def main(dataset, model_name):
 
-    # Split and convert data
+    # region ### INITIAL SETUP ###
+    device = get_device()
+    logging.info(f"Device: {device}")
+    # endregion
+
+    # region ### LOAD CONFIGURATION ###
+    config_data = load_config(get_path('config_dir', f'config_data_{dataset}.yaml'))
+    config_train = load_config(get_path('config_dir', f'config_train_{model_name}_{dataset}.yaml'))
+    # endregion
+
+    # region ### SET VARIABLES from CONFIGS ###
+    ts_past = config_data['ts_past']
+    ts_future = config_data['ts_future']
+    source_forecasted = config_data['source_forecasted']
+    feature_list = config_data['feature_list']
+
+    hidden_size = config_train['hidden_size']
+    learning_rate = config_train['learning_rate']
+    num_layers = config_train['num_layers']
+    dropout = config_train['dropout']
+    epochs = config_train['epochs']
+    # endregion
+
+    # region ### LOAD and PREPROCESS DATA ###
+    df, x_arr, y_arr, z_mean, z_std, selected_feature, num_features = (preprocess_data(config_data, dataset))
+    # endregion
+
+    # region ### SPLIT and CONVERT DATA ###
     x_train, x_val, x_test, y_train, y_val, y_test, x_arr_train, x_arr_val, x_arr_test, y_arr_train, y_arr_val, y_arr_test = split_and_convert_data(x_arr, y_arr)
+    # endregion
 
-    # Initialize model
+    # region ### INITIALIZE MODEL ###
     model_params = {
-        'num_classes': config_train['ts_future'],
+        'output_size': ts_future,
         'input_size': num_features,
-        'hidden_size': config_train['hidden_size'],
-        'num_layers': config_train['num_layers'],
-        'dropout': config_train['dropout']
+        'hidden_size': hidden_size,
+        'num_layers': num_layers,
+        'dropout': dropout
     }
     best_model = RNN(**model_params)
+    best_model.to(device)
+    logging.info(f"Model initialized with parameters: {model_params}")
+    logging.info(best_model)
+    # endregion
 
-    # Load trained model state_dict
+    # region ### CHECK FOR TRAINED MODEL ###
     trained_model_path = get_path(
         'model_dir', model_name, 'trained_models',
-        f'{model_name}_{dataset}_ts{config_train["ts_past"]}-{config_train["ts_future"]}_epochs{config_train["epochs"]}_'
-        f'lr{config_train["learning_rate"]}_hs{config_train["hidden_size"]}_nl{config_train["num_layers"]}_dr{config_train["dropout"]}_sf{config_data["station_forecasted"]}_'
+        f'{model_name}_{dataset}_ts{ts_past}-{ts_future}_epochs{epochs}_'
+        f'lr{learning_rate}_hs{hidden_size}_nl{num_layers}_dr{dropout}_sf{source_forecasted}_'
         f'feat{selected_feature}.pth'
     )
 
-    logging.info(f"Loading trained model from {trained_model_path}")
+    if not os.path.exists(trained_model_path):
+        logging.error(f"No trained model found at {trained_model_path}")
+        return
+    # endregion
 
-    best_model.load_state_dict(torch.load(trained_model_path, map_location=torch.device('cpu'), weights_only=True))
+    logging.info(f"Loading trained model from {trained_model_path}")
+    best_model.load_state_dict(torch.load(trained_model_path, map_location=device, weights_only=True))
     best_model.eval()
 
     # Define loss function
@@ -50,114 +83,46 @@ def evaluate_model(config_data, config_train, model_name, dataset):
     rnn_wrapper = RNNWrapper(best_model, None, loss_fn)
 
     # Calculate test loss
-    rnn_prediction = rnn_wrapper.predict(x_test)
-    rnn_mse_loss = round(loss_fn(rnn_prediction, y_test).item(), 4)
+    prediction = rnn_wrapper.predict(x_test)
+    rnn_mse_loss = round(loss_fn(prediction, y_test).item(), 4)
     logging.info(f"{model_name} mse loss: {rnn_mse_loss}")
 
-    # TODO those are the normalized ones also need UNNORMALIZED
-
-    # rnn_prediction = rnn_prediction * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
-    # y_test = y_test * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
-
-    metrics = calculate_metrics(rnn_prediction, y_test)
-    logging.warning(f"{model_name} metrics: {metrics}")
-
-    # TODO make method for normalization and denormalization
-    #
-    # import matplotlib.pyplot as plt
-    # import mplcursors
-    #
-    # # Denormalize the entire y_test and rnn_prediction arrays
-    # y_test_denorm = y_test * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
-    # rnn_prediction_denorm = rnn_prediction * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
-    #
-    # # Select the last 120 hours of y_test and the last 24 hours of rnn_prediction
-    # y_test_last_120h = y_test_denorm[-120:]
-    # rnn_prediction_last_24h = rnn_prediction_denorm[-24:]
-    #
-    # # Plot the true values for the last 120 hours
-    # plt.figure(figsize=(10, 6))
-    # line1 = plt.plot(y_test_last_120h, label='Actuals', color='blue')
-    #
-    # # Plot the predicted values for the last 24 hours
-    # line2 = plt.plot(range(96, 120), rnn_prediction_last_24h, label='Predictions', color='red', linestyle='--')
-    #
-    # plt.xlabel('Time Steps')
-    # plt.ylabel('Values')
-    # plt.title('True vs Predicted Values')
-    # plt.legend()
-    #
-    # # Add interactive cursor
-    # cursor = mplcursors.cursor([line1[0], line2[0]], hover=True)
-    # cursor.connect("add", lambda sel: sel.annotation.set_text(f'Value: {sel.target[1]:.2f}'))
-    #
-    # plt.show()
-    #
-
-
-
-
-
-
-    # TODO move this to training ?
-    # Save training results
-    training_results = {
-        'STATION_FORECASTED': config_data['station_forecasted'],
-        'selected_feature': selected_feature,
-        'model_type': model_name,
-        'epochs': config_train['epochs'],
-        'learning_rate': config_train['learning_rate'],
-        'num_classes': config_train['ts_future'],
-        'input_size': num_features,
-        'hidden_size': config_train['hidden_size'],
-        'num_layers': config_train['num_layers'],
-        'train_time': None,  # Not available in evaluation
-        'rnn_mse_loss': rnn_mse_loss
-    }
-
     # Test model
-    rnn_prediction = rnn_wrapper.predict(x_test[-1].unsqueeze(0))
-    rnn_prediction = rnn_prediction.detach().numpy()
-    rnn_prediction = rnn_prediction * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]  # Remove z-score normalization using iloc
-    rnn_prediction = rnn_prediction[0].tolist()
-
-    # Log the number of predicted values
-    logging.info(f"Number of predicted values: {len(rnn_prediction)}")
+    prediction = rnn_wrapper.predict(x_test[-1].unsqueeze(0))
+    prediction = prediction.detach().numpy()
+    prediction = z_score_denormalize(prediction, z_mean.iloc[selected_feature], z_std.iloc[selected_feature])
+    prediction = prediction[0].tolist()
 
     # Test target
     test_target = y_arr_test[-1, :]
-    test_target = test_target * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
+    test_target = z_score_denormalize(test_target, z_mean.iloc[selected_feature], z_std.iloc[selected_feature])
     test_target = test_target.tolist()
 
-
-
-
     # Plot prediction
-    plot_prediction(test_target, rnn_prediction, config_data['feature_list'], selected_feature, model_name)
+    plot_prediction(test_target, prediction, feature_list, selected_feature, model_name)
 
     # Plot prediction and context
-    # TODO check if this works corredt -> it always assumes it's prediction the last TS_PAST points
-    plot_prediction_with_context(df, y_arr_test, rnn_prediction, config_data['feature_list'], selected_feature, model_name, config_train['ts_past'], config_train['ts_future'], z_mean, z_std, training_results)
+    new_row = {
+        'source_forecasted': source_forecasted,
+        'selected_feature': selected_feature,
+        'model_type': model_name,
+        'epochs': epochs,
+        'learning_rate': learning_rate,
+        'ts_future': ts_future,
+        'input_size': num_features,
+        'hidden_size': hidden_size,
+        'num_layers': num_layers,
+        'rnn_mse_loss': rnn_mse_loss
+    }
+    plot_prediction_with_context(df, y_arr_test, prediction, feature_list, selected_feature, model_name, ts_past, ts_future, z_mean, z_std, new_row)
+
 
 if __name__ == "__main__":
     from configs.logging_config import setup_logging
-    import yaml
 
     setup_logging()
 
-    dataset = 'weather'
+    dataset = 'sinusoidal'
     model_name = 'rnn'
 
-    config_data_file = get_path('config_dir', f'config_data_{dataset}.yaml')
-    with open(config_data_file, 'r') as file:
-        config_data = yaml.safe_load(file)
-    logging.info(f"Loaded configuration from {config_data_file}")
-    logging.info(f"Configuration:\n{yaml.dump(config_data, default_flow_style=False)}")
-
-    config_train_file = get_path('config_dir', f'config_train_{model_name}.yaml')
-    with open(config_train_file, 'r') as file:
-        config_train = yaml.safe_load(file)
-    logging.info(f"Loaded configuration from {config_train_file}")
-    logging.info(f"Configuration:\n{yaml.dump(config_train, default_flow_style=False)}")
-
-    evaluate_model(config_data, config_train, model_name, dataset)
+    main(dataset, model_name)

@@ -1,6 +1,3 @@
-Feature,TCN_MSE,TCN_MAE,TCN_R2,LSTM_MSE,LSTM_MAE,LSTM_R2,GRU_MSE,GRU_MAE,GRU_R2
-Temp (degC),0.5349,0.590499997138977,-0.658,0.3709,0.498,-0.1495,0.6686,0.6848,-1.0726
-Rel Hum (%),,,,,,,,,
-Precip. Amount (mm),,,,,,,,,
-Stn Press (kPa),,,,,,,,,
-Wind Spd (km/h),,,,,,,,,
+version https://git-lfs.github.com/spec/v1
+oid sha256:9d7d8ec6a8f1fe73001fa3c120e1e057865ec7e7f6600352502ecbd06762e834
+size 273
