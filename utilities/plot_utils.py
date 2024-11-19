@@ -127,7 +127,7 @@ def plot_performance_during_training(wrapper, x_val, y_val, z_mean, z_std, selec
     plt.savefig(figure_path)
 
     # Show the plot (comment out if you don't want to see the plots during training)
-    #plt.show()
+    plt.show()
 
     plt.close()  # Close the plot to ensure it is rendered correctly
 

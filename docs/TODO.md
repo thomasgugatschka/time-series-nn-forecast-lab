@@ -13,6 +13,8 @@ A checklist of tasks to accomplish for the project.
 
 - [ ] GPU enabled Training -> if OPTION
 
+- single config file type -> JSON or YAML
+
 -[ ] add pandas. Describe for data check (statistics)
 
 - [ ] add masterthesis.support_files - to this project, if it makes sense..

@@ -7,7 +7,7 @@
     },
     "training_params": {
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [50, 51],
+      "epochs": [2, 3],
       "optimizer": ["Adam", "SGD"],
       "loss_function": ["MSELoss", "CrossEntropyLoss"]
     }

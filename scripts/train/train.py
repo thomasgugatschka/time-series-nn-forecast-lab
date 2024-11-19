@@ -160,12 +160,14 @@ def objective(config, config_data, model_type):
         'Adam': torch.optim.Adam,
         'SGD': torch.optim.SGD,
         # Add more optimizers as needed
+        # TODO -> add more optimizers
     }
     # Dictionary mapping for loss functions
     loss_functions = {
         'MSELoss': torch.nn.MSELoss,
         'CrossEntropyLoss': torch.nn.CrossEntropyLoss,
         # Add more loss functions as needed
+        # TODO -> add more loss functions
     }
     # Initialize optimizer and loss function
     optimizer = optimizers[optimizer_name](params=model.parameters(), lr=learning_rate)
@@ -275,9 +277,19 @@ if __name__ == "__main__":
         max_concurrent_trials=1
     )
 
+    # region ### SAVE BEST HYPERPARAMETERS ###
     # Get the best hyperparameters from tuning
+    # TODO - add information about model / dataset / split / ts_future / ts_past --> everything which relates to training.... for loading and actual training
     best_config = analysis.get_best_config(metric="val_loss", mode="min")
     print("Best hyperparameter configuration:", best_config)
+    best_config_file_path = get_path('config_dir', f'best_hyperparameters_{model_type}_{dataset}.json')
+    # Save the best configuration to a JSON file
+    with open(best_config_file_path, "w") as f:
+        json.dump(best_config, f, indent=4)
 
-    # Shutdown Ray
+    print(f"Best hyperparameters saved to {best_config_file_path}")
+    # endregion
+
+
+# Shutdown Ray
     ray.shutdown()

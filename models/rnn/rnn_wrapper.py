@@ -15,6 +15,7 @@ class RNNWrapper:
     def get_model_name(self):
         return self.model.get_model_name()
 
+    # TODO -> remove z_mean, z_std, selected_feature ??? -> MAYBE THERE IS A NICER WAY TO GENERATE THE PLOTS
     #def fit(self, x_train, y_train, x_val, y_val, epochs):
     def fit(self, x_train, y_train, x_val, y_val, epochs, z_mean, z_std, selected_feature):
         training_loss = []
