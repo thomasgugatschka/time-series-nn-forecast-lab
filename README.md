@@ -20,9 +20,6 @@ This project is focused on implementing and experimenting with various neural ne
 
 ## Project Structure
 
-# TODO -> GITHUB LFS (LArge File Storage) is MANDATORY for this project due to the size of the datasets
-# --> add download links and instructions for git lfs 
-
 # TODO FIX STRUCTURE :)
 
     ├── time-series-nn-forecast-lab/           # Main project directory
@@ -62,6 +59,9 @@ This project is focused on implementing and experimenting with various neural ne
     \```
     pip install -r requirements.txt
     \```
+
+### TODO -> GITHUB LFS (LArge File Storage) is MANDATORY for this project due to the size of the datasets
+### --> add download links and instructions for git lfs 
 
 ## Usage
 

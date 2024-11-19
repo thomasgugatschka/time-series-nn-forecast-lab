@@ -1,0 +1,29 @@
+{
+  "RNN": {
+    "model_params": {
+      "hidden_size": [32, 64],
+      "num_layers": [3, 4],
+      "dropout": [0.0, 0.5]
+    },
+    "training_params": {
+      "learning_rate": [1e-3, 1e-2, "log"],
+      "epochs": [50, 51],
+      "optimizer": ["Adam", "SGD"],
+      "loss_function": ["MSELoss", "CrossEntropyLoss"]
+    }
+  },
+  "Transformer": {
+    "model_params": {
+      "num_heads": [2, 8],
+      "num_layers": [1, 5],
+      "hidden_dim": [64, 512],
+      "dropout": [0.0, 0.5]
+    },
+    "training_params": {
+      "learning_rate": [1e-5, 1e-2, "log"],
+      "epochs": [10, 50],
+      "optimizer": ["Adam", "SGD"],
+      "loss_function": ["MSELoss", "CrossEntropyLoss"]
+    }
+  }
+}

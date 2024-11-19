@@ -1,4 +1,4 @@
-epochs: 50
+epochs: 20
 dropout: 0.0
 learning_rate: 0.005
 hidden_size: 32

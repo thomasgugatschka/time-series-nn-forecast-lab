@@ -3,8 +3,12 @@ import torch
 import time
 import logging
 import ray
+import json
 
 from ray import tune
+from ray.tune.experiment.trial import Trial
+from ray.air import session
+from sympy import false
 
 from configs.logging_config import setup_logging
 from configs.paths import get_path
@@ -19,142 +23,261 @@ from models.model_factory import model_factory
 from models.wrapper_factory import wrapper_factory
 
 
-def main(dataset, model_name):
+# Load the configuration file
+# TODO -> refactor naming.... so all config etc. have same same naming convention
+# TODO REFACOTR -> so Load Config or so can be used... myaybe new util for files / file loading ?
+with open(get_path('config_dir', 'hyperparameter_config.json'), "r") as f:
+    config_hyperparameter = json.load(f)
 
-    # region ### INITIAL SETUP ###
+
+import logging
+from ray import tune
+
+# Define the search space function based on loaded config
+def search_space(model_type):
+    model_config = config_hyperparameter.get(model_type, None)
+    if model_config is None:
+        raise ValueError(f"Model type {model_type} not found in the configuration!")
+
+    def parse_value(key, value):
+        if isinstance(value, list):
+            if len(value) == 3 and value[2] == "log":
+                parsed_value = tune.loguniform(value[0], value[1])
+            elif len(value) == 2:
+                if isinstance(value[0], int):
+                    parsed_value = tune.randint(value[0], value[1])
+                elif isinstance(value[0], float):
+                    parsed_value = tune.uniform(value[0], value[1])
+                else:
+                    parsed_value = tune.choice(value)  # Catch-all for other list values
+            else:
+                parsed_value = tune.choice(value)  # For categorical lists like ["Adam", "SGD"]
+        else:
+            parsed_value = value
+
+        # Log each parsed value for debugging purposes
+        logging.debug(f"Parsed value for key '{key}': {parsed_value}")
+        return parsed_value
+
+    search_space_config = {
+        "model_type": model_type,
+        "model_params": {
+            key: parse_value(key, val) for key, val in model_config.get("model_params", {}).items()
+        },
+        "training_params": {
+            key: parse_value(key, val) for key, val in model_config.get("training_params", {}).items()
+        },
+    }
+
+    # Debugging: Log the final search space
+    logging.info(f"Search space for model type {model_type}: {search_space_config}")
+    return search_space_config
+
+
+
+# region ### PARSE ARGUMENTS ###
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train different models with different datasets.")
+    parser.add_argument("--model_type", type=str, required=True, help="Model type to train (RNN, LSTM, GRU, Transformer, CNN)")
+    parser.add_argument("--dataset", type=str, required=True, help="Dataset to use (e.g., sinusoidal, weather_station)")
+    parser.add_argument("--num_samples", type=int, default=10, help="Number of trials for hyperparameter tuning")
+    parser.add_argument("--cpu_per_trial", type=int, default=2, help="Number of CPUs per trial")
+    parser.add_argument("--gpu_per_trial", type=float, default=0.5, help="Number of GPUs per trial")
+    parser.add_argument("--manual_hyperparams", action='store_true', help="Use manual hyperparameters instead of tuning")
+    return parser.parse_args()
+# endregion
+
+def load_manual_hyperparameters():
+    # TODO -> refactor so it is reading in the TRAIN_CONFIG FILES -> rework TRAINING CONFIG FILES
+    # TODO -> BATCH SIZE ???
+    return {
+        "model_type": "RNN",
+        "model_params": {
+            "output_size": 10,
+            "hidden_size": 32,
+            "num_layers": 2,
+            "dropout": 0.2,
+        },
+        "training_params": {
+            "learning_rate": 0.005,
+            "epochs": 50,
+            "optimizer": "Adam",
+            "loss_function": "MSELoss",
+        }
+    }
+
+# region ### TRAINING FUNCTION ##
+# --> train_model method
+def objective(config, config_data, model_type):
+    # Model-specific training process goes here
     set_seed(42)
-    setup_logging()
     device = get_device()
     logging.info(f"Device: {device}")
-    # endregion
-
-    # region ### LOAD CONFIGURATION ###
-    config_data = load_config(get_path('config_dir', f'config_data_{dataset}.yaml'))
-    config_train = load_config(get_path('config_dir', f'config_train_{model_name}_{dataset}.yaml'))
-    # endregion
-
-    # region ### SET VARIABLES from CONFIGS ###
-    epochs = config_train['epochs']
-    dropout = config_train['dropout']
-    learning_rate = config_train['learning_rate']
-    hidden_size = config_train['hidden_size']
-    num_layers = config_train['num_layers']
-
-    sources = config_data['sources']
-    source_forecasted = config_data['source_forecasted']
-    feature_list = config_data['feature_list']
-    feature_forecasted = config_data['feature_forecasted']
-    ts_past = config_data['ts_past']
-    ts_future = config_data['ts_future']
-    # endregion
 
     # region ### LOAD and PREPROCESS DATA ###
-    df, x_arr, y_arr, z_mean, z_std, selected_feature, num_features = (preprocess_data(config_data, dataset))
+    df, x_arr, y_arr, z_mean, z_std, selected_feature, num_features = preprocess_data(config_data, dataset)
     # endregion
 
     # region ### SPLIT and CONVERT DATA ###
-    x_train, x_val, x_test, y_train, y_val, y_test, x_arr_train, x_arr_val, x_arr_test, y_arr_train, y_arr_val, y_arr_test = split_and_convert_data(x_arr, y_arr)
+    # tODO are the remaining parameters "arr" not needed anywhere?
+    x_train, x_val, x_test, y_train, y_val, y_test, _, _, _, _, _, _ = split_and_convert_data(x_arr, y_arr)
+    # endregion
+
+    # region ### SET VARIABLES from CONFIG ###
+    model_params = config["model_params"]
+    model_params["input_size"] = num_features
+
+    model_params["output_size"] = config_data["ts_future"]
+
+
+    epochs = config["training_params"]["epochs"]
+    learning_rate = config["training_params"]["learning_rate"]
+    optimizer_name = config["training_params"].get('optimizer')
+    loss_function_name = config["training_params"].get('loss_function')
+
+    print(f"epochs: {epochs}")
+    print(f"learning_rate: {learning_rate}")
+    print(f"optimizer_name: {optimizer_name}")
+    print(f"loss_function_name: {loss_function_name}")
     # endregion
 
     # region ### INITIALIZE MODEL ###
-    model_params = {
-        'output_size':ts_future,
-        'input_size': num_features,
-        'hidden_size': hidden_size,
-        'num_layers': num_layers,
-        'dropout': dropout
-    }
-
-    model = model_factory(model_name, **model_params)
-    model.to(device) # GPU or CPU
+    model = model_factory(model_type, **model_params)
+    model.to(device)
     logging.info(model)
     # endregion
 
     # region ### DEFINE OPTIMIZER and LOSS FUNCTION ###
-    optimizer = torch.optim.Adam(params=model.parameters(), lr=learning_rate)
-    loss_fn = torch.nn.MSELoss() # TODO - make configurable in config_train
+    # TODO shouldn't this reference to the dictionary ????
+    if optimizer_name not in ['Adam', 'SGD']:
+        raise ValueError(f"Invalid optimizer name: {optimizer_name}")
+
+    if loss_function_name not in ['MSELoss', 'CrossEntropyLoss']:
+        raise ValueError(f"Invalid loss function name: {loss_function_name}")
+
+    # Dictionary mapping for optimizers
+    optimizers = {
+        'Adam': torch.optim.Adam,
+        'SGD': torch.optim.SGD,
+        # Add more optimizers as needed
+    }
+    # Dictionary mapping for loss functions
+    loss_functions = {
+        'MSELoss': torch.nn.MSELoss,
+        'CrossEntropyLoss': torch.nn.CrossEntropyLoss,
+        # Add more loss functions as needed
+    }
+    # Initialize optimizer and loss function
+    optimizer = optimizers[optimizer_name](params=model.parameters(), lr=learning_rate)
+    loss_fn = loss_functions[loss_function_name]()
     # endregion
 
-    # region ### WRAP MODEL for FIT and PREDICT ###
-    #rnn_wrapper = RNNWrapper(model, optimizer, loss_fn)
-    wrapper = wrapper_factory(model_name, model, optimizer, loss_fn)
+    # region ### WRAP MODEL ###
+    wrapper = wrapper_factory(model_type, model, optimizer, loss_fn)
     # endregion
 
     # region ### FIT / TRAIN MODEL ###
     model.train() # Set model to training mode
-    logging.info(f"Start training {model_name.upper()} model")
-    start_time = time.time()
-    training_loss, validation_loss = wrapper.fit(x_train, y_train, x_val, y_val, epochs, z_mean, z_std, selected_feature)
-    end_time = time.time()
-    train_time = round(end_time - start_time, 1)
-    logging.info(f"Execution time: {train_time} seconds")
-    # endregion
-
-    # region ### SAVE TRAINED MODEL ###
-    trained_model_path = get_path(
-        'model_dir', model_name, 'trained_models',
-        f'{model_name}_{dataset}_ts{ts_past}-{ts_future}_epochs{epochs}_'
-        f'lr{learning_rate}_hs{hidden_size}_nl{num_layers}_dr{dropout}_sf{source_forecasted}_'
-        f'feat{selected_feature}.pth'
+    training_loss, validation_loss = wrapper.fit(
+        x_train, y_train, x_val, y_val, epochs, z_mean, z_std, selected_feature
     )
-        # _bs{batch_size}_opt{optimizer}_loss{loss_fn} # --> add more parameters to the model name
-    # Save trained model state_dict
-    torch.save(model.state_dict(), trained_model_path)
-    logging.info(f"Done training {model_name} model")
     # endregion
 
-    # region ### PLOT TRAINING PROGRESS ###
-    plot_training_progress(training_loss, validation_loss, model_name)
+    # region ### REPORT VALIDATION LOSS TO RAY SESSION ###
+    session.report({"val_loss": validation_loss[-1]})
     # endregion
+# endregion
 
-    # region ### CALCUALTE TEST LOSS ###
-    model.eval() # Set model to evaluation mode
-    prediction = wrapper.predict(x_test)
-    rnn_mse_loss = round(loss_fn(prediction, y_test).item(), 4)
-    logging.info(f"{model_name} mse loss: {rnn_mse_loss}")
-    # endregion
-
-    # region ### SAVE TRAINING RESULTS ###
-    training_results = {
-        'source_forecasted': source_forecasted,
-        'selected_feature': selected_feature,
-        'model_type': model_name,
-        'epochs': epochs,
-        'learning_rate': learning_rate,
-        'ts_future': ts_future,
-        'input_size': num_features,
-        'hidden_size': hidden_size,
-        'num_layers': num_layers,
-        'train_time': train_time,
-        'rnn_mse_loss': rnn_mse_loss
-    }
-    save_parameters_and_results(training_results, model_name)
-
-    create_gif_from_plots(model_name)
-    # endregion
-
-
-    # Test model
-    prediction = wrapper.predict(x_test[-1].unsqueeze(0))
-    prediction = prediction.detach().numpy()
-    prediction = z_score_denormalize(prediction, z_mean.iloc[selected_feature], z_std.iloc[selected_feature])
-    prediction = prediction[0].tolist()
-
-    # Test target
-    test_target = y_arr_test[-1, :]
-    test_target = z_score_denormalize(test_target, z_mean.iloc[selected_feature], z_std.iloc[selected_feature])
-    test_target = test_target.tolist()
-
-    # Plot prediction
-    plot_prediction(test_target, prediction, feature_list, selected_feature, model_name)
-
-    # Plot prediction and context
-    plot_prediction_with_context(df, y_arr_test, prediction, feature_list, selected_feature, model_name, ts_past, ts_future, z_mean, z_std, training_results)
+# Custom function to create shorter trial directory names
+def custom_trial_dirname_creator(trial: Trial) -> str:
+    # Use a simpler naming convention to reduce the length of the trial directory name
+    return f"trial_{trial.trial_id}"
 
 if __name__ == "__main__":
+# TODO -> fix paths so command line arguments work
 
-    #dataset = 'weather_station'
+#    args = parse_args()
+#    model_type = args.model_type
+#    dataset = args.dataset
+#    manual_hyperparams = args.manual_hyperparams
+#    num_samples = args.num_samples
+#    cpu_per_trial = args.cpu_per_trial
+#    gpu_per_trial = args.gpu_per_trial
+
+    model_type = 'RNN'
     dataset = 'sinusoidal'
-    model_name = 'RNN'
+    manual_hyperparams = False
+    num_samples = 2
+    cpu_per_trial = 10
+    gpu_per_trial = 0.1
 
-    main(dataset, model_name)
+
+    # Load configuration for the dataset
+    # TODO -> refactor so it is place maybe within OBJECTIVE
+    config_data = load_config(get_path('config_dir', f'config_data_{dataset}.yaml'))
+    ts_future = config_data['ts_future']
+
+    # if manual_hyperparams:
+    #     config = load_manual_hyperparameters()
+    #     objective(config, config_data, model_type)
+    # else:
+    #     # Search space definition based on model type
+    #     # TODO -> move to CONFIG FILE -> just one -> hyperparameter_config.json
+    #     # TODO -> Then MANUAL one has the same structure but is loaded based on model + data
+    #     def search_space():
+    #         if model_type in ["RNN", "LSTM", "GRU"]:
+    #             return {
+    #                 "model_type": model_type,
+    #                 "model_params": {
+    #                     "output_size": ts_future,
+    #                     "hidden_size": tune.randint(32, 64),
+    #                     "num_layers": tune.randint(3, 4),
+    #                     "dropout": tune.uniform(0.0, 0.5),
+    #                 },
+    #                 "training_params": {
+    #                     "learning_rate": tune.loguniform(1e-3, 1e-2),
+    #                     "epochs": tune.randint(50, 51),
+    #                     "optimizer": tune.choice(['Adam', 'SGD']),
+    #                     "loss_function": tune.choice(['MSELoss', 'CrossEntropyLoss']),
+    #                 },
+    #             }
+    #         elif model_type == "Transformer":
+    #             return {
+    #                 "model_type": model_type,
+    #                 "model_params": {
+    #                     "output_size": ts_future,
+    #                     "num_heads": tune.randint(2, 8),
+    #                     "num_layers": tune.randint(1, 5),
+    #                     "hidden_dim": tune.randint(64, 512),
+    #                     "dropout": tune.uniform(0.0, 0.5),
+    #                 },
+    #                 "training_params": {
+    #                     "learning_rate": tune.loguniform(1e-5, 1e-2),
+    #                     "epochs": tune.randint(10, 50),
+    #                     "optimizer": tune.choice(['Adam', 'SGD']),
+    #                     "loss_function": tune.choice(['MSELoss', 'CrossEntropyLoss']),
+    #                 },
+    #             }
+
+
+    # Initialize Ray
+    ray.init(include_dashboard=false)
+
+    # Run Ray Tune with search space defined
+    # TODO -> is there a early STOP definition ??? like if after 10 epochs no improvement -> stop ??? !!!!
+    analysis = tune.run(
+        tune.with_parameters(objective, config_data=config_data, model_type=model_type),
+        config=search_space(model_type),
+        num_samples=num_samples,
+        resources_per_trial={"cpu": cpu_per_trial, "gpu": gpu_per_trial},
+        trial_dirname_creator=custom_trial_dirname_creator,  # Custom trial directory naming
+        resume=True,  # Resume from previous run
+        max_concurrent_trials=1
+    )
+
+    # Get the best hyperparameters from tuning
+    best_config = analysis.get_best_config(metric="val_loss", mode="min")
+    print("Best hyperparameter configuration:", best_config)
+
+    # Shutdown Ray
+    ray.shutdown()
