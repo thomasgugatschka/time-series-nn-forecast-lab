@@ -1,23 +1,17 @@
 import torch
 import copy
-import logging
-from configs.logging_config import setup_logging
-from utilities.plot_utils import plot_performance_during_training
-
-setup_logging()
 
 class RNNWrapper:
-    def __init__(self, model, optimizer, loss_fn):
+    def __init__(self, model, optimizer, loss_fn, callbacks=None):
         self.model = model
         self.optimizer = optimizer
         self.loss_fn = loss_fn
+        self.callbacks = callbacks if callbacks is not None else []
 
     def get_model_name(self):
         return self.model.get_model_name()
 
-    # TODO -> remove z_mean, z_std, selected_feature ??? -> MAYBE THERE IS A NICER WAY TO GENERATE THE PLOTS
-    #def fit(self, x_train, y_train, x_val, y_val, epochs):
-    def fit(self, x_train, y_train, x_val, y_val, epochs, z_mean, z_std, selected_feature):
+    def fit(self, x_train, y_train, x_val, y_val, epochs):
         training_loss = []
         validation_loss = []
         best_params = None
@@ -45,14 +39,13 @@ class RNNWrapper:
                 best_params = copy.deepcopy(self.model.state_dict())
                 min_val_loss = val_loss.item()
 
-            if epoch % 1 == 0:
-                logging.info(f'epoch {epoch}. train: {round(loss.item(), 4)}, val: {round(val_loss.item(), 4)}')
-                #plot_performance_during_training(self, x_val, y_val, z_mean, z_std, selected_feature, epoch)
-                plot_performance_during_training(self, x_val, y_val, z_mean, z_std, selected_feature, epoch, self.get_model_name())
-
+            # Trigger callbacks at the end of the epoch
+            for callback in self.callbacks:
+                callback.on_epoch_end(epoch, self, x_val, y_val)
 
         self.model.load_state_dict(best_params)
         return training_loss, validation_loss
+
 
     def predict(self, x):
         self.model.eval()

@@ -5,10 +5,9 @@ from models.rnn.rnn_wrapper import RNNWrapper
 # from models.tcn.tcn_wrapper import TCNWrapper
 # from models.cnn.cnn_wrapper import CNNWrapper
 
-# or create_factory
-def wrapper_factory(model_type, model, optimizer, loss_fn):
+def wrapper_factory(model_type, model, optimizer, loss_fn, callbacks=None):
     if model_type == 'RNN':
-        return RNNWrapper(model, optimizer, loss_fn)
+        return RNNWrapper(model, optimizer, loss_fn, callbacks)
     # elif model_type == 'LSTM':
     #     return LSTMWrapper(model, optimizer, loss_fn)
     # elif model_type == 'GRU':
