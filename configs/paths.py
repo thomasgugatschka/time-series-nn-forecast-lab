@@ -23,6 +23,9 @@ def get_path(key, *args):
     if key == 'training_plot_dir':
         model_name = args[0]
         return paths['result_dir'] / model_name / 'plots_training'
+    if key == 'checkpoint_dir':
+        model_name = args[0]
+        return paths['model_dir'] / model_name / 'checkpoints'
     # Add more elif statements for other model-specific paths as needed
     else:
         return paths[key] / Path(*args)

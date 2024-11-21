@@ -87,3 +87,4 @@ class TCN(nn.Module):
     def forward(self, x):
         y = self.tcn(x)
         return self.linear(y[:, :, -1])
+

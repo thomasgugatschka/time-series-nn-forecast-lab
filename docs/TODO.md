@@ -15,6 +15,28 @@ A checklist of tasks to accomplish for the project.
 
 - single config file type -> JSON or YAML
 
+- Change train.py to “hyper parameter tuning / search”
+- Remove the file manual hyperparameter argument  not needed for the tuning / search
+- Create own script for training -> based on best hyperparameter OR manual hyperparameter  ensure that they have the same format
+
+
+- Check if it makes sense to STORE the “split” data somewhere as temporary data… otherwise all models will need to do this before hyper parameter search and also training
+- (but must be done of course for each dataset and split variations)
+- Since train and hyper will be their respective script… it should not duplicate the code so much
+- So dedicated pre-processing stage -> which stores the data in a proper file format so all other scripts can read it in -> in a “temp” folder 
+
+
+- Have “run” or “start” script which starts the train / hyper / eval scritps either within DOCKER or read in the arguments from a config file or let’s you also overwrite it by allowing to set the arguments also manually 
+
+- add link to readme and in the respective code sections
+https://pytorch.org/docs/stable/nn.html#loss-functions
+
+https://pytorch.org/tutorials/beginner/hyperparameter_tuning_tutorial.html
+
+
+ASK HANNES FRITZ -> TO REVIEW MA
+
+
 -[ ] add pandas. Describe for data check (statistics)
 
 - [ ] add masterthesis.support_files - to this project, if it makes sense..

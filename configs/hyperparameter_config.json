@@ -2,14 +2,53 @@
   "RNN": {
     "model_params": {
       "hidden_size": [32, 64],
-      "num_layers": [3, 4],
+      "num_layers": [2, 4],
       "dropout": [0.0, 0.5]
     },
     "training_params": {
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [2, 3],
-      "optimizer": ["Adam", "SGD"],
-      "loss_function": ["MSELoss", "CrossEntropyLoss"]
+      "epochs": [2, 10],
+      "optimizer": ["Adam"],
+      "loss_function": ["MSELoss"]
+    }
+  },
+  "GRU": {
+    "model_params": {
+      "hidden_size": [32, 64],
+      "num_layers": [2, 4],
+      "dropout": [0.0, 0.5]
+    },
+    "training_params": {
+      "learning_rate": [1e-3, 1e-2, "log"],
+      "epochs": [2, 10],
+      "optimizer": ["Adam"],
+      "loss_function": ["MSELoss"]
+    }
+  },
+  "LSTM": {
+    "model_params": {
+      "hidden_size": [32, 64],
+      "num_layers": [2, 4],
+      "dropout": [0.0, 0.5]
+    },
+    "training_params": {
+      "learning_rate": [1e-3, 1e-2, "log"],
+      "epochs": [2, 10],
+      "optimizer": ["Adam"],
+      "loss_function": ["MSELoss"]
+    }
+  },
+  "BiLSTM": {
+    "model_params": {
+      "hidden_size": [32, 64],
+      "num_layers": [2, 4],
+      "dropout": [0.0, 0.5]
+    },
+    "training_params": {
+      "learning_rate": [1e-3, 1e-2, "log"],
+      "epochs": [2, 10],
+      "optimizer": ["Adam"],
+      "loss_function": ["MSELoss"]
     }
   },
   "Transformer": {

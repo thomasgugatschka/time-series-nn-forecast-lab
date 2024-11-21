@@ -1,19 +1,17 @@
 import logging
 
-from callbacks.base_callback import Callback
+from callbacks.base_callback import BaseCallback
 from configs.logging_config import setup_logging
 
 setup_logging()
 
 
-class LoggingCallback(Callback):
+class LoggingCallback(BaseCallback):
     def __init__(self, log_every_n_epochs=1):
         self.log_every_n_epochs = log_every_n_epochs
 
-    def on_epoch_end(self, epoch, wrapper, x_val, y_val):
-        # Calculate training and validation loss
-        train_loss = wrapper.loss_fn(wrapper.model(x_val), y_val).item()  # Training loss for logging
-        val_loss = wrapper.loss_fn(wrapper.model(x_val), y_val).item()  # Validation loss for logging
+    def on_epoch_end(self, epoch, wrapper, val_loss, **kwargs):
 
+        # TODO what about train loss ? -> how to get that?
         if epoch % self.log_every_n_epochs == 0:
-            logging.info(f'epoch {epoch}. train: {round(train_loss, 4)}, val: {round(val_loss, 4)}')
+            logging.info(f"Epoch {epoch + 1}: Validation Loss = {val_loss:.4f}")

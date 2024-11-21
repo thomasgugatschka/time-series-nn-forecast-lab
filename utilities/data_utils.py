@@ -63,6 +63,28 @@ def split_sequences(input_sequences, output_sequence, n_steps_in, n_steps_out):
         y.append(seq_y)
     return np.array(x), np.array(y)
 
+
+def load_and_preprocess_data(config_data, dataset):
+    # Preprocess data
+    df, x_arr, y_arr, z_mean, z_std, selected_feature, num_features = preprocess_data(config_data, dataset)
+
+    # Split and convert data
+    x_train, x_val, x_test, y_train, y_val, y_test, *_ = split_and_convert_data(x_arr, y_arr)
+
+    return {
+        "x_train": x_train,
+        "x_val": x_val,
+        "x_test": x_test,
+        "y_train": y_train,
+        "y_val": y_val,
+        "y_test": y_test,
+        "num_features": num_features,
+        "z_mean": z_mean,
+        "z_std": z_std,
+        "selected_feature": selected_feature
+    }
+
+
 # Split and convert data function
 def split_and_convert_data(x_arr, y_arr, frac_train=0.7, frac_val=0.15):
     num_samples = x_arr.shape[0]

@@ -1,9 +1,10 @@
 import torch.nn as nn
 import torch
+from models.base_model import BaseModel
 
 # https://pytorch.org/docs/stable/generated/torch.nn.RNN.html
 
-class RNN(nn.Module):
+class RNN(BaseModel):
     def __init__(self, output_size, input_size, hidden_size, num_layers, dropout=0.2):
         super(RNN, self).__init__()
         self.output_size = output_size
@@ -43,6 +44,3 @@ class RNN(nn.Module):
         out = self.fc_2(out)
 
         return out
-
-    def get_model_name(self):
-        return self.model_name

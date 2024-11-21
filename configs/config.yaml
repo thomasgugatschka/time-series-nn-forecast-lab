@@ -1,0 +1,10 @@
+model_type: "LSTM"
+dataset: "sinusoidal"
+num_samples: 2
+cpu_per_trial: 10
+gpu_per_trial: 0.1
+max_concurrent_trials: 1
+trial_params:
+  max_epochs: 50
+  grace_period: 5
+  reduction_factor: 2
