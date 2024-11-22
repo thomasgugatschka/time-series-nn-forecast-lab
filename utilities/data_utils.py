@@ -4,7 +4,14 @@ import pandas as pd
 import numpy as np
 import yaml
 import torch
+
+from torch.utils.data import DataLoader, TensorDataset
+
 from configs.paths import get_path
+
+# TODO -> change to CLASSES so it is somewhat separated???
+#
+
 
 # Load configuration function
 def load_config(config_file):
@@ -13,6 +20,22 @@ def load_config(config_file):
         config = yaml.safe_load(file)
     logging.info(f"Configuration loaded successfully from {config_file}")
     return config
+
+# Create data loaders function
+def create_data_loaders(x_train, y_train, x_val, y_val, x_test, y_test, batch_size):
+    # Create datasets
+    train_dataset = TensorDataset(x_train, y_train)
+    val_dataset = TensorDataset(x_val, y_val)
+    test_dataset = TensorDataset(x_test, y_test)
+
+    # Create data loaders
+    # TODO -> check what the shuffle does -> nad if TRUE is bad for Time Series Prediction
+    #train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+
+    return train_loader, val_loader, test_loader
 
 # Load data function
 def load_data(sources, data_dir, columns_to_drop):
@@ -99,8 +122,8 @@ def split_and_convert_data(x_arr, y_arr, frac_train=0.7, frac_val=0.15):
     y_arr_train = y_arr[:num_train, :]
     y_arr_val = y_arr[num_train:num_train + num_val, :]
     y_arr_test = y_arr[num_train + num_val:, :]
-    logging.info(f"\nx_arr shapes:\n{x_arr_train.shape}\n{x_arr_val.shape}\n{x_arr_test.shape}")
-    logging.info(f"\ny_arr shapes:\n{y_arr_train.shape}\n{y_arr_val.shape}\n{y_arr_test.shape}")
+    #logging.info(f"\nx_arr shapes:\n{x_arr_train.shape}\n{x_arr_val.shape}\n{x_arr_test.shape}")
+    #logging.info(f"\ny_arr shapes:\n{y_arr_train.shape}\n{y_arr_val.shape}\n{y_arr_test.shape}")
 
     # Convert to tensors
     x_train = torch.tensor(x_arr_train, dtype=torch.float32)
@@ -109,40 +132,33 @@ def split_and_convert_data(x_arr, y_arr, frac_train=0.7, frac_val=0.15):
     y_train = torch.tensor(y_arr_train, dtype=torch.float32)
     y_val = torch.tensor(y_arr_val, dtype=torch.float32)
     y_test = torch.tensor(y_arr_test, dtype=torch.float32)
-    logging.info(f"\nTensor shapes (x):\n{x_train.shape}\n{x_val.shape}\n{x_test.shape}")
-    logging.info(f"\nTensor shapes (y):\n{y_train.shape}\n{y_val.shape}\n{y_test.shape}\n")
+    #logging.info(f"\nTensor shapes (x):\n{x_train.shape}\n{x_val.shape}\n{x_test.shape}")
+    #logging.info(f"\nTensor shapes (y):\n{y_train.shape}\n{y_val.shape}\n{y_test.shape}\n")
 
     logging.info(f"""
     Data split and conversion completed:
-    - x_train, x_val, x_test: These are the input features for the training, validation, and test sets, respectively. 
-      They are PyTorch tensors of shape (num_samples, num_timesteps, num_features).
-      Shapes:
+    - Shapes:
       - x_train: {x_train.shape}
       - x_val: {x_val.shape}
       - x_test: {x_test.shape}
 
-    - y_train, y_val, y_test: These are the target values for the training, validation, and test sets, respectively. 
-      They are PyTorch tensors of shape (num_samples, num_targets).
-      Shapes:
+    - Shapes:
       - y_train: {y_train.shape}
       - y_val: {y_val.shape}
       - y_test: {y_test.shape}
 
-    - x_arr_train, x_arr_val, x_arr_test: These are the input features for the training, validation, and test sets, respectively, in NumPy array format. 
-      They have the same shape as their corresponding PyTorch tensors.
-      Shapes:
+    - Shapes:
       - x_arr_train: {x_arr_train.shape}
       - x_arr_val: {x_arr_val.shape}
       - x_arr_test: {x_arr_test.shape}
 
-    - y_arr_train, y_arr_val, y_arr_test: These are the target values for the training, validation, and test sets, respectively, in NumPy array format. 
-      They have the same shape as their corresponding PyTorch tensors.
-      Shapes:
+    - Shapes:
       - y_arr_train: {y_arr_train.shape}
       - y_arr_val: {y_arr_val.shape}
       - y_arr_test: {y_arr_test.shape}
     """)
 
+    # TODO - Refactor return so it works the same way as for the load_and_preprocess_data function
     return x_train, x_val, x_test, y_train, y_val, y_test, x_arr_train, x_arr_val, x_arr_test, y_arr_train, y_arr_val, y_arr_test
 
 def calculate_features(feature_list, columns_to_drop, source_forecasted, feature_forecasted, sources):

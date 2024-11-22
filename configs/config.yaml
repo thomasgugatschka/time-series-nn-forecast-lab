@@ -1,5 +1,6 @@
-model_type: "LSTM"
-dataset: "sinusoidal"
+model_type: "GRU"
+#dataset: "sinusoidal"
+dataset: "weather_station"
 num_samples: 2
 cpu_per_trial: 10
 gpu_per_trial: 0.1

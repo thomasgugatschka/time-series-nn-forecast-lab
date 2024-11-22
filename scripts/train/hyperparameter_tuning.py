@@ -27,7 +27,7 @@ from configs.paths import get_path
 from utilities.device_utils import get_device
 from utilities.seed_utils import set_seed
 from utilities.save_utils import save_parameters_and_results
-from utilities.data_utils import preprocess_data, split_and_convert_data, load_config, load_and_preprocess_data
+from utilities.data_utils import preprocess_data, split_and_convert_data, load_config, load_and_preprocess_data, create_data_loaders
 from utilities.plot_utils import plot_training_progress, plot_prediction, plot_prediction_with_context, create_gif_from_plots
 
 from models.model_factory import model_factory
@@ -111,7 +111,20 @@ def objective(config, config_data, model_type):
     learning_rate = config["training_params"]["learning_rate"]
     optimizer_name = config["training_params"].get('optimizer')
     loss_function_name = config["training_params"].get('loss_function')
+
+    # Get batch size from config
+    batch_size = config["training_params"]["batch_size"]
+
     # endregion
+
+    # region ### DATALOADER ###
+    # Create data loaders
+    train_loader, val_loader, test_loader = create_data_loaders(
+        x_train, y_train, x_val, y_val, x_test, y_test, batch_size
+    )
+    # endregion
+
+
 
     # region ### INITIALIZE MODEL ###
     model = model_factory(model_type, **model_params)
@@ -144,17 +157,39 @@ def objective(config, config_data, model_type):
     # endregion
 
     # region ### FIT / TRAIN MODEL ###
-    # Training Loop with Callbacks
+    # Training Loop with DataLoader Integration and Callbacks
     for epoch in range(epochs):
         logging.info(f'Start Training Epoch {epoch}')
-        train_loss = wrapper.train_epoch(x_train, y_train)
-        val_loss = wrapper.validate(x_val, y_val)
 
-        logging.info(f'Epoch {epoch}: train_loss = {train_loss:.4f}, val_loss = {val_loss:.4f}')
+        # Initialize variables to track epoch losses
+        train_loss_total = 0
+        num_train_batches = 0
+
+        # Training Loop for each mini-batch
+        for batch_idx, (x_batch, y_batch) in enumerate(train_loader):
+            x_batch, y_batch = x_batch.to(device), y_batch.to(device)
+            train_loss = wrapper.train_epoch(x_batch, y_batch)
+            train_loss_total += train_loss
+            num_train_batches += 1
+
+        avg_train_loss = train_loss_total / num_train_batches
+        logging.info(f'Epoch {epoch}: avg_train_loss = {avg_train_loss:.4f}')
+
+        # Validation Loop
+        val_loss_total = 0
+        num_val_batches = 0
+        for x_val_batch, y_val_batch in val_loader:
+            x_val_batch, y_val_batch = x_val_batch.to(device), y_val_batch.to(device)
+            val_loss = wrapper.validate(x_val_batch, y_val_batch)
+            val_loss_total += val_loss
+            num_val_batches += 1
+
+        avg_val_loss = val_loss_total / num_val_batches
+        # TODO - move to callback manager
+        logging.info(f'Epoch {epoch}: avg_val_loss = {avg_val_loss:.4f}')
 
         # Use the callback manager to trigger on_epoch_end
-        # TODO - logging callback does not work train and val loss are the same
-        callback_manager.on_epoch_end(epoch, wrapper, val_loss, x_val=x_val, y_val=y_val)
+        callback_manager.on_epoch_end(epoch, wrapper, avg_val_loss, x_val=x_val, y_val=y_val)
 
         # Check if early stopping is triggered
         if early_stopping_callback.should_stop():
@@ -162,8 +197,7 @@ def objective(config, config_data, model_type):
             break
 
         # Report the validation loss to Ray Tune
-        session.report({"val_loss": val_loss})
-
+        session.report({"val_loss": avg_val_loss})
     # endregion
 
 # endregion
