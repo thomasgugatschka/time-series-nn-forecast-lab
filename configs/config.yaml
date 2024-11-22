@@ -1,11 +1,17 @@
-model_type: "GRU"
-#dataset: "sinusoidal"
-dataset: "weather_station"
+model_type: "RNN"
+dataset: "sinusoidal"
+#dataset: "weather_station"
 num_samples: 2
 cpu_per_trial: 10
 gpu_per_trial: 0.1
 max_concurrent_trials: 1
 trial_params:
-  max_epochs: 50
+  max_epochs: 200
   grace_period: 5
   reduction_factor: 2
+train_val_test_split: # OVERWRITTEN by dataset specific config if set there
+  frac_train: 0.7
+  frac_val: 0.15
+search_algorithm: "optuna" #
+scheduler: "asha"  # Options for schedulers like "asha", "fifo", "hyperband", etc.
+# TODO -> make comments which options are available

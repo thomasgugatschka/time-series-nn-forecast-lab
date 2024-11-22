@@ -8,7 +8,7 @@
     "training_params": {
       "batch_size": [16, 32, 64, 128, 256, 512],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [2, 10],
+      "epochs": [2, 3],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }
@@ -22,21 +22,21 @@
     "training_params": {
       "batch_size": [16, 32, 64, 128, 256, 512],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [15, 20],
+      "epochs": [2, 3],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }
   },
   "LSTM": {
     "model_params": {
-      "hidden_size": [32, 64],
+      "hidden_size": [32, 64, 128],
       "num_layers": [2, 4],
       "dropout": [0.0, 0.5]
     },
     "training_params": {
       "batch_size": [16, 32, 64, 128, 256, 512],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [2, 10],
+      "epochs": [2, 3],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }
@@ -50,7 +50,7 @@
     "training_params": {
       "batch_size": [16, 32, 64, 128, 256, 512],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [2, 10],
+      "epochs": [30, 50],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }

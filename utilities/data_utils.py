@@ -87,12 +87,18 @@ def split_sequences(input_sequences, output_sequence, n_steps_in, n_steps_out):
     return np.array(x), np.array(y)
 
 
-def load_and_preprocess_data(config_data, dataset):
+def load_and_preprocess_data(config_data, dataset, default_split):
+
+    # Extract split ratios from dataset-specific config if available, otherwise use the default split
+    frac_train = config_data.get('train_val_test_split', {}).get('frac_train', default_split['frac_train'])
+    frac_val = config_data.get('train_val_test_split', {}).get('frac_val', default_split['frac_val'])
+
+
     # Preprocess data
     df, x_arr, y_arr, z_mean, z_std, selected_feature, num_features = preprocess_data(config_data, dataset)
 
     # Split and convert data
-    x_train, x_val, x_test, y_train, y_val, y_test, *_ = split_and_convert_data(x_arr, y_arr)
+    x_train, x_val, x_test, y_train, y_val, y_test, *_ = split_and_convert_data(x_arr, y_arr, frac_train=frac_train, frac_val=frac_val)
 
     return {
         "x_train": x_train,
@@ -109,7 +115,7 @@ def load_and_preprocess_data(config_data, dataset):
 
 
 # Split and convert data function
-def split_and_convert_data(x_arr, y_arr, frac_train=0.7, frac_val=0.15):
+def split_and_convert_data(x_arr, y_arr, frac_train, frac_val):
     num_samples = x_arr.shape[0]
     num_train = int(frac_train * num_samples)
     num_val = int(frac_val * num_samples)

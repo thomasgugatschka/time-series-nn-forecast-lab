@@ -10,7 +10,7 @@ class EarlyStoppingCallback:
 
     def on_epoch_end(self, epoch, wrapper, val_loss, **kwargs):
         # Check if there is an improvement
-        if val_loss < self.best_val_loss - self.delta:
+        if val_loss < self.best_val_loss - self.delta: #TODO - check if this is correct # not sure since it always checks based on best not last...
             self.best_val_loss = val_loss
             self.wait = 0  # Reset the wait counter
         else:

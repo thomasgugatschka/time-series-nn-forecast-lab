@@ -41,9 +41,9 @@ learning_rate = 0.005               # Learning rate
 
 # Import time-series from stored pickles
 df_list = []
-files = os.listdir(os.path.join("..", "data", "pickles"))
+files = os.listdir(os.path.join("../..", "data", "pickles"))
 for file in files:
-    target_file = os.path.join("..", "data", "pickles", file)
+    target_file = os.path.join("../..", "data", "pickles", file)
     df = pd.read_pickle(target_file)
     df = df.drop(columns='Date/Time (LST)')
     df_list.append(df)

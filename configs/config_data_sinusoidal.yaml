@@ -24,3 +24,7 @@ crop_start: null
 crop_end: null
 ts_past: 500
 ts_future: 200
+# Optional: Override split ratios for specific dataset needs
+#train_val_test_split:
+#  frac_train: 0.7
+#  frac_val: 0.15

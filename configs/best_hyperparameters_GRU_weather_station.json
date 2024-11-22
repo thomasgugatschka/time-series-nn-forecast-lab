@@ -1,16 +1,16 @@
 {
     "model_type": "GRU",
     "model_params": {
-        "hidden_size": 51,
+        "hidden_size": 54,
         "num_layers": 2,
-        "dropout": 0.1366442926316775
+        "dropout": 0.07436044408849518
     },
     "training_params": {
         "batch_size": 256,
-        "learning_rate": 0.0049362743968369115,
-        "epochs": 20,
+        "learning_rate": 0.004723873679137285,
+        "epochs": 17,
         "optimizer": "Adam",
         "loss_function": "MSELoss"
     },
-    "trial_seed": 2807
+    "trial_seed": 6569
 }

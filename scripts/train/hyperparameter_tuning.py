@@ -12,28 +12,39 @@ from ray.air import session
 from ray.tune.experiment.trial import Trial
 from ray.tune.schedulers import ASHAScheduler
 
+# Callbacks
 from callbacks.callback_manager import CallbackManager
 from callbacks.logging_callback import LoggingCallback
 from callbacks.plotting_callback import PlottingCallback
 from callbacks.early_stopping_callback import EarlyStoppingCallback
 from callbacks.model_checkpoint_callback import ModelCheckpointCallback
 
+# Config Management
 from configs.config_manager import ConfigManager
 from configs.hyperparameter_manager import HyperparameterManager
-
 from configs.logging_config import setup_logging
 from configs.paths import get_path
 
+# Utilities
 from utilities.device_utils import get_device
 from utilities.seed_utils import set_seed
 from utilities.save_utils import save_parameters_and_results
 from utilities.data_utils import preprocess_data, split_and_convert_data, load_config, load_and_preprocess_data, create_data_loaders
 from utilities.plot_utils import plot_training_progress, plot_prediction, plot_prediction_with_context, create_gif_from_plots
 
+from utilities.scheduler_factory import get_scheduler
+
+# Models and Pipeline
 from models.model_factory import model_factory
 from models.wrapper_factory import wrapper_factory
+from strategies.search_algorithm_strategy import SearchAlgorithmStrategy
+from training_pipeline.training_pipeline import TrainingPipeline
 
 
+
+
+
+# Initialize logging
 setup_logging()
 
 
@@ -82,9 +93,13 @@ def get_loss_function(loss_function_name):
         raise ValueError(f"Invalid loss function name: {loss_function_name}")
     return loss_functions[loss_function_name]()
 
+def custom_trial_dirname_creator(trial: Trial) -> str:
+    # Custom function to create shorter trial directory names
+    # Use a simpler naming convention to reduce the length of the trial directory name
+    return f"trial_{trial.trial_id}"
 
 # region ### TRAINING FUNCTION ##
-def objective(config, config_data, model_type):
+def objective(config, config_data, model_type, default_split):
     trial_seed = config.get("trial_seed")
     set_seed(trial_seed)
 
@@ -93,14 +108,13 @@ def objective(config, config_data, model_type):
 
 
     # region ### LOAD and PREPROCESS DATA ###
-    data = load_and_preprocess_data(config_data, dataset)
+    data = load_and_preprocess_data(config_data, dataset, default_split)
 
     x_train, x_val, x_test = data["x_train"], data["x_val"], data["x_test"]
     y_train, y_val, y_test = data["y_train"], data["y_val"], data["y_test"]
     num_features = data["num_features"]
     z_mean, z_std, selected_feature = data["z_mean"], data["z_std"], data["selected_feature"]
     # endregion
-
 
     # region ### SET VARIABLES from CONFIG ###
     model_params = config["model_params"]
@@ -111,35 +125,24 @@ def objective(config, config_data, model_type):
     learning_rate = config["training_params"]["learning_rate"]
     optimizer_name = config["training_params"].get('optimizer')
     loss_function_name = config["training_params"].get('loss_function')
-
-    # Get batch size from config
     batch_size = config["training_params"]["batch_size"]
-
     # endregion
 
     # region ### DATALOADER ###
-    # Create data loaders
     train_loader, val_loader, test_loader = create_data_loaders(
         x_train, y_train, x_val, y_val, x_test, y_test, batch_size
     )
     # endregion
 
+    # region ### INITIALIZE MODEL, OPTIMIZER, LOSS FUNCTION ###
+    model = model_factory(model_type, **model_params).to(device)
+    #model = model_factory(model_type, **model_params)
+    #model.to(device)
+    #logging.info(model)
 
-
-    # region ### INITIALIZE MODEL ###
-    model = model_factory(model_type, **model_params)
-    model.to(device)
-    logging.info(model)
-    # endregion
-
-    # region ### DEFINE OPTIMIZER and LOSS FUNCTION ###
     optimizer = get_optimizer(optimizer_name, model.parameters(), learning_rate)
     loss_fn = get_loss_function(loss_function_name)
     # endregion
-
-
-
-
 
     # region ### CALLBACKS ###
     # Set up callbacks using the callback manager
@@ -151,61 +154,33 @@ def objective(config, config_data, model_type):
     #model_checkpoint_callback = ModelCheckpointCallback(checkpoint_dir=checkpoint_dir, monitor='val_loss')
 
     callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback])
-
-    # region ### WRAP MODEL ###
-    wrapper = wrapper_factory(model_type, model, optimizer, loss_fn)
     # endregion
 
-    # region ### FIT / TRAIN MODEL ###
-    # Training Loop with DataLoader Integration and Callbacks
-    for epoch in range(epochs):
-        logging.info(f'Start Training Epoch {epoch}')
+    # region ### INITIALIZE MODEL WRAPPER ###
+    wrapper = wrapper_factory(model_type, model, optimizer, loss_fn, device)
+    # endregion
 
-        # Initialize variables to track epoch losses
-        train_loss_total = 0
-        num_train_batches = 0
+    # region ### Assemble the pipeline config ###
+    pipeline_config = {
+        "model": model,
+        "data_loaders": {
+            "train": train_loader,
+            "val": val_loader,
+            "test": test_loader
+        },
+        "epochs": epochs,
+        "callback_manager": callback_manager
+    }
+    # endregion
 
-        # Training Loop for each mini-batch
-        for batch_idx, (x_batch, y_batch) in enumerate(train_loader):
-            x_batch, y_batch = x_batch.to(device), y_batch.to(device)
-            train_loss = wrapper.train_epoch(x_batch, y_batch)
-            train_loss_total += train_loss
-            num_train_batches += 1
-
-        avg_train_loss = train_loss_total / num_train_batches
-        logging.info(f'Epoch {epoch}: avg_train_loss = {avg_train_loss:.4f}')
-
-        # Validation Loop
-        val_loss_total = 0
-        num_val_batches = 0
-        for x_val_batch, y_val_batch in val_loader:
-            x_val_batch, y_val_batch = x_val_batch.to(device), y_val_batch.to(device)
-            val_loss = wrapper.validate(x_val_batch, y_val_batch)
-            val_loss_total += val_loss
-            num_val_batches += 1
-
-        avg_val_loss = val_loss_total / num_val_batches
-        # TODO - move to callback manager
-        logging.info(f'Epoch {epoch}: avg_val_loss = {avg_val_loss:.4f}')
-
-        # Use the callback manager to trigger on_epoch_end
-        callback_manager.on_epoch_end(epoch, wrapper, avg_val_loss, x_val=x_val, y_val=y_val)
-
-        # Check if early stopping is triggered
-        if early_stopping_callback.should_stop():
-            logging.info(f"Training stopped early at epoch {epoch + 1}")
-            break
-
-        # Report the validation loss to Ray Tune
-        session.report({"val_loss": avg_val_loss})
+    # region ### Create the TrainingPipeline ###
+    training_pipeline = TrainingPipeline(pipeline_config, wrapper)
+    training_pipeline.run()
     # endregion
 
 # endregion
 
-# Custom function to create shorter trial directory names
-def custom_trial_dirname_creator(trial: Trial) -> str:
-    # Use a simpler naming convention to reduce the length of the trial directory name
-    return f"trial_{trial.trial_id}"
+
 
 if __name__ == "__main__":
 
@@ -225,14 +200,21 @@ if __name__ == "__main__":
     gpu_per_trial = config_manager.get('gpu_per_trial')
     max_concurrent_trials = config_manager.get('max_concurrent_trials')
 
+    # Load the default split ratios from the experiment config
+    default_split = config_manager.get('train_val_test_split')
+
     # Load configuration for the dataset
     config_data = load_config(get_path('config_dir', f'config_data_{dataset}.yaml'))
 
 
-
+    # TODO - refactor don't like it here, tooo random
     ts_future = config_data['ts_future']
 
 
+    # Load the scheduler from config
+    scheduler_name = config_manager.get('scheduler', default='asha')
+    trial_params = config_manager.get('trial_params')
+    scheduler = get_scheduler(scheduler_name, trial_params)
 
     # Run Ray Tune with search space defined
 
@@ -240,27 +222,50 @@ if __name__ == "__main__":
     # Initialize Ray
     ray.init(include_dashboard=False)
 
-    # Run Ray Tune with search space defined
-    scheduler = ASHAScheduler(
+#    # Run Ray Tune with search space defined
+#    scheduler = ASHAScheduler(
+#        metric="val_loss",
+#        mode="min",
+#        max_t=config_manager['trial_params']['max_epochs'],
+#        grace_period=config_manager['trial_params']['grace_period'],
+#        reduction_factor=config_manager['trial_params']['reduction_factor']
+#    )
+
+    # Search algorithm setup using the SearchAlgorithmStrategy
+    search_algorithm_strategy = SearchAlgorithmStrategy(
+        algorithm_name=config_manager.get("search_algorithm"),
         metric="val_loss",
-        mode="min",
-        max_t=config_manager['trial_params']['max_epochs'],
-        grace_period=config_manager['trial_params']['grace_period'],
-        reduction_factor=config_manager['trial_params']['reduction_factor']
+        mode="min"
     )
+    search_algorithm = search_algorithm_strategy.get_search_algorithm()
 
     search_space_config = hyperparameter_manager.get_search_space(model_type)
 
+    # Run hyperparameter tuning with Ray Tune
     analysis = tune.run(
-        tune.with_parameters(objective, config_data=config_data, model_type=model_type),
+        tune.with_parameters(objective, config_data=config_data, model_type=model_type, default_split=default_split),
         config=search_space_config,
         num_samples=num_samples,
         resources_per_trial={"cpu": cpu_per_trial, "gpu": gpu_per_trial},
-        trial_dirname_creator=custom_trial_dirname_creator,
+        trial_dirname_creator=lambda trial: f"trial_{trial.trial_id}",
         scheduler=scheduler,
-        resume=True,  # Resume from previous run
+        search_alg=search_algorithm,
+        resume=True,
         max_concurrent_trials=max_concurrent_trials
     )
+
+
+
+#    analysis = tune.run(
+#        tune.with_parameters(objective, config_data=config_data, model_type=model_type, default_split=default_split),
+#        config=search_space_config,
+#        num_samples=num_samples,
+#        resources_per_trial={"cpu": cpu_per_trial, "gpu": gpu_per_trial},
+#        trial_dirname_creator=custom_trial_dirname_creator,
+#        scheduler=scheduler,
+#        resume=True,  # Resume from previous run
+#        max_concurrent_trials=max_concurrent_trials
+#    )
 
 
 

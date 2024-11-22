@@ -1,16 +1,16 @@
 {
     "model_type": "RNN",
     "model_params": {
-        "hidden_size": 43,
-        "num_layers": 2,
-        "dropout": 0.09908251078630126
+        "hidden_size": 44,
+        "num_layers": 4,
+        "dropout": 0.29670518493321646
     },
     "training_params": {
-        "batch_size": 64,
-        "learning_rate": 0.002675779351718894,
-        "epochs": 8,
+        "batch_size": 256,
+        "learning_rate": 0.0012932654312169413,
+        "epochs": 3,
         "optimizer": "Adam",
         "loss_function": "MSELoss"
     },
-    "trial_seed": 8150
+    "trial_seed": 7584
 }

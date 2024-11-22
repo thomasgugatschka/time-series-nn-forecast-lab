@@ -1,0 +1,27 @@
+@startuml
+actor DataScientist as "Data Scientist"
+entity TrainingDataset as "Training Dataset"
+entity ValidationDataset as "Validation Dataset"
+entity DeepLearningModel as "Deep Learning Model"
+collections Optimizer as "Optimizer"
+entity LossFunction as "Loss Function"
+
+DataScientist -> DeepLearningModel : Configures and starts training
+loop Each Epoch
+  TrainingDataset -> DeepLearningModel : Sends data in batches
+  DeepLearningModel -> LossFunction : Makes predictions
+  LossFunction -> Optimizer : Evaluates predictions
+  Optimizer -> DeepLearningModel : Updates weights
+  
+  alt Every 10% of Data Processed
+    DeepLearningModel -> DeepLearningModel : Stores model checkpoint
+  end
+
+  alt Validation Step
+    ValidationDataset -> DeepLearningModel : Validates model
+    DeepLearningModel -> DataScientist : Reports validation results
+  end
+end
+
+DataScientist -> DeepLearningModel : Stops training upon criterion
+@enduml

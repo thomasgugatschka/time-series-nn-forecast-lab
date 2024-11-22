@@ -1,0 +1,50 @@
+@startuml
+
+package "Cloud Environment" {
+    rectangle "Dataset Management" as DM {
+        database "Dataset" as DS
+        frame "Splitter" as Split {
+            note right: Split into training\nand test datasets\nwith varying ratios
+        }
+        frame "Preprocessor" as Prep {
+            note right: Prepare and clean data\nas required
+        }
+    }
+    
+    rectangle "Data Augmentation" as DA {
+        note right: Generate new data based\non statistics for baseline
+    }
+
+    rectangle "Model Training" as MT {
+        rectangle "Docker Containers" as DC {
+            component "[RNN Model]" as RNN
+            component "[LSTM Model]" as LSTM
+            component "[Transformer Model]" as TRF
+            component "[VAEs Model]" as VAEs
+            component "[GANs Model]" as GANs
+        }
+    }
+
+    database "Model Storage" as MS {
+        note right: Store models at various\ntraining stages
+    }
+
+    rectangle "Testing & Evaluation" as TE {
+        frame "Test Set Evaluator" as TSE {
+            note right: Evaluate models using\ntest datasets
+        }
+        database "Results Table" as RT {
+            note right: Comparison between\nmodels and baseline
+        }
+    }
+
+    DM -right-> DA
+    DM --> MT : Train Dataset
+    DA --> MT : Augmented Data
+    MT --> MS : Store Models
+    MS --> TE : Fetch Models
+    DM --> TE : Test Dataset
+    TE --> RT : Generate Comparison
+}
+
+@enduml

@@ -110,6 +110,7 @@ def plot_prediction_with_context(df, y_arr_test, rnn_prediction, feature_list, s
 
 
 def plot_performance_during_training(wrapper, x_val, y_val, z_mean, z_std, selected_feature, epochs, model_name):
+    # TODO - modify... and store with some sort of logic th pngs.... because now everything is in the same folder so no idendification at all
     prediction = wrapper.predict(x_val).detach().numpy()
     prediction_denorm = z_score_denormalize(prediction, z_mean.iloc[selected_feature], z_std.iloc[selected_feature])
     y_val_denorm = z_score_denormalize(y_val.detach().numpy(), z_mean.iloc[selected_feature],

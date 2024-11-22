@@ -10,11 +10,9 @@ import logging
 
 from configs.logging_config import setup_logging
 from utilities.data_utils import split_sequences
-from models.GRU.gru_model import GRU
+from models.LSTM.lstm_model import LSTM
 
 setup_logging()
-base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Record the start time
 start_time = time.time()
@@ -32,21 +30,21 @@ TS_PAST     = 120   # Time steps to look into the past (context) [h]
 TS_FUTURE   = 24    # Time steps to look into the future (forecast) [h]
 
 # Global nn parameters
-chosen_model = "GRU"               # Choose which model structure to use
-epochs = 200                        # Training epochs
+chosen_model = "LSTM"               # Choose which model structure to use
+epochs = 10                        # Training epochs
 dropout = .0                        # Dropout
 learning_rate = 0.005               # Learning rate
-output_size =   TS_FUTURE
+output_size = TS_FUTURE
 input_size = num_features
-hidden_size = 32
-num_layers = 4
+hidden_size = 64
+num_layers = 1
 output_dim = TS_FUTURE
 
 # Import time-series from stored pickles
 df_list = []
-files = os.listdir(os.path.join("..", "data", "pickles"))
+files = os.listdir(os.path.join("../..", "data", "pickles"))
 for file in files:
-    target_file = os.path.join("..", "data", "pickles", file)
+    target_file = os.path.join("../..", "data", "pickles", file)
     df = pd.read_pickle(target_file)
     df = df.drop(columns='Date/Time (LST)')
     df_list.append(df)
@@ -83,6 +81,7 @@ print(f"\ny_arr shapes:\n{y_arr_train.shape}\n{y_arr_val.shape}\n{y_arr_test.sha
 # We want to feed 120 samples and predict the next 24 for 15 different features
 # Tensor shape sould be x_train(12264,120,15) and y_train(12264,24)
 # x[TS batch size,TS context, num features] and y[TS batch size,TS forecast]
+# https://charlieoneill.medium.com/predicting-the-price-of-bitcoin-with-multivariate-pytorch-lstms-695bc294130
 x_train = torch.tensor(x_arr_train, dtype=torch.float32)
 x_val   = torch.tensor(x_arr_val, dtype=torch.float32)
 x_test  = torch.tensor(x_arr_test, dtype=torch.float32)
@@ -101,7 +100,7 @@ model_params = {
         'num_layers':   num_layers,
         'dropout':      dropout,
     }
-model = GRU(**model_params)
+model = LSTM(**model_params)
 print(model)
 
 # Define optimizer and loss functions
@@ -144,7 +143,7 @@ for epoch in range(epochs):
         diff = (y_train - prediction).view(-1).abs_().tolist()
         print(f'epoch {epoch}. train: {round(loss.item(), 4)}, '
               f'val: {round(val_loss.item(), 4)}')
-        
+
 # Record the end time
 end_time = time.time()
 
@@ -160,46 +159,44 @@ plt.plot(validation_loss, label = 'validation')
 plt.ylabel("Loss")
 plt.xlabel("Epoch")
 plt.legend()
-plot_results_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "GRU", "Results")
+plot_results_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "LSTM", "Results")
 figure_path = os.path.join(plot_results_directory, "Training_progress.png")
 plt.savefig(figure_path)
 plt.show()
 
 # Load best trained model
-best_model = GRU(**model_params)
+best_model = LSTM(**model_params)
 best_model.load_state_dict(best_params)
-trained_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'models', 'GRU', 'trained_models', f'gru_trained_model_{FEATURE_FORECASTED}.pt')
+trained_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'models', 'LSTM', 'trained_models', f'lstm_trained_model_{FEATURE_FORECASTED}.pt')
 torch.save(best_model, trained_model_path)
 best_model.eval()
 
 
-
 # Calculate test loss
-gru_prediction = best_model(x_test)
-gru_mse_loss = round(mse_loss(gru_prediction, y_test).item(), 4)
-print(f"GRU mse loss: {gru_mse_loss}")
+lstm_prediction = best_model(x_test)
+lstm_mse_loss = round(mse_loss(lstm_prediction, y_test).item(), 4)
+print(f"LSTM mse loss: {lstm_mse_loss}")
 
 # Test model
-gru_prediction = best_model(x_test[-1].unsqueeze(0))
-gru_prediction = gru_prediction.detach().numpy()
-#gru_prediction = gru_prediction * z_std[selected_feature] + z_mean[selected_feature]    # Remove z-score normalization
-gru_prediction = gru_prediction * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
-gru_prediction = gru_prediction[0].tolist()
+lstm_prediction = best_model(x_test[-1].unsqueeze(0))
+lstm_prediction = lstm_prediction.detach().numpy()
+lstm_prediction = lstm_prediction * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature] # Remove z-score normalization using iloc
+
+lstm_prediction = lstm_prediction[0].tolist()
 
 # Test target
 test_target = y_arr_test[-1,:]
-#test_target = test_target * z_std[selected_feature] + z_mean[selected_feature]  # Remove z-score normalization
 test_target = test_target * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
 test_target = test_target.tolist()
 
 # Plot prediction
 plt.plot(test_target, label="Actual Data")
-plt.plot(gru_prediction, label="GRU Predictions")
-plt.title('GRU predictions')
+plt.plot(lstm_prediction, label="LSTM Predictions")
+plt.title('LSTM predictions')
 plt.ylabel(f"{feature_list[selected_feature%5]}")
 plt.xlabel("Time")
 plt.legend()
-figure_path = os.path.join(plot_results_directory, "GRU_predictions.png")
+figure_path = os.path.join(plot_results_directory, "LSTM_predictions.png")
 plt.savefig(figure_path)
 plt.show()
 
@@ -208,7 +205,7 @@ csv_file_path = os.path.join(plot_results_directory, "parameter_iterations.csv")
 # Check if the CSV file exists
 if not os.path.isfile(csv_file_path):
     # If the file does not exist, create a new DataFrame
-    df_params_iter = pd.DataFrame(columns=['STATION_FORECASTED', 'selected_feature', 'model_type', 'epochs', 'learning_rate', 'output_size', 'input_size', 'hidden_size','num_layers', 'train_time', 'gru_mse_loss'])
+    df_params_iter = pd.DataFrame(columns=['STATION_FORECASTED', 'selected_feature', 'model_type', 'epochs', 'learning_rate', 'output_size', 'input_size', 'hidden_size','num_layers', 'train_time', 'lstm_mse_loss'])
 else:
     # If the file exists, load the existing DataFrame
     df_params_iter = pd.read_csv(csv_file_path)
@@ -222,27 +219,26 @@ new_row = {'STATION_FORECASTED': STATION_FORECASTED,
            'hidden_size': hidden_size,
            'num_layers':  num_layers,
            'train_time' : train_time,
-           'gru_mse_loss': gru_mse_loss}
+           'lstm_mse_loss': lstm_mse_loss}
 df_params_iter = pd.concat([df_params_iter, pd.DataFrame([new_row])], ignore_index=True)
 df_params_iter.to_csv(csv_file_path, index=False)
 
 # Plot prediction and context
 plt.figure(figsize=(10,6)) #plotting
-plt.title('GRU predictions with context')
+plt.title('LSTM predictions with context')
 start_plot = len(y_arr_test) - 2*TS_PAST
 y = df.iloc[:,selected_feature]
 y = y[-len(y_arr_test):]
-#y = y * z_std[selected_feature] + z_mean[selected_feature]  # Remove z-score normalization
 y = y * z_std.iloc[selected_feature] + z_mean.iloc[selected_feature]
 a = [x for x in range(start_plot, len(y))]
 plt.plot(a, y[start_plot:], label='Actual data')
 c = [x for x in range(len(y)-TS_FUTURE, len(y))]
-plt.plot(c, gru_prediction, label=f'One-shot multi-step prediction ({TS_FUTURE}h)')
+plt.plot(c, lstm_prediction, label=f'One-shot multi-step prediction ({TS_FUTURE}h)')
 plt.axvline(x=len(y)-TS_FUTURE, c='r', linestyle='--')
 plt.ylabel(f"{feature_list[selected_feature%5]}")
 plt.xlabel("Time")
 plt.legend(loc='upper left')
-figure_path = os.path.join(plot_results_directory, "GRU_predictions_context.png")
+figure_path = os.path.join(plot_results_directory, "LSTM_predictions_context.png")
 text_content = '\n'.join([f'{key}: {value}' for key, value in new_row.items()])
 plt.text(0.05, 0.05, text_content, transform=plt.gca().transAxes, bbox=dict(facecolor='white', alpha=0.8), verticalalignment='bottom', horizontalalignment='left')
 plt.savefig(figure_path)

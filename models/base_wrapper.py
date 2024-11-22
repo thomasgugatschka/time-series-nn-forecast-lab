@@ -1,7 +1,7 @@
 import torch
 
 class BaseWrapper:
-    def __init__(self, model, optimizer, loss_fn, callbacks=None):
+    def __init__(self, model, optimizer, loss_fn, device, callbacks=None):
         """
         Base wrapper for models to encapsulate common functionality.
 
@@ -14,6 +14,7 @@ class BaseWrapper:
         self.model = model
         self.optimizer = optimizer
         self.loss_fn = loss_fn
+        self.device = device
         self.callbacks = callbacks if callbacks is not None else []
 
     def train_epoch(self, x_train, y_train):
@@ -66,6 +67,7 @@ class BaseWrapper:
         with torch.no_grad():
             return self.model(x)
 
+    # TODO REFACTOR THIS -> val_loss and **kwargs... mybe move val_loss also to **kwargs
     def on_epoch_end(self, epoch, val_loss, **kwargs):
         """
         Call on_epoch_end for all registered callbacks.

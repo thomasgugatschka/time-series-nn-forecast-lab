@@ -28,6 +28,7 @@ class ConfigManager:
         with open(filepath, 'r') as f:
             return yaml.safe_load(f)
 
+    # TODO - update this?!?!?!?!?!?!?!?!?!
     def validate_config(self):
         # Example validation logic - can be extended
         required_keys = ['model_type', 'dataset', 'num_samples', 'cpu_per_trial', 'gpu_per_trial']
