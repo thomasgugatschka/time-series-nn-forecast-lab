@@ -1,7 +1,12 @@
-# utilities/seed_utils.py
 import torch
 import numpy as np
 import random
+
+# TODO write comment for everything in here
+
+def get_device():
+    return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 def set_seed(seed):
     torch.manual_seed(seed)

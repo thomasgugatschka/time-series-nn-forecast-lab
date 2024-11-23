@@ -1,9 +1,9 @@
 import logging
 import logging.config
-from configs.paths import get_path
-import colorlog
+from manager.path_manager import path_manager
 import inspect
 import os
+
 
 use_common_log_file = True      # Set to True to use a common log file for all scripts
                                 # Set to False to use a log file with the same name as the calling script
@@ -58,7 +58,7 @@ def setup_logging():
         caller_file = os.path.basename(caller_frame.filename)
         log_file_name = f"{os.path.splitext(caller_file)[0]}.log"
 
-    log_file_path = get_path('log_dir') / log_file_name
+    log_file_path = path_manager.get_path_log() / log_file_name
     logging_config = LOGGING_CONFIG_TEMPLATE.copy()
     logging_config['handlers']['file']['filename'] = log_file_path
     logging.config.dictConfig(logging_config)

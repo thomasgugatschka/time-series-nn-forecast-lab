@@ -1,5 +1,3 @@
-# callbacks/model_checkpoint_callback.py
-
 import os
 import torch
 import logging

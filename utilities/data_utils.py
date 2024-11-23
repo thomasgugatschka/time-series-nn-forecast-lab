@@ -7,7 +7,7 @@ import torch
 
 from torch.utils.data import DataLoader, TensorDataset
 
-from configs.paths import get_path
+from manager.path_manager import path_manager
 
 # TODO -> change to CLASSES so it is somewhat separated???
 #
@@ -187,7 +187,7 @@ def preprocess_data(config_data, dataset_name):
     ts_past = config_data['ts_past']
     ts_future = config_data['ts_future']
 
-    data_dir = get_path('data_dir', dataset_name)
+    data_dir = path_manager.get_path_data(dataset_name=dataset_name)
 
     df = load_data(sources, data_dir, columns_to_drop)
     df = crop_data(df, crop_start, crop_end)

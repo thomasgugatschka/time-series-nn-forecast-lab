@@ -13,5 +13,6 @@ class LoggingCallback(BaseCallback):
     def on_epoch_end(self, epoch, wrapper, val_loss, **kwargs):
 
         # TODO what about train loss ? -> how to get that?
+        # TODO -> why +1 ???
         if epoch % self.log_every_n_epochs == 0:
             logging.info(f"Epoch {epoch + 1}: Validation Loss = {val_loss:.4f}")

@@ -1,26 +1,72 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
-from configs.paths import get_path
+from manager.path_manager import path_manager
+from manager.file_manager import file_manager
+
+# def generate_multivariate_sinusoidal_data(num_samples=1000, num_features=5, stop=20):
+#     t = np.linspace(0, stop, num_samples)
+#     data = np.zeros((num_samples, num_features))
+#     for i in range(num_features):
+#         frequency = 1 + i * 0.1  # Vary frequency
+#         phase = i * np.pi / 4    # Vary phase
+#         amplitude = 10 + i * 5   # Increase amplitude
+#         data[:, i] = amplitude * np.sin(2 * np.pi * frequency * t + phase)
+#     return data, t
+#
+# def save_data_to_csv(data, filename):
+#     feature_names = [f'feature_{i+1}' for i in range(data.shape[1])]
+#     df = pd.DataFrame(data, columns=feature_names)
+#     df.to_csv(filename, index=False, encoding='utf-8')
+#
+# def plot_data(data, t, plot_filename):
+#     feature_names = [f'feature_{i+1}' for i in range(data.shape[1])]
+#     plt.figure(figsize=(10, 6))
+#     for i in range(data.shape[1]):
+#         plt.plot(t, data[:, i], label=feature_names[i])
+#     plt.title('Multivariate Sinusoidal Data')
+#     plt.xlabel('Time')
+#     plt.ylabel('Amplitude')
+#     plt.legend()
+#     plt.savefig(plot_filename)
+#     plt.close()
+#
+# if __name__ == "__main__":
+#     num_samples = 20_000
+#     num_features = 5
+#     stop = 100
+#     data, t = generate_multivariate_sinusoidal_data(num_samples, num_features, stop)
+#     output_path = os.path.join(path_manager.get_path('data_dir', 'sinusoidal'), f'multivariate_sinusoidal_ns{num_samples}_nf{num_features}_st{stop}.csv')
+#     save_data_to_csv(data, output_path)
+#     plot_filename = os.path.join(path_manager.get_path('data_dir', 'sinusoidal'), f'multivariate_sinusoidal_ns{num_samples}_nf{num_features}_st{stop}.png')
+#     plot_data(data, t, plot_filename)
+#
+#
+#
+
+
+
+
 
 def generate_multivariate_sinusoidal_data(num_samples=1000, num_features=5, stop=20):
     t = np.linspace(0, stop, num_samples)
     data = np.zeros((num_samples, num_features))
     for i in range(num_features):
         frequency = 1 + i * 0.1  # Vary frequency
-        phase = i * np.pi / 4    # Vary phase
-        amplitude = 10 + i * 5   # Increase amplitude
+        phase = i * np.pi / 4  # Vary phase
+        amplitude = 10 + i * 5  # Increase amplitude
         data[:, i] = amplitude * np.sin(2 * np.pi * frequency * t + phase)
     return data, t
 
+
 def save_data_to_csv(data, filename):
-    feature_names = [f'feature_{i+1}' for i in range(data.shape[1])]
+    feature_names = [f'feature_{i + 1}' for i in range(data.shape[1])]
     df = pd.DataFrame(data, columns=feature_names)
-    df.to_csv(filename, index=False, encoding='utf-8')
+    file_manager.save_csv(df, filename)
+
 
 def plot_data(data, t, plot_filename):
-    feature_names = [f'feature_{i+1}' for i in range(data.shape[1])]
+    feature_names = [f'feature_{i + 1}' for i in range(data.shape[1])]
     plt.figure(figsize=(10, 6))
     for i in range(data.shape[1]):
         plt.plot(t, data[:, i], label=feature_names[i])
@@ -28,15 +74,27 @@ def plot_data(data, t, plot_filename):
     plt.xlabel('Time')
     plt.ylabel('Amplitude')
     plt.legend()
-    plt.savefig(plot_filename)
+    file_manager.save_plot(plt, plot_filename)
     plt.close()
 
+
 if __name__ == "__main__":
-    num_samples = 20_000
+    num_samples = 19_000
     num_features = 5
     stop = 100
+
+    # Generate data
     data, t = generate_multivariate_sinusoidal_data(num_samples, num_features, stop)
-    output_path = os.path.join(get_path('data_dir', 'sinusoidal'), f'multivariate_sinusoidal_ns{num_samples}_nf{num_features}_st{stop}.csv')
-    save_data_to_csv(data, output_path)
-    plot_filename = os.path.join(get_path('data_dir', 'sinusoidal'), f'multivariate_sinusoidal_ns{num_samples}_nf{num_features}_st{stop}.png')
+
+    # Define output paths using PathManager
+    sinusoidal_dir = path_manager.get_path_data() / 'sinusoidal'
+    file_manager.create_directory(sinusoidal_dir)
+
+    csv_filename = sinusoidal_dir / f'multivariate_sinusoidal_ns{num_samples}_nf{num_features}_st{stop}.csv'
+    plot_filename = sinusoidal_dir / f'multivariate_sinusoidal_ns{num_samples}_nf{num_features}_st{stop}.png'
+
+    # Save data to CSV
+    save_data_to_csv(data, csv_filename)
+
+    # Plot and save the data
     plot_data(data, t, plot_filename)

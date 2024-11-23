@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
-from configs.paths import get_path
+
+from manager.path_manager import path_manager
+from manager.file_manager import file_manager
+
 from configs.logging_config import setup_logging
 from utilities.data_utils import load_config, load_data, crop_data, calculate_features
 
@@ -8,21 +11,22 @@ def main(dataset):
     setup_logging()
 
     # Load configuration files
-    data_config = load_config(get_path('config_dir', f'config_data_{dataset}.yaml'))
+    dataset_config_path = path_manager.get_path_dataset_config(dataset_name=dataset)
+    dataset_config = file_manager.load_yaml(dataset_config_path)
 
     # Load data
-    ts_past = data_config['ts_past']
-    ts_future = data_config['ts_future']
+    ts_past = dataset_config['ts_past']
+    ts_future = dataset_config['ts_future']
 
-    sources = data_config['sources']
-    source_forecasted = data_config['source_forecasted']
-    feature_forecasted = data_config['feature_forecasted']
-    columns_to_drop = data_config.get('columns_to_drop')
-    crop_start = data_config.get('crop_start')
-    crop_end = data_config.get('crop_end')
-    feature_list = data_config['feature_list']
+    sources = dataset_config['sources']
+    source_forecasted = dataset_config['source_forecasted']
+    feature_forecasted = dataset_config['feature_forecasted']
+    columns_to_drop = dataset_config.get('columns_to_drop')
+    crop_start = dataset_config.get('crop_start')
+    crop_end = dataset_config.get('crop_end')
+    feature_list = dataset_config['feature_list']
 
-    df = load_data(sources, get_path('data_dir', dataset), columns_to_drop)
+    df = load_data(sources, path_manager.get_path_data(dataset_name=dataset), columns_to_drop)
 
     # Crop data if specified
     df = crop_data(df, crop_start, crop_end)
@@ -72,6 +76,6 @@ def main(dataset):
 
 
 if __name__ == "__main__":
-    #dataset = 'weather_station'
-    dataset = 'sinusoidal'
+    dataset = 'weather_station'
+    #dataset = 'sinusoidal'
     main(dataset)

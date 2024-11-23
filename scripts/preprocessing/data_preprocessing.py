@@ -1,7 +1,10 @@
-import logging
-from configs.paths import get_path
+
+from manager.path_manager import path_manager
+from manager.file_manager import file_manager
 from configs.logging_config import setup_logging
 from utilities.data_utils import load_config, preprocess_data
+
+
 
 setup_logging()
 
@@ -16,5 +19,11 @@ def main(config_data_file, dataset_name):
     print(f"y_arr shape: {y_arr.shape}")
 
 if __name__ == "__main__":
-    config_data_file = get_path('config_dir', 'config_data_sinusoidal.yaml')
-    main(config_data_file, 'sinusoidal')
+
+    # TODO -> TEST IF STILL WORKS AFTER REFACTOR OF FILE MANAGER and PATH MANAGER
+    # Load configuration files
+    dataset = "sinusoidal"
+    dataset_config_path = path_manager.get_path_dataset_config(dataset_name=dataset)
+    dataset_config = file_manager.load_yaml(dataset_config_path)
+
+    main(dataset_config, dataset)

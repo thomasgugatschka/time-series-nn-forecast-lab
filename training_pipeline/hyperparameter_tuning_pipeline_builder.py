@@ -1,4 +1,4 @@
-from search_algorithms.search_algorithm_strategy import SearchAlgorithmStrategy
+from strategies.search_algorithm_strategy import SearchAlgorithmStrategy
 from ray.tune.schedulers import ASHAScheduler
 
 class TrainingPipelineBuilder:
@@ -18,6 +18,7 @@ class TrainingPipelineBuilder:
         self.search_algorithm = strategy.get_search_algorithm()
         return self
 
+    # TODO - check is the scheduler even possible to set from a config file?
     def set_scheduler(self, max_epochs, grace_period, reduction_factor):
         self.scheduler = ASHAScheduler(
             metric="val_loss",

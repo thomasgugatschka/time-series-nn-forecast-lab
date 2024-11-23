@@ -1,34 +1,28 @@
 import argparse
-import os
 import torch
-import time
 import logging
 import ray
 import json
-import yaml
 
 from ray import tune
 from ray.air import session
 from ray.tune.experiment.trial import Trial
 from ray.tune.schedulers import ASHAScheduler
 
-from callbacks.callback_manager import CallbackManager
+from manager.callback_manager import CallbackManager
 from callbacks.logging_callback import LoggingCallback
 from callbacks.plotting_callback import PlottingCallback
 from callbacks.early_stopping_callback import EarlyStoppingCallback
-from callbacks.model_checkpoint_callback import ModelCheckpointCallback
 
-from configs.config_manager import ConfigManager
-from configs.hyperparameter_manager import HyperparameterManager
+from manager.config_manager import ConfigManager
+from manager.hyperparameter_manager import HyperparameterManager
 
 from configs.logging_config import setup_logging
-from configs.paths import get_path
+from manager.path_manager import get_path
 
-from utilities.device_utils import get_device
-from utilities.seed_utils import set_seed
-from utilities.save_utils import save_parameters_and_results
-from utilities.data_utils import preprocess_data, split_and_convert_data, load_config, load_and_preprocess_data, create_data_loaders
-from utilities.plot_utils import plot_training_progress, plot_prediction, plot_prediction_with_context, create_gif_from_plots
+from utilities.training_utils import get_device
+from utilities.training_utils import set_seed
+from utilities.data_utils import load_config, load_and_preprocess_data, create_data_loaders
 
 from models.model_factory import model_factory
 from models.wrapper_factory import wrapper_factory

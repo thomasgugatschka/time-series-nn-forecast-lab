@@ -1,9 +1,10 @@
 import os
 import pandas as pd
-from configs.paths import get_path
+from manager.path_manager import path_manager
+
 
 def save_parameters_and_results(new_row, model_name):
-    csv_file_path = os.path.join(get_path('result_dir', model_name), "parameter_iterations.csv")
+    csv_file_path = os.path.join(path_manager.get_path('result_dir', model_name), "parameter_iterations.csv")
 
     # Check if the file exists and is not empty
     if os.path.exists(csv_file_path) and os.path.getsize(csv_file_path) > 0:

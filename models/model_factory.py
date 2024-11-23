@@ -7,7 +7,6 @@ from models.gru.gru_model import GRU
 #from models.cnn import CNN
 
 
-
 # or create_model
 def model_factory(model_type, **params):
     if model_type == 'RNN':

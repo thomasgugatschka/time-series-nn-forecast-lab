@@ -1,36 +1,32 @@
 import argparse
-import os
 import torch
-import time
 import logging
 import ray
-import json
-import yaml
+import datetime
+
 
 from ray import tune
-from ray.air import session
 from ray.tune.experiment.trial import Trial
-from ray.tune.schedulers import ASHAScheduler
 
 # Callbacks
-from callbacks.callback_manager import CallbackManager
+from manager.callback_manager import CallbackManager
 from callbacks.logging_callback import LoggingCallback
 from callbacks.plotting_callback import PlottingCallback
 from callbacks.early_stopping_callback import EarlyStoppingCallback
-from callbacks.model_checkpoint_callback import ModelCheckpointCallback
 
-# Config Management
-from configs.config_manager import ConfigManager
-from configs.hyperparameter_manager import HyperparameterManager
+# Manager
+from manager.config_manager import ConfigManager
+from manager.hyperparameter_manager import HyperparameterManager
+from manager.file_manager import file_manager
+from manager.path_manager import path_manager
+from manager.result_manager import result_manager
+
 from configs.logging_config import setup_logging
-from configs.paths import get_path
 
 # Utilities
-from utilities.device_utils import get_device
-from utilities.seed_utils import set_seed
-from utilities.save_utils import save_parameters_and_results
-from utilities.data_utils import preprocess_data, split_and_convert_data, load_config, load_and_preprocess_data, create_data_loaders
-from utilities.plot_utils import plot_training_progress, plot_prediction, plot_prediction_with_context, create_gif_from_plots
+from utilities.training_utils import get_device
+from utilities.training_utils import set_seed
+from utilities.data_utils import load_and_preprocess_data, create_data_loaders
 
 from utilities.scheduler_factory import get_scheduler
 
@@ -38,10 +34,7 @@ from utilities.scheduler_factory import get_scheduler
 from models.model_factory import model_factory
 from models.wrapper_factory import wrapper_factory
 from strategies.search_algorithm_strategy import SearchAlgorithmStrategy
-from training_pipeline.training_pipeline import TrainingPipeline
-
-
-
+from training_pipeline.hyperparameter_tuning_pipeline import TrainingPipeline
 
 
 # Initialize logging
@@ -49,23 +42,15 @@ setup_logging()
 
 
 # region ### PARSE ARGUMENTS ###
-# TODO: Updated parse_args to optionally allow override of default config path
 def parse_args():
     parser = argparse.ArgumentParser(description="Train different models with different datasets.")
-    parser.add_argument("--config_path", type=str, default='configs/config.yaml', help="Path to the configuration file.")
-    return parser.parse_args()
+    parser.add_argument("--config_path", type=str, default='config.yaml', help="Path to the configuration file.")
 
-#def parse_args():
-#    parser = argparse.ArgumentParser(description="Train different models with different datasets.")
-#    parser.add_argument("--model_type", type=str, required=True, help="Model type to train (RNN, LSTM, GRU, Transformer, CNN)")
-#    parser.add_argument("--dataset", type=str, required=True, help="Dataset to use (e.g., sinusoidal, weather_station)")
-#    parser.add_argument("--num_samples", type=int, default=10, help="Number of trials for hyperparameter tuning")
-#    parser.add_argument("--cpu_per_trial", type=int, default=2, help="Number of CPUs per trial")
-#    parser.add_argument("--gpu_per_trial", type=float, default=0.5, help="Number of GPUs per trial")
-#    parser.add_argument("--max_concurrent_trials", type=int, default=1, help="Number of concurrent trials")
-#    return parser.parse_args()
+    logging.info(f'Parse Args: {parser.parse_args()}')
+    return parser.parse_args()
 # endregion
 
+# region ### UTILITIES ###
 def get_optimizer(optimizer_name, params, lr):
     optimizers = {
         'Adam': torch.optim.Adam,
@@ -93,22 +78,16 @@ def get_loss_function(loss_function_name):
         raise ValueError(f"Invalid loss function name: {loss_function_name}")
     return loss_functions[loss_function_name]()
 
-def custom_trial_dirname_creator(trial: Trial) -> str:
-    # Custom function to create shorter trial directory names
-    # Use a simpler naming convention to reduce the length of the trial directory name
-    return f"trial_{trial.trial_id}"
+# endregion
 
 # region ### TRAINING FUNCTION ##
-def objective(config, config_data, model_type, default_split):
+def objective(config, dataset_config, model_type, default_data_split):
     trial_seed = config.get("trial_seed")
     set_seed(trial_seed)
 
-    device = get_device()
-    logging.info(f"Device: {device}")
-
 
     # region ### LOAD and PREPROCESS DATA ###
-    data = load_and_preprocess_data(config_data, dataset, default_split)
+    data = load_and_preprocess_data(dataset_config, dataset, default_data_split)
 
     x_train, x_val, x_test = data["x_train"], data["x_val"], data["x_test"]
     y_train, y_val, y_test = data["y_train"], data["y_val"], data["y_test"]
@@ -119,7 +98,7 @@ def objective(config, config_data, model_type, default_split):
     # region ### SET VARIABLES from CONFIG ###
     model_params = config["model_params"]
     model_params["input_size"] = num_features
-    model_params["output_size"] = config_data["ts_future"]
+    model_params["output_size"] = dataset_config["ts_future"]
 
     epochs = config["training_params"]["epochs"]
     learning_rate = config["training_params"]["learning_rate"]
@@ -135,9 +114,9 @@ def objective(config, config_data, model_type, default_split):
     # endregion
 
     # region ### INITIALIZE MODEL, OPTIMIZER, LOSS FUNCTION ###
+    device = get_device()
+    logging.info(f"Device: {device}")
     model = model_factory(model_type, **model_params).to(device)
-    #model = model_factory(model_type, **model_params)
-    #model.to(device)
     #logging.info(model)
 
     optimizer = get_optimizer(optimizer_name, model.parameters(), learning_rate)
@@ -150,7 +129,7 @@ def objective(config, config_data, model_type, default_split):
     plotting_callback = PlottingCallback(z_mean, z_std, selected_feature)
     early_stopping_callback = EarlyStoppingCallback(patience=10)
 
-    checkpoint_dir = get_path('checkpoint_dir', model_type) # TODO maybe need to add dataset? and also split?
+    checkpoint_dir = path_manager.get_path_checkpoint(model_name=model_type) # TODO maybe need to add dataset? and also split?
     #model_checkpoint_callback = ModelCheckpointCallback(checkpoint_dir=checkpoint_dir, monitor='val_loss')
 
     callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback])
@@ -183,15 +162,10 @@ def objective(config, config_data, model_type, default_split):
 
 
 if __name__ == "__main__":
-
     args = parse_args()
+
+    # Load the configuration file (->config.yaml)
     config_manager = ConfigManager(args.config_path)
-
-    # Load hyperparameters
-    with open(get_path('config_dir', 'hyperparameter_config.json'), "r") as f:
-        config_hyperparameter = json.load(f)
-
-    hyperparameter_manager = HyperparameterManager(config_hyperparameter)
 
     model_type = config_manager.get('model_type')
     dataset = config_manager.get('dataset')
@@ -199,21 +173,31 @@ if __name__ == "__main__":
     cpu_per_trial = config_manager.get('cpu_per_trial')
     gpu_per_trial = config_manager.get('gpu_per_trial')
     max_concurrent_trials = config_manager.get('max_concurrent_trials')
+    default_data_split = config_manager.get('train_val_test_split')
+    scheduler_name = config_manager.get('scheduler')
+    trial_params = config_manager.get('trial_params')
+    search_algorithm_name = config_manager.get("search_algorithm")
 
-    # Load the default split ratios from the experiment config
-    default_split = config_manager.get('train_val_test_split')
+    # Load configuration for the dataset (-> config_data_{dataset}.yaml)
+    dataset_config_path = path_manager.get_path_dataset_config(dataset_name=dataset)
+    dataset_config = file_manager.load_yaml(dataset_config_path)
 
-    # Load configuration for the dataset
-    config_data = load_config(get_path('config_dir', f'config_data_{dataset}.yaml'))
+    # Load hyperparameters (->model_hyperparameter_config.json)
+    hyperparameter_config_path = path_manager.get_path_hyperparameter_config()
+    hyperparameter_config = file_manager.load_json(hyperparameter_config_path)
+
+    hyperparameter_manager = HyperparameterManager(hyperparameter_config)
+
+
+
 
 
     # TODO - refactor don't like it here, tooo random
-    ts_future = config_data['ts_future']
+    ts_future = dataset_config['ts_future']
 
 
-    # Load the scheduler from config
-    scheduler_name = config_manager.get('scheduler', default='asha')
-    trial_params = config_manager.get('trial_params')
+
+
     scheduler = get_scheduler(scheduler_name, trial_params)
 
     # Run Ray Tune with search space defined
@@ -222,18 +206,11 @@ if __name__ == "__main__":
     # Initialize Ray
     ray.init(include_dashboard=False)
 
-#    # Run Ray Tune with search space defined
-#    scheduler = ASHAScheduler(
-#        metric="val_loss",
-#        mode="min",
-#        max_t=config_manager['trial_params']['max_epochs'],
-#        grace_period=config_manager['trial_params']['grace_period'],
-#        reduction_factor=config_manager['trial_params']['reduction_factor']
-#    )
+# TODO REFACTOR SEARCH ALGORITHM... maybe not strategy pattern?
 
     # Search algorithm setup using the SearchAlgorithmStrategy
     search_algorithm_strategy = SearchAlgorithmStrategy(
-        algorithm_name=config_manager.get("search_algorithm"),
+        algorithm_name=search_algorithm_name,
         metric="val_loss",
         mode="min"
     )
@@ -243,43 +220,57 @@ if __name__ == "__main__":
 
     # Run hyperparameter tuning with Ray Tune
     analysis = tune.run(
-        tune.with_parameters(objective, config_data=config_data, model_type=model_type, default_split=default_split),
+        tune.with_parameters(
+            objective,
+            dataset_config=dataset_config,
+            model_type=model_type,
+            default_data_split=default_data_split),
         config=search_space_config,
         num_samples=num_samples,
         resources_per_trial={"cpu": cpu_per_trial, "gpu": gpu_per_trial},
         trial_dirname_creator=lambda trial: f"trial_{trial.trial_id}",
         scheduler=scheduler,
         search_alg=search_algorithm,
-        resume=True,
+        #resume=True,
+        resume=False,
         max_concurrent_trials=max_concurrent_trials
     )
 
 
 
-#    analysis = tune.run(
-#        tune.with_parameters(objective, config_data=config_data, model_type=model_type, default_split=default_split),
-#        config=search_space_config,
-#        num_samples=num_samples,
-#        resources_per_trial={"cpu": cpu_per_trial, "gpu": gpu_per_trial},
-#        trial_dirname_creator=custom_trial_dirname_creator,
-#        scheduler=scheduler,
-#        resume=True,  # Resume from previous run
-#        max_concurrent_trials=max_concurrent_trials
-#    )
-
-
 
     # region ### SAVE BEST HYPERPARAMETERS ###
-    # Get the best hyperparameters from tuning
-    # TODO - add information about model / dataset / split / ts_future / ts_past --> everything which relates to training.... for loading and actual training
     best_config = analysis.get_best_config(metric="val_loss", mode="min")
-    print("Best hyperparameter configuration:", best_config)
-    best_config_file_path = get_path('config_dir', f'best_hyperparameters_{model_type}_{dataset}.json')
-    # Save the best configuration to a JSON file
-    with open(best_config_file_path, "w") as f:
-        json.dump(best_config, f, indent=4)
+    best_config_extended = {
+        "model_type": model_type,
+        "dataset": dataset,
+        "train_val_test_split": default_data_split,
+        "ts_future": dataset_config.get('ts_future'),
+        "ts_past": dataset_config.get('ts_past'),
+        "tuning_timestamp": datetime.datetime.now().isoformat(),
+        "best_hyperparameters": best_config
+    }
 
-    print(f"Best hyperparameters saved to {best_config_file_path}")
+    result_manager.save_best_config(
+        best_config_extended,
+        model_name=model_type,
+        dataset_name=dataset,
+        ts_future=dataset_config.get('ts_future'),
+        ts_past=dataset_config.get('ts_past'),
+        split_id="default"
+    )
+
+    print(f"Best hyperparameters: {best_config_extended}")
+    # endregion
+
+    # region ### LOG TO TENSORBOARD (OPTIONAL) ###
+    if config_manager.get('log_to_tensorboard', default=False):
+        best_trial = analysis.get_best_trial(metric="val_loss", mode="min")
+        best_metric_value = best_trial.last_result["val_loss"] if best_trial else None
+
+        # Use the ResultManager to log hyperparameters and best metric to TensorBoard
+        if best_metric_value is not None:
+            result_manager.log_to_tensorboard(model_type, best_config_extended, best_metric_value)
     # endregion
 
 

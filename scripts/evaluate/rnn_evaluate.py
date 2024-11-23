@@ -1,16 +1,16 @@
 import torch
 import logging
-import yaml
 import os
 
 from utilities.data_utils import preprocess_data, load_config, split_and_convert_data, z_score_denormalize
 from utilities.plot_utils import plot_prediction, plot_prediction_with_context
-from utilities.metrics_utils import calculate_metrics
-from utilities.device_utils import get_device
-from configs.paths import get_path
+from utilities.training_utils import get_device
+from manager.path_manager import path_manager
 
 from models.rnn.rnn_model import RNN
 from models.rnn.rnn_wrapper import RNNWrapper
+
+
 
 def main(dataset, model_name):
 
@@ -20,8 +20,8 @@ def main(dataset, model_name):
     # endregion
 
     # region ### LOAD CONFIGURATION ###
-    config_data = load_config(get_path('config_dir', f'config_data_{dataset}.yaml'))
-    config_train = load_config(get_path('config_dir', f'config_train_{model_name}_{dataset}.yaml'))
+    config_data = load_config(path_manager.get_path('config_dir', f'config_data_{dataset}.yaml'))
+    config_train = load_config(path_manager.get_path('config_dir', f'config_train_{model_name}_{dataset}.yaml'))
     # endregion
 
     # region ### SET VARIABLES from CONFIGS ###
@@ -60,7 +60,7 @@ def main(dataset, model_name):
     # endregion
 
     # region ### CHECK FOR TRAINED MODEL ###
-    trained_model_path = get_path(
+    trained_model_path = path_manager.get_path(
         'model_dir', model_name, 'trained_models',
         f'{model_name}_{dataset}_ts{ts_past}-{ts_future}_epochs{epochs}_'
         f'lr{learning_rate}_hs{hidden_size}_nl{num_layers}_dr{dropout}_sf{source_forecasted}_'

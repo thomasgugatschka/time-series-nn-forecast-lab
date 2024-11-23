@@ -1,4 +1,5 @@
 class BaseCallback:
+    # TODO -> add more unify the arguements... maybe more **kwargs or add train_loss or move val_loss to kwargs
     def on_epoch_end(self, epoch, wrapper, val_loss, **kwargs):
         """
         Default implementation of on_epoch_end. This does nothing by default.

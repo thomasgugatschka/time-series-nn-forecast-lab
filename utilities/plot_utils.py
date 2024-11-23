@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 import imageio.v2 as imageio
 import logging
 from configs.logging_config import setup_logging
-from configs.paths import get_path
 from utilities.data_utils import z_score_denormalize
-import configs.plot_config # TODO does not seem to be imported
+
+from manager.path_manager import path_manager
+from manager.file_manager import file_manager
 
 setup_logging()
 
@@ -31,10 +32,10 @@ def plot_training_progress(training_loss, validation_loss, model_name):
     plt.ylabel("Loss")
     plt.xlabel("Epoch")
     plt.legend()
-    plot_results_directory = get_path('result_dir', model_name)
-    figure_path = os.path.join(plot_results_directory, f"Training_progress_{model_name}.png")
-    plt.savefig(figure_path)
-    plt.show()
+
+    results_directory = path_manager.get_path_result(model_name)
+    figure_path = results_directory / f"Training_progress_{model_name}.png"
+    file_manager.save_plot(plt, figure_path)
 
 
 def plot_prediction(test_target, rnn_prediction, feature_list, selected_feature, model_name):
@@ -54,10 +55,11 @@ def plot_prediction(test_target, rnn_prediction, feature_list, selected_feature,
     plt.ylabel(f"{feature_list[selected_feature % 5]}")
     plt.xlabel("Time")
     plt.legend()
-    plot_results_directory = get_path('result_dir', model_name)
-    figure_path = os.path.join(plot_results_directory, f"{model_name}_predictions.png")
-    plt.savefig(figure_path)
-    plt.show()
+
+    results_directory = path_manager.get_path_result(model_name)
+    figure_path = results_directory / f"{model_name}_predictions.png"
+    file_manager.save_plot(plt, figure_path)
+
 
 
 def plot_prediction_with_context(df, y_arr_test, rnn_prediction, feature_list, selected_feature, model_name, ts_past,
@@ -98,15 +100,15 @@ def plot_prediction_with_context(df, y_arr_test, rnn_prediction, feature_list, s
     plt.ylabel(f"{feature_list[selected_feature % 5]}")
     plt.xlabel("Time")
     plt.legend(loc='upper left')
-    plot_results_directory = get_path('result_dir', model_name)
+    plot_results_directory = path_manager.get_path('result_dir', model_name)
 
     text_content = '\n'.join([f'{key}: {value}' for key, value in new_row.items()])
     plt.text(0.05, 0.05, text_content, transform=plt.gca().transAxes, bbox=dict(facecolor='white', alpha=0.8),
              verticalalignment='bottom', horizontalalignment='left')
 
-    figure_path = os.path.join(plot_results_directory, f"{model_name}_predictions_context.png")
-    plt.savefig(figure_path)
-    plt.show()
+    results_directory = path_manager.get_path_result(model_name)
+    figure_path = results_directory / f"{model_name}_predictions_context.png"
+    file_manager.save_plot(plt, figure_path)
 
 
 def plot_performance_during_training(wrapper, x_val, y_val, z_mean, z_std, selected_feature, epochs, model_name):
@@ -122,7 +124,7 @@ def plot_performance_during_training(wrapper, x_val, y_val, z_mean, z_std, selec
     plt.plot(prediction_denorm[:, 0], label='Prediction')
     plt.title('Denormalized Prediction vs Actual | Epoch: ' + str(epochs))
     plt.legend()
-    plot_results_directory = get_path('training_plot_dir', model_name)
+    plot_results_directory = path_manager.get_path_training_plot(model_name=model_name)
     os.makedirs(plot_results_directory, exist_ok=True)
     figure_path = os.path.join(plot_results_directory, f"epoch_{epochs:04d}.png")
     plt.savefig(figure_path)
@@ -142,9 +144,10 @@ def create_gif_from_plots(model_name, gif_name='training_progress.gif', duration
     - gif_name: Name of the output GIF file.
     - duration: Duration of each frame in the GIF.
     """
-    plot_results_directory = get_path('training_plot_dir', model_name)
+    plot_results_directory = path_manager.get_path_training_plot(model_name=model_name)
     images = []
-    gif_path = get_path('result_dir', model_name, gif_name)
+    # TODO - refactor GIF is NOT handled at ALL
+    gif_path = path_manager.get_path('result_dir', model_name, gif_name)
 
     for file_name in sorted(os.listdir(plot_results_directory)):
         if file_name.endswith('.png'):
@@ -160,3 +163,4 @@ def create_gif_from_plots(model_name, gif_name='training_progress.gif', duration
 
 if __name__ == "__main__":
     create_gif_from_plots('rnn')
+
