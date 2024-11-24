@@ -1,9 +1,9 @@
-model_type: "LSTM"            # Implemented Models
-# dataset: "sinusoidal"       # Uncomment to select this dataset
+model_type: "RNN"            # Implemented Models
+#dataset: "sinusoidal"       # Uncomment to select this dataset
 dataset: "weather_station"    # Available Datasets from data folder
-num_samples: 70               # Number of trials to run during hyperparameter tuning
+num_samples: 25               # Number of trials to run during hyperparameter tuning
 cpu_per_trial: 10             # Number of CPU cores allocated per trial
-gpu_per_trial: 0.1            # Fraction of GPU allocated per trial
+gpu_per_trial: 0.8            # Fraction of GPU allocated per trial
 max_concurrent_trials: 1      # Maximum number of trials to run concurrently
 trial_params:
   max_epochs: 200             # Maximum number of epochs for training each trial
@@ -12,7 +12,7 @@ trial_params:
 train_val_test_split:         # Ratios for splitting data; these values are overwritten by dataset-specific config if defined there
   frac_train: 0.7             # Fraction of data for training
   frac_val: 0.15              # Fraction of data for validation
-search_algorithm: "optuna"    # Algorithm used for hyperparameter tuning; "optuna", "bayesopt", "random", "hyperopt"
+search_algorithm: "hyperopt"    # Algorithm used for hyperparameter tuning; "optuna", "bayesopt", "random", "hyperopt"
 scheduler: "asha"             # Scheduler to control the execution of trials
-log_to_tensorboard: false     # Log metrics to TensorBoard
+log_to_tensorboard: true     # Log metrics to TensorBoard
 # TODO log to tensorboard - not tested

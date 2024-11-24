@@ -20,10 +20,10 @@ feature_forecasted: 0
 columns_to_drop:
 #  - feature_2
 # Indices for cropping the DataFrame for lower calc time // disable set to null
-crop_start: null
-crop_end: null
-ts_past: 500
-ts_future: 200
+crop_start: 5_000
+crop_end: 10_000
+ts_past: 200
+ts_future: 50
     # Optional: Override split ratios for specific dataset needs
 #train_val_test_split:
 #  frac_train: 0.7

@@ -1,0 +1,18 @@
+sources:
+  - ETTh1
+  - ETTh2
+source_forecasted: 0
+feature_list:
+  - 'HUFL'
+  - 'HULL'
+  - 'MUFL'
+  - 'MULL'
+  - 'LUFL'
+  - 'LULL'
+feature_forecasted: 0
+columns_to_drop:
+  - 'date'
+crop_start: null
+crop_end: null
+ts_past: 120
+ts_future: 24
