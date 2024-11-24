@@ -1,10 +1,10 @@
-# File: training_pipeline/training_pipeline.py
-import logging
 import torch
 from ray.air import session
 
 from callbacks.early_stopping_callback import EarlyStoppingCallback
 
+from utilities.logging_utils import get_logger
+logger = get_logger(__name__)
 
 class HyperparameterTuningPipeline:
     def __init__(self, pipeline_config, wrapper):
@@ -24,25 +24,29 @@ class HyperparameterTuningPipeline:
     def run(self):
         """Runs the full training process."""
         for epoch in range(self.epochs):
-            logging.info(f'Start Training Epoch {epoch}')
+            logger.info(f'Start Training Epoch {epoch}')
 
             # Train the model for one epoch
             train_loss = self.train_epoch(epoch)
-            logging.info(f'Epoch {epoch}: avg_train_loss = {train_loss:.4f}')
+            logger.info(f'Epoch {epoch}: avg_train_loss = {train_loss:.4f}')
 
             # Validate the model at the end of the epoch
             val_loss, x_val, y_val = self.validate_epoch(epoch)
-            logging.info(f'Epoch {epoch}: avg_val_loss = {val_loss:.4f}')
+            logger.info(f'Epoch {epoch}: avg_val_loss = {val_loss:.4f}')
 
             # Use the callback manager to trigger on_epoch_end
             if self.callback_manager:
-                self.callback_manager.on_epoch_end(epoch, self.wrapper, val_loss, x_val=x_val, y_val=y_val)
+                self.callback_manager.on_epoch_end(
+                    epoch=epoch,
+                    wrapper=self.wrapper,
+                    val_loss=val_loss,
+                    train_loss=train_loss,
+                    x_val=x_val,
+                    y_val=y_val
+                )
 
-            # Check if early stopping is triggered TODO change this somehow... maybe use a STOP MANAGER or something,
-            #  do not want to have such strong dependency for something like this
-            if any(isinstance(cb, EarlyStoppingCallback) and cb.should_stop() for cb in
-                   self.callback_manager.callbacks):
-                logging.info(f"Training stopped early at epoch {epoch + 1}")
+            if self.callback_manager.should_stop():
+                logger.info(f"Training stopped early at epoch {epoch + 1}")
                 break
 
             # Report the validation loss to Ray Tune

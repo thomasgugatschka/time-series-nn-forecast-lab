@@ -1,19 +1,35 @@
 import os
 import matplotlib.pyplot as plt
 import imageio.v2 as imageio
-import logging
-from configs.logging_config import setup_logging
+
 from utilities.data_utils import z_score_denormalize
 
 from manager.path_manager import path_manager
 from manager.file_manager import file_manager
 
-setup_logging()
+from utilities.logging_utils import get_logger
+logger = get_logger(__name__)
 
 
 # TODO -> REFACTOR and REMOVE anything MODEL related e.g. rnn_prediction
 
 # TODO -> Refactor the model_name should be in all CAPS
+
+# Function to set up the plot styles globally
+def setup_plot_style():
+    """
+    Set global settings for plots to maintain consistency across all plots.
+    """
+    plt.rcParams['figure.figsize'] = (14, 8)
+    plt.rcParams['axes.titlesize'] = 16
+    plt.rcParams['axes.labelsize'] = 14
+    plt.rcParams['xtick.labelsize'] = 12
+    plt.rcParams['ytick.labelsize'] = 12
+    plt.rcParams['legend.fontsize'] = 12
+    plt.rcParams['lines.linewidth'] = 2.5
+
+# Call the setup_plot_style function when this module is imported
+setup_plot_style()
 
 
 def plot_training_progress(training_loss, validation_loss, model_name):
@@ -158,7 +174,7 @@ def create_gif_from_plots(model_name, gif_name='training_progress.gif', duration
 
     imageio.mimsave(gif_path, images, fps=fps)
 
-    logging.info(f"GIF saved at {gif_path}")
+    logger.info(f"GIF saved at {gif_path}")
 
 
 if __name__ == "__main__":

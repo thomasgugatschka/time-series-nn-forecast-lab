@@ -1,6 +1,8 @@
 import os
 import torch
-import logging
+
+from utilities.logging_utils import get_logger
+logger = get_logger(__name__)
 
 class ModelCheckpointCallback:
     def __init__(self, checkpoint_dir, monitor='val_loss', mode='min', save_best_only=True):
@@ -15,7 +17,8 @@ class ModelCheckpointCallback:
         if not os.path.exists(self.checkpoint_dir):
             os.makedirs(self.checkpoint_dir)
 
-    def on_epoch_end(self, epoch, wrapper, val_loss, **kwargs):
+    def on_epoch_end(self, epoch, wrapper, **kwargs):
+        val_loss = kwargs.get('val_loss')
         # Determine if the current epoch's validation loss is better than the best score so far
         if self.best_score is None or (
             (self.mode == 'min' and val_loss < self.best_score) or
@@ -24,9 +27,9 @@ class ModelCheckpointCallback:
             self.best_score = val_loss
             model_save_path = os.path.join(self.checkpoint_dir, f'best_model_epoch_{epoch}.pt')
             torch.save(wrapper.model.state_dict(), model_save_path)
-            logging.info(f"Model checkpoint saved at epoch {epoch + 1}: {model_save_path}")
+            logger.info(f"Model checkpoint saved at epoch {epoch + 1}: {model_save_path}")
 
         elif not self.save_best_only:
             model_save_path = os.path.join(self.checkpoint_dir, f'model_epoch_{epoch}.pt')
             torch.save(wrapper.model.state_dict(), model_save_path)
-            logging.info(f"Model checkpoint saved at epoch {epoch + 1}: {model_save_path}")
+            logger.info(f"Model checkpoint saved at epoch {epoch + 1}: {model_save_path}")

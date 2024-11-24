@@ -1,5 +1,4 @@
 import os
-import logging
 import pandas as pd
 import numpy as np
 import yaml
@@ -9,16 +8,19 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from manager.path_manager import path_manager
 
+from utilities.logging_utils import get_logger
+logger = get_logger(__name__)
+
 # TODO -> change to CLASSES so it is somewhat separated???
 #
 
-
+# TODO REFACOTR to use FIEL MANAGER
 # Load configuration function
 def load_config(config_file):
-    logging.info(f"Loading configuration from {config_file}")
+    logger.info(f"Loading configuration from {config_file}")
     with open(config_file, 'r') as file:
         config = yaml.safe_load(file)
-    logging.info(f"Configuration loaded successfully from {config_file}")
+    logger.info(f"Configuration loaded successfully from {config_file}")
     return config
 
 # Create data loaders function
@@ -42,14 +44,14 @@ def load_data(sources, data_dir, columns_to_drop):
     df_list = []
     for source in sources:
         target_file = os.path.join(data_dir, f"{source}.csv")
-        logging.info(f"Loading data from {target_file}")
+        logger.info(f"Loading data from {target_file}")
         df = pd.read_csv(target_file, encoding='utf-8')
-        logging.info(f"Data shape before dropping columns: {df.shape}")
+        logger.info(f"Data shape before dropping columns: {df.shape}")
         if columns_to_drop:
             df = df.drop(columns=columns_to_drop)
-            logging.info(f"Data shape after dropping columns: {df.shape}")
+            logger.info(f"Data shape after dropping columns: {df.shape}")
         df_list.append(df)
-        logging.info(f"Appended data from {source}.csv")
+        logger.info(f"Appended data from {source}.csv")
     return pd.concat(df_list, axis=1)
 
 # Crop data function
@@ -140,7 +142,7 @@ def split_and_convert_data(x_arr, y_arr, frac_train, frac_val):
     y_val = torch.tensor(y_arr_val, dtype=torch.float32)
     y_test = torch.tensor(y_arr_test, dtype=torch.float32)
 
-    logging.info(f"""
+    logger.info(f"""
     Data split and conversion completed:
     - Shapes:
       - x_train: {x_train.shape}
@@ -198,13 +200,13 @@ def preprocess_data(config_data, dataset_name):
 
     x_arr, y_arr = split_sequences(df, df.iloc[:, selected_feature], ts_past, ts_future)
 
-    logging.info(f"DataFrame shape: {df.shape}")
-    logging.info(f"x_arr shape: {x_arr.shape}")
-    logging.info(f"y_arr shape: {y_arr.shape}")
-    logging.info(f"z_mean: {z_mean}")
-    logging.info(f"z_std: {z_std}")
-    logging.info(f"selected_feature: {selected_feature}")
-    logging.info(f"num_features: {num_features}")
+    logger.info(f"DataFrame shape: {df.shape}")
+    logger.info(f"x_arr shape: {x_arr.shape}")
+    logger.info(f"y_arr shape: {y_arr.shape}")
+    logger.info(f"z_mean: {z_mean}")
+    logger.info(f"z_std: {z_std}")
+    logger.info(f"selected_feature: {selected_feature}")
+    logger.info(f"num_features: {num_features}")
 
     return df, x_arr, y_arr, z_mean, z_std, selected_feature, num_features
 

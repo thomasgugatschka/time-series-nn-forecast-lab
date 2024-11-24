@@ -2,7 +2,6 @@ import argparse
 import os
 
 import torch
-import logging
 import ray
 import datetime
 
@@ -24,8 +23,6 @@ from manager.file_manager import file_manager
 from manager.path_manager import path_manager
 from manager.result_manager import result_manager
 
-from configs.logging_config import setup_logging
-
 from training_pipeline.hyperparameter_tuning_pipeline_builder import HyperparameterTuningPipelineBuilder
 
 # Utilities
@@ -33,15 +30,16 @@ from utilities.training_utils import get_device
 from utilities.training_utils import set_seed
 from utilities.data_utils import load_and_preprocess_data, create_data_loaders
 
-
-
 # Models and Pipeline
 from models.model_factory import model_factory
 from models.wrapper_factory import wrapper_factory
 from strategies.search_algorithm_strategy import SearchAlgorithmStrategy
 
 # Initialize logging
+from utilities.logging_utils import setup_logging, get_logger
 setup_logging()
+logger = get_logger(__name__)
+logger.info("Logger is set up")
 
 
 # region ### PARSE ARGUMENTS ###
@@ -49,7 +47,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Train different models with different datasets.")
     parser.add_argument("--config_path", type=str, default='config.yaml', help="Path to the configuration file.")
 
-    logging.info(f'Parse Args: {parser.parse_args()}')
+    logger.info(f'Parse Args: {parser.parse_args()}')
     return parser.parse_args()
 # endregion
 
@@ -118,7 +116,7 @@ def objective(config, dataset_config, model_type, data_split):
 
     # region ### INITIALIZE MODEL, OPTIMIZER, LOSS FUNCTION ###
     device = get_device()
-    logging.info(f"Device: {device}")
+    logger.info(f"Device: {device}")
     model = model_factory(model_type, **model_params).to(device)
     #logging.info(model)
 
@@ -246,7 +244,7 @@ if __name__ == "__main__":
         split_id=data_split
     )
 
-    print(f"Best hyperparameters: {best_config_extended}")
+    logger.info(f"Best hyperparameters: {best_config_extended}")
     # endregion
 
     # region ### LOG TO TENSORBOARD (OPTIONAL) ###

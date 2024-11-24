@@ -2,6 +2,8 @@ import os
 import pandas as pd
 from manager.path_manager import path_manager
 
+from utilities.logging_utils import get_logger
+logger = get_logger(__name__)
 
 def save_parameters_and_results(new_row, model_name):
     csv_file_path = os.path.join(path_manager.get_path('result_dir', model_name), "parameter_iterations.csv")
@@ -36,4 +38,4 @@ def update_results_in_csv(csv_file_path, chosen_model, feature_list, FEATURE_FOR
     df.at[chosen_feature_index, f"{chosen_model_no_space}_R2"] = round(model_r2_loss, 4)
 
     df.to_csv(csv_file_path, index=False)
-    print(f"Results for {chosen_model} and {feature_list[chosen_feature_index]} updated in {csv_file_path}")
+    logger.info(f"Results for {chosen_model} and {feature_list[chosen_feature_index]} updated in {csv_file_path}")

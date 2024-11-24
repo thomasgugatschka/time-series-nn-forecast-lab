@@ -8,9 +8,9 @@ class PlottingCallback(BaseCallback):
         self.z_std = z_std
         self.selected_feature = selected_feature
 
-    def on_epoch_end(self, epoch, wrapper, val_loss, **kwargs):
-        x_val = kwargs['x_val']
-        y_val = kwargs['y_val']
+    def on_epoch_end(self, epoch, wrapper, **kwargs):
+        x_val = kwargs.get('x_val')
+        y_val = kwargs.get('y_val')
 
         if x_val is not None and y_val is not None:
             # Import the plot utility here to avoid circular imports if needed

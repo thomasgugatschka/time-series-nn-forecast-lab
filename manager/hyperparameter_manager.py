@@ -1,5 +1,7 @@
-import logging
 from ray import tune
+
+from utilities.logging_utils import get_logger
+logger = get_logger(__name__)
 
 class HyperparameterManager:
     def __init__(self, config_hyperparameter):
@@ -36,7 +38,7 @@ class HyperparameterManager:
                 parsed_value = value
 
             # Log each parsed value for debugging purposes
-            logging.debug(f"Parsed value for key '{key}': {parsed_value}")
+            logger.debug(f"Parsed value for key '{key}': {parsed_value}")
             return parsed_value
 
         # Generate the search space
@@ -52,5 +54,5 @@ class HyperparameterManager:
         }
 
         # Debugging: Log the final search space
-        logging.info(f"Search space for model type '{model_type}': {search_space_config}")
+        logger.info(f"Search space for model type '{model_type}': {search_space_config}")
         return search_space_config

@@ -67,20 +67,6 @@ class BaseWrapper:
         with torch.no_grad():
             return self.model(x)
 
-    # TODO REFACTOR THIS -> val_loss and **kwargs... mybe move val_loss also to **kwargs
-    def on_epoch_end(self, epoch, val_loss, **kwargs):
-        """
-        Call on_epoch_end for all registered callbacks.
-
-        Args:
-            epoch (int): The current epoch number.
-            val_loss (float): The validation loss for the epoch.
-            **kwargs: Additional arguments that may be needed by specific callbacks.
-        """
-        # Here, the wrapper calls the callbacks at the end of each epoch
-        for callback in self.callbacks:
-            callback.on_epoch_end(epoch=epoch, wrapper=self, val_loss=val_loss, **kwargs)
-
     def get_model_name(self):
         """
         Get the name of the model.

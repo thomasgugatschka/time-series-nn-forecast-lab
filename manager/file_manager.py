@@ -4,9 +4,13 @@ import pickle
 import os
 import pandas as pd
 from pathlib import Path
-
+from utilities.logging_utils import get_logger
+logger = get_logger(__name__)
 
 # SINGELTON CLASS
+
+#TODO add DEBUG level messages for each action
+
 
 class FileManager:
     _instance = None
@@ -72,16 +76,6 @@ class FileManager:
         with open(file_path, 'w') as f:
             json.dump(data, f, indent=4)
 
-    def save_csv(self, df: pd.DataFrame, file_path: str):
-        """
-        Save a pandas DataFrame to a CSV file.
-
-        Args:
-            df (pd.DataFrame): DataFrame to save.
-            file_path (str): Path to save the CSV file.
-        """
-        df.to_csv(file_path, index=False, encoding='utf-8')
-
     def load_csv(self, file_path: str) -> pd.DataFrame:
         """
         Load a CSV file into a pandas DataFrame.
@@ -97,6 +91,16 @@ class FileManager:
             raise FileNotFoundError(f"CSV file not found at {file_path}")
 
         return pd.read_csv(file_path, encoding='utf-8')
+
+    def save_csv(self, df: pd.DataFrame, file_path: str):
+        """
+        Save a pandas DataFrame to a CSV file.
+
+        Args:
+            df (pd.DataFrame): DataFrame to save.
+            file_path (str): Path to save the CSV file.
+        """
+        df.to_csv(file_path, index=False, encoding='utf-8')
 
     def load_pickle(self, file_path: str):
         """
@@ -125,6 +129,16 @@ class FileManager:
         """
         with open(file_path, 'wb') as f:
             pickle.dump(data, f)
+
+    def save_plot(self, plt_obj, file_path: str):
+        """
+        Save a matplotlib plot to a file.
+
+        Args:
+            plt_obj: Matplotlib plot object.
+            file_path (str): Path to save the plot.
+        """
+        plt_obj.savefig(file_path)
 
     def create_directory(self, dir_path: str):
         """
@@ -159,15 +173,6 @@ class FileManager:
         except FileNotFoundError:
             pass
 
-    def save_plot(self, plt_obj, file_path: str):
-        """
-        Save a matplotlib plot to a file.
-
-        Args:
-            plt_obj: Matplotlib plot object.
-            file_path (str): Path to save the plot.
-        """
-        plt_obj.savefig(file_path)
 
 # Create the singleton instance
 file_manager = FileManager()

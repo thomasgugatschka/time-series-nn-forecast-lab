@@ -76,7 +76,6 @@ class PathManager:
             return self.paths['dataset_config_dir'] / f'config_data_{dataset_name}.yaml'
         return self.paths['dataset_config_dir']
 
-    # TODO -> Refactor the NAME maybe add RESULT or something
     def get_path_training_plot(self, model_name: str) -> Path:
         if not model_name:
             raise ValueError("Model name is required for training plot path.")
@@ -89,9 +88,6 @@ class PathManager:
 
     def get_path_hyperparameter_config(self) -> Path:
         return self.paths['config_dir'] / 'model_hyperparameter_config.json'
-
-    from pathlib import Path
-    from typing import Optional
 
     def get_path_best_hyperparameters(self, model_name: str, dataset_name: str, split_id: str,
                                       ts_future: Optional[int] = None, ts_past: Optional[int] = None) -> Path:

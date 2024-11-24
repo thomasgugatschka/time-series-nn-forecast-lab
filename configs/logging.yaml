@@ -1,0 +1,29 @@
+version: 1
+disable_existing_loggers: false
+formatters:
+  standard:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  colored:
+    format: '%(log_color)s%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    () : 'colorlog.ColoredFormatter'
+    log_colors:
+      DEBUG: 'cyan'
+      INFO: 'green'
+      WARNING: 'yellow'
+      ERROR: 'red'
+      CRITICAL: 'bold_red'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: colored
+    level: INFO
+  file:
+    class: logging.FileHandler
+    formatter: standard
+    level: INFO
+    filename: logs/app.log  # Path to log file
+
+root:
+  level: INFO
+  handlers: [console, file]

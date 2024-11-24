@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 from manager.path_manager import path_manager
 from manager.file_manager import file_manager
 
-from configs.logging_config import setup_logging
-from utilities.data_utils import load_config, load_data, crop_data, calculate_features
+from utilities.data_utils import load_data, crop_data, calculate_features
 
+from utilities.logging_utils import get_logger
+logger = get_logger(__name__)
 
 def main(dataset):
-    setup_logging()
 
     # Load configuration files
     dataset_config_path = path_manager.get_path_dataset_config(dataset_name=dataset)
