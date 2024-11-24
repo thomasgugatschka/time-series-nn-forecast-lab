@@ -9,17 +9,14 @@ class SearchAlgorithmStrategy:
         self.metric = metric
         self.mode = mode
 
-
-    # TODO - ADD GRID SEARCH
     def get_search_algorithm(self):
-        if self.algorithm_name == "random":
-            return BasicVariantGenerator()
-        elif self.algorithm_name == "bayesopt":
-            return BayesOptSearch(metric=self.metric, mode=self.mode)
-        elif self.algorithm_name == "hyperopt":
-            return HyperOptSearch(metric=self.metric, mode=self.mode, random_state_seed=42)
-        elif self.algorithm_name == "optuna":
-            return OptunaSearch(metric=self.metric, mode=self.mode)
-        else:
-            raise ValueError(f"Unknown search algorithm '{self.algorithm_name}'")
+        algorithms = {
+            "random": BasicVariantGenerator(),
+            "bayesopt": BayesOptSearch(metric=self.metric, mode=self.mode),
+            "hyperopt": HyperOptSearch(metric=self.metric, mode=self.mode, random_state_seed=42),
+            "optuna": OptunaSearch(metric=self.metric, mode=self.mode)
+        }
+        return algorithms.get(self.algorithm_name) or self._raise_unknown_algorithm()
 
+    def _raise_unknown_algorithm(self):
+        raise ValueError(f"Unknown search algorithm '{self.algorithm_name}'")

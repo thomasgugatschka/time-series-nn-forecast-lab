@@ -2,8 +2,8 @@ from models.rnn.rnn_wrapper import RNNWrapper
 from models.lstm.lstm_wrapper import LSTMWrapper
 from models.bilstm.bilstm_wrapper import BiLSTMWrapper
 from models.gru.gru_wrapper import GRUWrapper
-# from models.transformer.transformer_wrapper import TransformerWrapper
-# from models.tcn.tcn_wrapper import TCNWrapper
+from models.transformer.transformer_wrapper import TransformerWrapper
+from models.tcn.tcn_wrapper import TCNWrapper
 # from models.cnn.cnn_wrapper import CNNWrapper
 
 def wrapper_factory(model_type, model, optimizer, loss_fn, device, callbacks=None):
@@ -15,10 +15,10 @@ def wrapper_factory(model_type, model, optimizer, loss_fn, device, callbacks=Non
         return BiLSTMWrapper(model, optimizer, loss_fn, device, callbacks)
     elif model_type == 'GRU':
         return GRUWrapper(model, optimizer, loss_fn, device, callbacks)
-    # elif model_type == 'Transformer':
-    #     return TransformerWrapper(model, optimizer, loss_fn)
-    # elif model_type == 'TCN':
-    #     return TCNWrapper(model, optimizer, loss_fn)
+    elif model_type == 'Transformer':
+        return TransformerWrapper(model, optimizer, loss_fn, device, callbacks)
+    elif model_type == 'TCN':
+        return TCNWrapper(model, optimizer, loss_fn, device, callbacks)
     # elif model_type == 'CNN':
     #     return CNNWrapper(model, optimizer, loss_fn)
     else:

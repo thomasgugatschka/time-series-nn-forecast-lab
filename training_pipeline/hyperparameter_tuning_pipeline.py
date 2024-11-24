@@ -6,7 +6,7 @@ from ray.air import session
 from callbacks.early_stopping_callback import EarlyStoppingCallback
 
 
-class TrainingPipeline:
+class HyperparameterTuningPipeline:
     def __init__(self, pipeline_config, wrapper):
         """
         TrainingPipeline constructor.
@@ -38,8 +38,8 @@ class TrainingPipeline:
             if self.callback_manager:
                 self.callback_manager.on_epoch_end(epoch, self.wrapper, val_loss, x_val=x_val, y_val=y_val)
 
-            # Check if early stopping is triggered
-            # TODO change this somehow... maybe use a STOP MANAGER or something, do not want to have such strong dependency for something like this
+            # Check if early stopping is triggered TODO change this somehow... maybe use a STOP MANAGER or something,
+            #  do not want to have such strong dependency for something like this
             if any(isinstance(cb, EarlyStoppingCallback) and cb.should_stop() for cb in
                    self.callback_manager.callbacks):
                 logging.info(f"Training stopped early at epoch {epoch + 1}")

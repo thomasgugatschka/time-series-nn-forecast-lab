@@ -87,12 +87,15 @@ def split_sequences(input_sequences, output_sequence, n_steps_in, n_steps_out):
     return np.array(x), np.array(y)
 
 
-def load_and_preprocess_data(config_data, dataset, default_split):
+def load_and_preprocess_data(config_data, dataset, data_split):
+
+    # Use the default split ratios
+    frac_train = data_split['frac_train']
+    frac_val = data_split['frac_val']
 
     # Extract split ratios from dataset-specific config if available, otherwise use the default split
-    frac_train = config_data.get('train_val_test_split', {}).get('frac_train', default_split['frac_train'])
-    frac_val = config_data.get('train_val_test_split', {}).get('frac_val', default_split['frac_val'])
-
+    #frac_train = config_data.get('train_val_test_split', {}).get('frac_train', data_split['frac_train'])
+    #frac_val = config_data.get('train_val_test_split', {}).get('frac_val', data_split['frac_val'])
 
     # Preprocess data
     df, x_arr, y_arr, z_mean, z_std, selected_feature, num_features = preprocess_data(config_data, dataset)
@@ -128,8 +131,6 @@ def split_and_convert_data(x_arr, y_arr, frac_train, frac_val):
     y_arr_train = y_arr[:num_train, :]
     y_arr_val = y_arr[num_train:num_train + num_val, :]
     y_arr_test = y_arr[num_train + num_val:, :]
-    #logging.info(f"\nx_arr shapes:\n{x_arr_train.shape}\n{x_arr_val.shape}\n{x_arr_test.shape}")
-    #logging.info(f"\ny_arr shapes:\n{y_arr_train.shape}\n{y_arr_val.shape}\n{y_arr_test.shape}")
 
     # Convert to tensors
     x_train = torch.tensor(x_arr_train, dtype=torch.float32)
@@ -138,8 +139,6 @@ def split_and_convert_data(x_arr, y_arr, frac_train, frac_val):
     y_train = torch.tensor(y_arr_train, dtype=torch.float32)
     y_val = torch.tensor(y_arr_val, dtype=torch.float32)
     y_test = torch.tensor(y_arr_test, dtype=torch.float32)
-    #logging.info(f"\nTensor shapes (x):\n{x_train.shape}\n{x_val.shape}\n{x_test.shape}")
-    #logging.info(f"\nTensor shapes (y):\n{y_train.shape}\n{y_val.shape}\n{y_test.shape}\n")
 
     logging.info(f"""
     Data split and conversion completed:

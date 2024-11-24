@@ -1,8 +1,6 @@
 import logging
 from ray import tune
 
-# TODO -> REFACTOR so it is a bit nicer and cleaner and not a def within a def....
-
 class HyperparameterManager:
     def __init__(self, config_hyperparameter):
         self.config_hyperparameter = config_hyperparameter
@@ -13,19 +11,25 @@ class HyperparameterManager:
             raise ValueError(f"Model type '{model_type}' not found in the hyperparameter configuration!")
 
         # Parse the JSON-like dictionary to generate Ray Tune search space
+
         def parse_value(key, value):
             if isinstance(value, list):
-                # Check if the list has a "log" indicator for loguniform sampling
-                if len(value) == 3 and value[2] == "log":
+                # Handle list of lists case (e.g., TCN num_channels)
+                if all(isinstance(item, list) for item in value):
+                    # If all elements are lists, return as a categorical choice of list options
+                    parsed_value = tune.choice(value)
+                # Handle "log" indicator for log-uniform sampling
+                elif len(value) == 3 and value[2] == "log":
                     parsed_value = tune.loguniform(value[0], value[1])
+                # Handle range with two elements
                 elif len(value) == 2:
-                    # If list has two values, we assume it's a range for tuning
                     if isinstance(value[0], int):
-                        parsed_value = tune.randint(value[0], value[1] + 1) #TODO is the +1 necessary???
+                        parsed_value = tune.randint(value[0], value[1] + 1)  # To include the upper limit
                     elif isinstance(value[0], float):
                         parsed_value = tune.uniform(value[0], value[1])
                     else:
                         parsed_value = tune.choice(value)  # Catch-all for other list values
+                # Handle categorical lists
                 else:
                     parsed_value = tune.choice(value)  # For categorical lists like ["Adam", "SGD"]
             else:

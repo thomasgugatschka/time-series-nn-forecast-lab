@@ -8,7 +8,7 @@
     "training_params": {
       "batch_size": [16, 32, 64, 128, 256, 512],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [2, 3],
+      "epochs": [10, 15],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }
@@ -22,7 +22,7 @@
     "training_params": {
       "batch_size": [16, 32, 64, 128, 256, 512],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [50, 60],
+      "epochs": [2, 3],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }
@@ -36,7 +36,7 @@
     "training_params": {
       "batch_size": [16, 32, 64, 128, 256, 512],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [50, 100],
+      "epochs": [20, 50],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }
@@ -57,19 +57,38 @@
   },
   "Transformer": {
     "model_params": {
-      "num_heads": [2, 8],
-      "num_layers": [1, 5],
-      "hidden_dim": [64, 512],
-      "dropout": [0.0, 0.5]
+      "embed_dim": [32, 64, 128, 256],
+      "num_heads": [2, 4, 8],
+      "num_layers": [2, 10],
+      "forward_dim": [128, 256, 512],
+      "dropout": [0.1, 0.2, 0.3, 0.5]
     },
     "training_params": {
-      "batch_size": [16, 32, 64, 128, 256, 512],
-      "learning_rate": [1e-5, 1e-2, "log"],
-      "epochs": [10, 50],
-      "optimizer": ["Adam", "SGD"],
-      "loss_function": ["MSELoss", "CrossEntropyLoss"]
+      "batch_size": [16, 32, 64, 128],
+      "learning_rate": [1e-3, 1e-2, "log"],
+      "epochs": [30, 50],
+      "optimizer": ["Adam"],
+      "loss_function": ["MSELoss"]
+    }
+  },
+  "TCN": {
+    "model_params": {
+      "num_channels": [[16, 32, 64], [32, 64, 128]],
+      "kernel_size": [2, 3, 5],
+      "dropout": [0.1, 0.2, 0.5],
+      "dilation": [1, 2, 4],
+      "num_layers": [3, 4, 5]
+    },
+    "training_params": {
+      "batch_size": [16, 32, 64, 128],
+      "learning_rate": [1e-3, 1e-2, "log"],
+      "epochs": [20, 50],
+      "optimizer": ["Adam"],
+      "loss_function": ["MSELoss"]
     }
   }
+
 }
+
 
 

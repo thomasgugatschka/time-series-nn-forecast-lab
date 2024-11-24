@@ -14,6 +14,12 @@ class ResultManager:
 
     def save_best_config(self, best_config: dict, model_name: str, dataset_name: str, ts_future, ts_past,
                          split_id="default"):
+
+        # Convert split_id dictionary into a valid string for the file path
+        if isinstance(split_id, dict):
+            # Example: {'frac_train': 0.7, 'frac_val': 0.15} -> frac_train_0.7_frac_val_0.15
+            split_id = "_".join(f"{key}_{value}" for key, value in split_id.items())
+
         """Save the best hyperparameter configuration along with additional metadata."""
         # Generate a unique path for best hyperparameters based on different factors
         best_config_file_path = path_manager.get_path_best_hyperparameters(

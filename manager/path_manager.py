@@ -90,8 +90,11 @@ class PathManager:
     def get_path_hyperparameter_config(self) -> Path:
         return self.paths['config_dir'] / 'model_hyperparameter_config.json'
 
+    from pathlib import Path
+    from typing import Optional
 
-    def get_path_best_hyperparameters(self, model_name: str, dataset_name: str, split_id: str, ts_future: Optional[int] = None, ts_past: Optional[int] = None) -> Path:
+    def get_path_best_hyperparameters(self, model_name: str, dataset_name: str, split_id: str,
+                                      ts_future: Optional[int] = None, ts_past: Optional[int] = None) -> Path:
         """
         Generate a unique path for storing the best hyperparameters, based on model type, dataset, and parameters.
 
@@ -105,12 +108,19 @@ class PathManager:
         Returns:
             Path: Path where the best hyperparameters JSON file should be saved.
         """
-        # Create a directory structure based on model, dataset, and other parameters
-        hyperparameters_dir = self.paths['best_hyperparameters_dir'] / model_name / dataset_name / f'split_{split_id}'
+        # Create a directory structure based on model, dataset, split, ts_future, and ts_past parameters at the same level
+        hyperparameters_dir = self.paths['best_hyperparameters_dir'] / model_name / dataset_name
+
+        # Create folder name for the split and optional ts_future and ts_past
+        split_folder_name = f'split_{split_id}'
         if ts_future is not None:
-            hyperparameters_dir = hyperparameters_dir / f'ts_future_{ts_future}'
+            split_folder_name += f'_ts_f_{ts_future}'
         if ts_past is not None:
-            hyperparameters_dir = hyperparameters_dir / f'ts_past_{ts_past}'
+            split_folder_name += f'_ts_p_{ts_past}'
+
+        hyperparameters_dir = hyperparameters_dir / split_folder_name
+
+        # Return the final path to the JSON file
         return hyperparameters_dir / 'best_hyperparameters.json'
 
 
