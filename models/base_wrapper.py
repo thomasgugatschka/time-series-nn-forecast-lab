@@ -1,7 +1,7 @@
 import torch
 
 class BaseWrapper:
-    def __init__(self, model, optimizer, loss_fn, device, callbacks=None):
+    def __init__(self, model, optimizer, loss_fn, device):
         """
         Base wrapper for models to encapsulate common functionality.
 
@@ -9,13 +9,11 @@ class BaseWrapper:
             model: The neural network model instance.
             optimizer: The optimizer used for training.
             loss_fn: The loss function used for training.
-            callbacks (list, optional): List of callbacks to use during training.
         """
         self.model = model
         self.optimizer = optimizer
         self.loss_fn = loss_fn
         self.device = device
-        self.callbacks = callbacks if callbacks is not None else []
 
     def train_epoch(self, x_train, y_train):
         """

@@ -1,5 +1,4 @@
 import argparse
-import os
 
 import torch
 import ray
@@ -12,6 +11,8 @@ from manager.callback_manager import CallbackManager
 from callbacks.logging_callback import LoggingCallback
 from callbacks.plotting_callback import PlottingCallback
 from callbacks.early_stopping_callback import EarlyStoppingCallback
+from callbacks.model_checkpoint_callback import ModelCheckpointCallback
+from callbacks.tensorboard_callback import TensorBoardCallback
 
 # Strategies
 from strategies.strategy_factory import StrategyFactory
@@ -22,18 +23,20 @@ from manager.hyperparameter_manager import HyperparameterManager
 from manager.file_manager import file_manager
 from manager.path_manager import path_manager
 from manager.result_manager import result_manager
+from manager.experiment_manager import experiment_manager
 
-from training_pipeline.hyperparameter_tuning_pipeline_builder import HyperparameterTuningPipelineBuilder
+from hyperparameter_pipeline.hyperparameter_tuning_pipeline_builder import HyperparameterTuningPipelineBuilder
 
 # Utilities
-from utilities.training_utils import get_device
-from utilities.training_utils import set_seed
+from utilities.tensorboard_utils import start_tensorboard
+from utilities.experiment_utils import get_device
+from utilities.experiment_utils import set_seed
 from utilities.data_utils import load_and_preprocess_data, create_data_loaders
 
 # Models and Pipeline
 from models.model_factory import model_factory
 from models.wrapper_factory import wrapper_factory
-from strategies.search_algorithm_strategy import SearchAlgorithmStrategy
+
 
 # Initialize logging
 from utilities.logging_utils import setup_logging, get_logger
@@ -86,6 +89,12 @@ def objective(config, dataset_config, model_type, data_split):
     trial_seed = config.get("trial_seed")
     set_seed(trial_seed)
 
+    # Use trial information to generate a unique directory for each trial
+    timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+    tensorboard_trial_log_dir = tensorboard_log_dir / timestamp
+    logger.info(f"Tensorboard log directory for this trial: {tensorboard_trial_log_dir}")
+
+
 
     # region ### LOAD and PREPROCESS DATA ###
     data = load_and_preprocess_data(dataset_config, dataset, data_split)
@@ -129,11 +138,12 @@ def objective(config, dataset_config, model_type, data_split):
     logging_callback = LoggingCallback(log_every_n_epochs=1)
     plotting_callback = PlottingCallback(z_mean, z_std, selected_feature)
     early_stopping_callback = EarlyStoppingCallback(patience=10)
+    tensorboard_callback = TensorBoardCallback(log_dir=tensorboard_trial_log_dir)
+#    checkpoint_dir = path_manager.get_path_checkpoint(model_name=model_type, experiment_name=experiment_name)
+#    model_checkpoint_callback = ModelCheckpointCallback(checkpoint_dir=checkpoint_dir, monitor='val_loss')
 
-    checkpoint_dir = path_manager.get_path_checkpoint(model_name=model_type) # TODO maybe need to add dataset? and also split?
-    #model_checkpoint_callback = ModelCheckpointCallback(checkpoint_dir=checkpoint_dir, monitor='val_loss')
 
-    callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback])
+    callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback, tensorboard_callback])
     # endregion
 
     # region ### INITIALIZE MODEL WRAPPER ###
@@ -163,7 +173,8 @@ if __name__ == "__main__":
     args = parse_args()
 
     # Load the configuration file (->config.yaml)
-    config_manager = ConfigManager(args.config_path)
+    config = args.config_path
+    config_manager = ConfigManager(config)
 
     model_type = config_manager.get('model_type')
     dataset = config_manager.get('dataset')
@@ -194,10 +205,29 @@ if __name__ == "__main__":
     search_algorithm = StrategyFactory.create_search_algorithm(search_algorithm_name, "val_loss", "min")
     scheduler = StrategyFactory.create_scheduler(scheduler_name, "val_loss", "min", trial_params)
 
-    # TODO - DEBUG  -> name maybe?? but path should be build correctly...
-    experiment_name = f"{model_type}_{dataset}"
-    # TODO move to project dir? as ray_results? with .gitignore
-    experiment_path = os.path.join('C:/Users/Thomas/ray_results', experiment_name)
+
+
+    # Manage experiment: Check if it's a new experiment or should resume
+    config_path = path_manager.get_path_config() / config
+    experiment_name, resume = (experiment_manager.
+                               manage_experiment(model_type, dataset, ts_future, ts_past, config_path))
+
+    # Set up the experiment paths
+    experiment_path = path_manager.get_ray_results_dir() / experiment_name
+    tensorboard_log_dir = path_manager.get_tensorboard_log_dir(model_type, experiment_name)
+
+
+    logger.info(f"Experiment name: {experiment_name}")
+    logger.info(f"Experiment path: {experiment_path}")
+    logger.info(f"Resume: {resume}")
+    logger.info(f"Tensorboard log directory: {tensorboard_log_dir}")
+
+
+
+    # Start TensorBoard if needed (optional)
+    tensorboard_view_dir = path_manager.get_tensorboard_log_dir()
+    start_tensorboard(str(tensorboard_view_dir))
+
 
 
     # Initialize Ray
@@ -209,7 +239,8 @@ if __name__ == "__main__":
             objective,
             dataset_config=dataset_config,
             model_type=model_type,
-            data_split=data_split),
+            data_split=data_split
+            ),
         config=search_space_config,
         num_samples=num_samples,
         resources_per_trial={"cpu": cpu_per_trial, "gpu": gpu_per_trial},
@@ -220,10 +251,12 @@ if __name__ == "__main__":
         max_concurrent_trials=max_concurrent_trials,
         name=experiment_name,
         storage_path=experiment_path
+ #       log_to_file=True
     )
 
 
     # region ### SAVE BEST HYPERPARAMETERS ###
+    # TODO MAYBE MOVE TO EXPERIMENT MANAGER ? so merge experiment with result manager
     best_config = analysis.get_best_config(metric="val_loss", mode="min")
     best_config_extended = {
         "model_type": model_type,
@@ -245,16 +278,6 @@ if __name__ == "__main__":
     )
 
     logger.info(f"Best hyperparameters: {best_config_extended}")
-    # endregion
-
-    # region ### LOG TO TENSORBOARD (OPTIONAL) ###
-    if config_manager.get('log_to_tensorboard', default=False):
-        best_trial = analysis.get_best_trial(metric="val_loss", mode="min")
-        best_metric_value = best_trial.last_result["val_loss"] if best_trial else None
-
-        # Use the ResultManager to log hyperparameters and best metric to TensorBoard
-        if best_metric_value is not None:
-            result_manager.log_to_tensorboard(model_type, best_config_extended, best_metric_value)
     # endregion
 
 

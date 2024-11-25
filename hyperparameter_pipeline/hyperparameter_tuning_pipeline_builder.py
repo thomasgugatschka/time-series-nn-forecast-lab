@@ -1,4 +1,4 @@
-from training_pipeline.hyperparameter_tuning_pipeline import HyperparameterTuningPipeline
+from hyperparameter_pipeline.hyperparameter_tuning_pipeline import HyperparameterTuningPipeline
 
 class HyperparameterTuningPipelineBuilder:
     def __init__(self):

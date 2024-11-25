@@ -36,10 +36,12 @@ class PathManager:
             'config_dir': self.base_dir / 'configs',
             'dataset_config_dir': self.base_dir / 'configs' / 'dataset_configs',
             'best_hyperparameters_dir': self.base_dir / 'configs' / 'best_hyperparameters',
+            'ray_results_dir': self.base_dir / 'ray_results',
             'script_dir': self.base_dir / 'scripts',
             'script_train_dir': self.base_dir / 'scripts' / 'train',
             'script_eval_dir': self.base_dir / 'scripts' / 'evaluate',
-            'script_preprocess_dir': self.base_dir / 'scripts' / 'preprocessing'
+            'script_preprocess_dir': self.base_dir / 'scripts' / 'preprocessing',
+            'tensorboard_log_dir': self.base_dir / 'logs' / 'tensorboard'
         }
 
         self.initialized = True
@@ -60,6 +62,12 @@ class PathManager:
     def get_path_log(self) -> Path:
         return self.paths['log_dir']
 
+    def get_tensorboard_log_dir(self, model_name: Optional[str] = None, experiment_name: Optional[str] = None) -> Path:
+        log_path = self.paths['tensorboard_log_dir']
+        if model_name and experiment_name:
+            return log_path / model_name / experiment_name
+        return log_path
+
     def get_path_result(self, model_name: Optional[str] = None) -> Path:
         if model_name:
             return self.paths['result_dir'] / model_name
@@ -67,6 +75,11 @@ class PathManager:
 
     def get_path_experiment(self) -> Path:
         return self.paths['experiment_dir']
+
+
+    def get_ray_results_dir(self) -> Path:
+        return self.paths['ray_results_dir']
+
 
     def get_path_config(self) -> Path:
         return self.paths['config_dir']

@@ -1,20 +1,11 @@
 import torch
 from ray.air import session
 
-from callbacks.early_stopping_callback import EarlyStoppingCallback
-
 from utilities.logging_utils import get_logger
 logger = get_logger(__name__)
 
 class HyperparameterTuningPipeline:
     def __init__(self, pipeline_config, wrapper):
-        """
-        TrainingPipeline constructor.
-
-        Args:
-            pipeline_config (dict): Contains components of the training pipeline.
-            wrapper (BaseWrapper): The wrapper object that controls the training of the model.
-        """
         self.model = pipeline_config["model"]
         self.data_loaders = pipeline_config["data_loaders"]
         self.epochs = pipeline_config["epochs"]
@@ -23,34 +14,45 @@ class HyperparameterTuningPipeline:
 
     def run(self):
         """Runs the full training process."""
-        for epoch in range(self.epochs):
-            logger.info(f'Start Training Epoch {epoch}')
-
-            # Train the model for one epoch
-            train_loss = self.train_epoch(epoch)
-            logger.info(f'Epoch {epoch}: avg_train_loss = {train_loss:.4f}')
-
-            # Validate the model at the end of the epoch
-            val_loss, x_val, y_val = self.validate_epoch(epoch)
-            logger.info(f'Epoch {epoch}: avg_val_loss = {val_loss:.4f}')
-
-            # Use the callback manager to trigger on_epoch_end
+        try:
+            # Trigger training begin callback
             if self.callback_manager:
-                self.callback_manager.on_epoch_end(
-                    epoch=epoch,
-                    wrapper=self.wrapper,
-                    val_loss=val_loss,
-                    train_loss=train_loss,
-                    x_val=x_val,
-                    y_val=y_val
-                )
+                self.callback_manager.on_train_begin(wrapper=self.wrapper)
 
-            if self.callback_manager.should_stop():
-                logger.info(f"Training stopped early at epoch {epoch + 1}")
-                break
+            for epoch in range(self.epochs):
+                # Trigger epoch begin callback
+                if self.callback_manager:
+                    self.callback_manager.on_epoch_begin(epoch=epoch, wrapper=self.wrapper)
 
-            # Report the validation loss to Ray Tune
-            session.report({"val_loss": val_loss})
+                # Train the model for one epoch
+                train_loss = self.train_epoch(epoch)
+
+                # Validate the model at the end of the epoch
+                val_loss, x_val, y_val = self.validate_epoch(epoch)
+
+                # Trigger epoch end callback
+                if self.callback_manager:
+                    self.callback_manager.on_epoch_end(
+                        epoch=epoch,
+                        wrapper=self.wrapper,
+                        val_loss=val_loss,
+                        train_loss=train_loss,
+                        x_val=x_val,
+                        y_val=y_val
+                    )
+
+                # Check if early stopping or any other stopping condition has been met
+                if self.callback_manager and self.callback_manager.should_stop():
+                    logger.info(f"Training stopped early at epoch {epoch + 1}")
+                    break
+
+                # Report the validation loss to Ray Tune
+                session.report({"val_loss": val_loss})
+
+        finally:
+            # Trigger training end callback
+            if self.callback_manager:
+                self.callback_manager.on_train_end(wrapper=self.wrapper)
 
     def train_epoch(self, epoch):
         """Train the model for one epoch using the wrapper and data loader."""
@@ -58,11 +60,19 @@ class HyperparameterTuningPipeline:
         num_train_batches = 0
 
         # Train loop over each batch in the training data
-        for x_batch, y_batch in self.data_loaders["train"]:
+        for batch_idx, (x_batch, y_batch) in enumerate(self.data_loaders["train"]):
+            # Trigger batch begin callback
+            if self.callback_manager:
+                self.callback_manager.on_batch_begin(batch=batch_idx, wrapper=self.wrapper)
+
             x_batch, y_batch = x_batch.to(self.wrapper.device), y_batch.to(self.wrapper.device)
             batch_loss = self.wrapper.train_epoch(x_batch, y_batch)
             train_loss_total += batch_loss
             num_train_batches += 1
+
+            # Trigger batch end callback
+            if self.callback_manager:
+                self.callback_manager.on_batch_end(batch=batch_idx, wrapper=self.wrapper)
 
         avg_train_loss = train_loss_total / num_train_batches
         return avg_train_loss
@@ -75,8 +85,12 @@ class HyperparameterTuningPipeline:
         x_val_batches = []  # Store x_val batches for callback use
         y_val_batches = []  # Store y_val batches for callback use
 
+        # Trigger validation begin callback
+        if self.callback_manager:
+            self.callback_manager.on_validation_begin(wrapper=self.wrapper)
+
         # Validation loop over each batch in the validation data
-        for x_val_batch, y_val_batch in self.data_loaders["val"]:
+        for batch_idx, (x_val_batch, y_val_batch) in enumerate(self.data_loaders["val"]):
             x_val_batch, y_val_batch = x_val_batch.to(self.wrapper.device), y_val_batch.to(self.wrapper.device)
             batch_loss = self.wrapper.validate(x_val_batch, y_val_batch)
             val_loss_total += batch_loss
@@ -91,5 +105,9 @@ class HyperparameterTuningPipeline:
         # Collect complete validation data for callback usage
         x_val = torch.cat(x_val_batches, dim=0)
         y_val = torch.cat(y_val_batches, dim=0)
+
+        # Trigger validation end callback
+        if self.callback_manager:
+            self.callback_manager.on_validation_end(val_loss=avg_val_loss, wrapper=self.wrapper)
 
         return avg_val_loss, x_val, y_val

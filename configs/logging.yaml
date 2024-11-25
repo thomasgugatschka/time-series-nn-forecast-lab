@@ -23,6 +23,7 @@ handlers:
     formatter: standard
     level: INFO
     filename: logs/app.log  # Path to log file
+    encoding: utf-8
 
 root:
   level: INFO

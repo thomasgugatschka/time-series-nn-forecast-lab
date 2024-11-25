@@ -4,7 +4,7 @@ import os
 
 from utilities.data_utils import preprocess_data, load_config, split_and_convert_data, z_score_denormalize
 from utilities.plot_utils import plot_prediction, plot_prediction_with_context
-from utilities.training_utils import get_device
+from utilities.experiment_utils import get_device
 from manager.path_manager import path_manager
 
 from models.rnn.rnn_model import RNN
