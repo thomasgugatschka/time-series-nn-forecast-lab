@@ -3,6 +3,10 @@
 
 This project is focused on implementing and experimenting with various neural network models for time series forecasting. It is part of my master's thesis.
 
+https://console.cloud.google.com/welcome/new?project=time-series-nn-forecast-lab
+
+https://trello.com/b/6q793jEO/time-series-nn-forecast-lab
+
 # TODO: ADAPT TO NEW STRUCTURE AND SETUP!!!!
 
 ## Table of Contents
@@ -64,6 +68,9 @@ This project is focused on implementing and experimenting with various neural ne
 ### --> add download links and instructions for git lfs 
 
 ## Usage
+
+## NEW MODELS
+- [How to Add a Model](docs/adding-models.md)
 
 ### Configuration
 

@@ -5,6 +5,7 @@ import ray
 import datetime
 
 from ray import tune
+from ray.tune.logger import TBXLoggerCallback
 
 # Callbacks
 from manager.callback_manager import CallbackManager
@@ -13,6 +14,9 @@ from callbacks.plotting_callback import PlottingCallback
 from callbacks.early_stopping_callback import EarlyStoppingCallback
 from callbacks.model_checkpoint_callback import ModelCheckpointCallback
 from callbacks.tensorboard_callback import TensorBoardCallback
+
+from callbacks.extended_tensorboard_callback import ExtendedTensorBoardCallback
+
 
 # Strategies
 from strategies.strategy_factory import StrategyFactory
@@ -72,6 +76,7 @@ def get_optimizer(optimizer_name, params, lr):
     return optimizers[optimizer_name](params=params, lr=lr)
 
 def get_loss_function(loss_function_name):
+    # https://pytorch.org/docs/stable/nn.html#loss-functions
     loss_functions = {
         'MSELoss': torch.nn.MSELoss,
         'MAELoss': torch.nn.L1Loss,
@@ -142,8 +147,32 @@ def objective(config, dataset_config, model_type, data_split):
 #    checkpoint_dir = path_manager.get_path_checkpoint(model_name=model_type, experiment_name=experiment_name)
 #    model_checkpoint_callback = ModelCheckpointCallback(checkpoint_dir=checkpoint_dir, monitor='val_loss')
 
+    hparams = {
+        "learning_rate": config["training_params"]["learning_rate"],
+        "batch_size": config["training_params"]["batch_size"],
+        "optimizer": config["training_params"].get('optimizer'),
+        "loss_function": config["training_params"].get('loss_function'),
+        "num_layers": config["model_params"].get("num_layers"),
+        "hidden_size": config["model_params"].get("hidden_size"),
+        "dropout": config["model_params"].get("dropout"),
+    }
 
-    callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback, tensorboard_callback])
+    seq_len = ts_past
+
+    # Example input with the correct shape (seq_len, batch_size, input_size)
+    example_input = torch.randn(seq_len, batch_size, num_features)
+
+    # Create an instance of the ExtendedTensorBoardCallback
+    extended_tensorboard_callback = ExtendedTensorBoardCallback(
+        log_dir=tensorboard_trial_log_dir,
+        hparams=hparams,
+        model=model,
+        example_input=example_input
+    )
+
+    callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback, extended_tensorboard_callback])
+    #callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback, tensorboard_callback])
+    #callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback])
     # endregion
 
     # region ### INITIALIZE MODEL WRAPPER ###
@@ -226,7 +255,7 @@ if __name__ == "__main__":
 
     # Start TensorBoard if needed (optional)
     tensorboard_view_dir = path_manager.get_tensorboard_log_dir()
-    start_tensorboard(str(tensorboard_view_dir))
+    #start_tensorboard(str(tensorboard_view_dir))
 
 
 
@@ -251,6 +280,7 @@ if __name__ == "__main__":
         max_concurrent_trials=max_concurrent_trials,
         name=experiment_name,
         storage_path=experiment_path
+ #       callbacks=[TBXLoggerCallback()]
  #       log_to_file=True
     )
 
