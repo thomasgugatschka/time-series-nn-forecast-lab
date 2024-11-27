@@ -56,3 +56,31 @@ class HyperparameterManager:
         # Debugging: Log the final search space
         logger.info(f"Search space for model type '{model_type}': {search_space_config}")
         return search_space_config
+
+    def get_hyperparameter_dict_for_tensorboard(self, chosen_config):
+        """
+        Extracts a flat dictionary of hyperparameters for logging in TensorBoard.
+
+        Args:
+            chosen_config (dict): The chosen configuration (after sampling by Ray Tune).
+
+        Returns:
+            dict: A dictionary of hyperparameters formatted for TensorBoard.
+        """
+        # Flatten the configuration dictionary for TensorBoard
+        flat_hparams = {}
+        for param_group in ["model_params", "training_params"]:
+            for key, value in chosen_config.get(param_group, {}).items():
+                # Since we're getting a chosen config, it should be a single sampled value
+                if isinstance(value, list):
+                    raise ValueError(f"Hyperparameter '{key}' has a list value in the chosen config. "
+                                     f"Expected a single value for TensorBoard logging.")
+                flat_hparams[key] = value
+
+        # Add the trial seed if it exists
+        if "trial_seed" in chosen_config:
+            flat_hparams["trial_seed"] = chosen_config["trial_seed"]
+
+        logger.info(f"Formatted hyperparameter dictionary for TensorBoard: {flat_hparams}")
+        return flat_hparams
+

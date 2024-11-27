@@ -50,9 +50,12 @@ class HyperparameterTuningPipeline:
                 session.report({"val_loss": val_loss})
 
         finally:
-            # Trigger training end callback
             if self.callback_manager:
-                self.callback_manager.on_train_end(wrapper=self.wrapper)
+                if 'val_loss' in locals():
+                    self.callback_manager.on_train_end(wrapper=self.wrapper, val_loss=val_loss, train_loss=train_loss)
+                else:
+                    self.callback_manager.on_train_end(wrapper=self.wrapper)
+
 
     def train_epoch(self, epoch):
         """Train the model for one epoch using the wrapper and data loader."""

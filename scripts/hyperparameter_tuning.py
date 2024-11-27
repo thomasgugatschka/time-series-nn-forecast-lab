@@ -1,22 +1,18 @@
 import argparse
-
 import torch
 import ray
 import datetime
 
 from ray import tune
-from ray.tune.logger import TBXLoggerCallback
 
 # Callbacks
 from manager.callback_manager import CallbackManager
 from callbacks.logging_callback import LoggingCallback
 from callbacks.plotting_callback import PlottingCallback
 from callbacks.early_stopping_callback import EarlyStoppingCallback
-from callbacks.model_checkpoint_callback import ModelCheckpointCallback
 from callbacks.tensorboard_callback import TensorBoardCallback
 
-from callbacks.extended_tensorboard_callback import ExtendedTensorBoardCallback
-
+from callbacks.model_checkpoint_callback import ModelCheckpointCallback
 
 # Strategies
 from strategies.strategy_factory import StrategyFactory
@@ -26,7 +22,6 @@ from manager.config_manager import ConfigManager
 from manager.hyperparameter_manager import HyperparameterManager
 from manager.file_manager import file_manager
 from manager.path_manager import path_manager
-from manager.result_manager import result_manager
 from manager.experiment_manager import experiment_manager
 
 from hyperparameter_pipeline.hyperparameter_tuning_pipeline_builder import HyperparameterTuningPipelineBuilder
@@ -94,11 +89,11 @@ def objective(config, dataset_config, model_type, data_split):
     trial_seed = config.get("trial_seed")
     set_seed(trial_seed)
 
-    # Use trial information to generate a unique directory for each trial
-    timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
-    tensorboard_trial_log_dir = tensorboard_log_dir / timestamp
-    logger.info(f"Tensorboard log directory for this trial: {tensorboard_trial_log_dir}")
 
+    # Generate a unique directory for each trial
+    timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+    tensorboard_trial_log_dir = tensorboard_log_dir / timestamp # tensorboard_log_dir from __main__
+    logger.info(f"Tensorboard log directory for this trial: {tensorboard_trial_log_dir}")
 
 
     # region ### LOAD and PREPROCESS DATA ###
@@ -139,40 +134,24 @@ def objective(config, dataset_config, model_type, data_split):
     # endregion
 
     # region ### CALLBACKS ###
-    # Set up callbacks using the callback manager
     logging_callback = LoggingCallback(log_every_n_epochs=1)
     plotting_callback = PlottingCallback(z_mean, z_std, selected_feature)
     early_stopping_callback = EarlyStoppingCallback(patience=10)
-    tensorboard_callback = TensorBoardCallback(log_dir=tensorboard_trial_log_dir)
+
 #    checkpoint_dir = path_manager.get_path_checkpoint(model_name=model_type, experiment_name=experiment_name)
 #    model_checkpoint_callback = ModelCheckpointCallback(checkpoint_dir=checkpoint_dir, monitor='val_loss')
 
-    hparams = {
-        "learning_rate": config["training_params"]["learning_rate"],
-        "batch_size": config["training_params"]["batch_size"],
-        "optimizer": config["training_params"].get('optimizer'),
-        "loss_function": config["training_params"].get('loss_function'),
-        "num_layers": config["model_params"].get("num_layers"),
-        "hidden_size": config["model_params"].get("hidden_size"),
-        "dropout": config["model_params"].get("dropout"),
-    }
-
-    seq_len = ts_past
-
-    # Example input with the correct shape (seq_len, batch_size, input_size)
-    example_input = torch.randn(seq_len, batch_size, num_features)
+    hparams = hyperparameter_manager.get_hyperparameter_dict_for_tensorboard(config) # Config chosen by RayTune
 
     # Create an instance of the ExtendedTensorBoardCallback
-    extended_tensorboard_callback = ExtendedTensorBoardCallback(
+    tensorboard_callback = TensorBoardCallback(
         log_dir=tensorboard_trial_log_dir,
         hparams=hparams,
         model=model,
-        example_input=example_input
+        example_input_tensor=torch.randn(ts_past, batch_size, num_features) # Create example input tensor so model graph can be logged to TensorBoard
     )
 
-    callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback, extended_tensorboard_callback])
-    #callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback, tensorboard_callback])
-    #callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback])
+    callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback, tensorboard_callback])
     # endregion
 
     # region ### INITIALIZE MODEL WRAPPER ###
@@ -235,7 +214,6 @@ if __name__ == "__main__":
     scheduler = StrategyFactory.create_scheduler(scheduler_name, "val_loss", "min", trial_params)
 
 
-
     # Manage experiment: Check if it's a new experiment or should resume
     config_path = path_manager.get_path_config() / config
     experiment_name, resume = (experiment_manager.
@@ -254,7 +232,7 @@ if __name__ == "__main__":
 
 
     # Start TensorBoard if needed (optional)
-    tensorboard_view_dir = path_manager.get_tensorboard_log_dir()
+    #tensorboard_view_dir = path_manager.get_tensorboard_log_dir()
     #start_tensorboard(str(tensorboard_view_dir))
 
 
@@ -280,13 +258,11 @@ if __name__ == "__main__":
         max_concurrent_trials=max_concurrent_trials,
         name=experiment_name,
         storage_path=experiment_path
- #       callbacks=[TBXLoggerCallback()]
  #       log_to_file=True
     )
 
 
     # region ### SAVE BEST HYPERPARAMETERS ###
-    # TODO MAYBE MOVE TO EXPERIMENT MANAGER ? so merge experiment with result manager
     best_config = analysis.get_best_config(metric="val_loss", mode="min")
     best_config_extended = {
         "model_type": model_type,
@@ -298,7 +274,7 @@ if __name__ == "__main__":
         "best_hyperparameters": best_config
     }
 
-    result_manager.save_best_config(
+    experiment_manager.save_best_config(
         best_config_extended,
         model_name=model_type,
         dataset_name=dataset,
@@ -307,7 +283,11 @@ if __name__ == "__main__":
         split_id=data_split
     )
 
-    logger.info(f"Best hyperparameters: {best_config_extended}")
+    # Now, to get the best trial, explicitly specify the metric and mode
+    best_trial = analysis.get_best_trial(metric="val_loss", mode="min", scope="all")
+    best_result = best_trial.last_result
+
+    experiment_manager.generate_summary_report(best_config_extended, best_result)
     # endregion
 
 
