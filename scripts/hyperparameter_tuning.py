@@ -24,7 +24,7 @@ from manager.file_manager import file_manager
 from manager.path_manager import path_manager
 from manager.experiment_manager import experiment_manager
 
-from hyperparameter_pipeline.hyperparameter_tuning_pipeline_builder import HyperparameterTuningPipelineBuilder
+from training_pipeline.training_pipeline_builder import TrainingPipelineBuilder
 
 # Utilities
 from utilities.tensorboard_utils import start_tensorboard
@@ -148,6 +148,7 @@ def objective(config, dataset_config, model_type, data_split):
         log_dir=tensorboard_trial_log_dir,
         hparams=hparams,
         model=model,
+        # TODO -> why randn ???
         example_input_tensor=torch.randn(ts_past, batch_size, num_features) # Create example input tensor so model graph can be logged to TensorBoard
     )
 
@@ -158,9 +159,9 @@ def objective(config, dataset_config, model_type, data_split):
     wrapper = wrapper_factory(model_type, model, optimizer, loss_fn, device)
     # endregion
 
-    # region ### Assemble the Hyperparameter Tuning Pipeline ###
-    builder = HyperparameterTuningPipelineBuilder()
-    hyperparameter_tuning_pipeline = (builder
+    # region ### Assemble the Training Pipeline ###
+    builder = TrainingPipelineBuilder()
+    training_pipeline = (builder
                          .set_model(model)
                          .set_wrapper(wrapper)
                          .set_data_loaders(train_loader, val_loader, test_loader)
@@ -170,7 +171,7 @@ def objective(config, dataset_config, model_type, data_split):
     # endregion
 
     # region ### Run the Training Pipeline ###
-    hyperparameter_tuning_pipeline.run()
+    training_pipeline.run()
     # endregion
 
 # endregion

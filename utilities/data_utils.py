@@ -9,7 +9,9 @@ from torch.utils.data import DataLoader, TensorDataset
 from manager.path_manager import path_manager
 
 from utilities.logging_utils import get_logger
+
 logger = get_logger(__name__)
+
 
 # TODO -> change to CLASSES so it is somewhat separated???
 #
@@ -22,6 +24,7 @@ def load_config(config_file):
         config = yaml.safe_load(file)
     logger.info(f"Configuration loaded successfully from {config_file}")
     return config
+
 
 # Create data loaders function
 def create_data_loaders(x_train, y_train, x_val, y_val, x_test, y_test, batch_size):
@@ -39,6 +42,7 @@ def create_data_loaders(x_train, y_train, x_val, y_val, x_test, y_test, batch_si
 
     return train_loader, val_loader, test_loader
 
+
 # Load data function
 def load_data(sources, data_dir, columns_to_drop):
     df_list = []
@@ -54,6 +58,7 @@ def load_data(sources, data_dir, columns_to_drop):
         logger.info(f"Appended data from {source}.csv")
     return pd.concat(df_list, axis=1)
 
+
 # Crop data function
 def crop_data(df, crop_start, crop_end):
     if crop_start is not None and crop_end is not None:
@@ -64,6 +69,7 @@ def crop_data(df, crop_start, crop_end):
         df = df.iloc[:crop_end, :]
     return df
 
+
 # Z-score normalization function
 def z_score_normalize(df):
     z_mean = df.mean()
@@ -71,10 +77,12 @@ def z_score_normalize(df):
     normalized_df = (df - z_mean) / z_std
     return normalized_df, z_mean, z_std
 
+
 # Z-score denormalization function
 def z_score_denormalize(normalized_df, z_mean, z_std):
     denormalized_df = (normalized_df * z_std) + z_mean
     return denormalized_df
+
 
 # Split sequences function
 def split_sequences(input_sequences, output_sequence, n_steps_in, n_steps_out):
@@ -90,7 +98,6 @@ def split_sequences(input_sequences, output_sequence, n_steps_in, n_steps_out):
 
 
 def load_and_preprocess_data(config_data, dataset, data_split):
-
     # Use the default split ratios
     frac_train = data_split['frac_train']
     frac_val = data_split['frac_val']
@@ -103,7 +110,8 @@ def load_and_preprocess_data(config_data, dataset, data_split):
     df, x_arr, y_arr, z_mean, z_std, selected_feature, num_features = preprocess_data(config_data, dataset)
 
     # Split and convert data
-    x_train, x_val, x_test, y_train, y_val, y_test, *_ = split_and_convert_data(x_arr, y_arr, frac_train=frac_train, frac_val=frac_val)
+    x_train, x_val, x_test, y_train, y_val, y_test, *_ = split_and_convert_data(x_arr, y_arr, frac_train=frac_train,
+                                                                                frac_val=frac_val)
 
     return {
         "x_train": x_train,
@@ -168,6 +176,7 @@ def split_and_convert_data(x_arr, y_arr, frac_train, frac_val):
     # TODO - Refactor return so it works the same way as for the load_and_preprocess_data function
     return x_train, x_val, x_test, y_train, y_val, y_test, x_arr_train, x_arr_val, x_arr_test, y_arr_train, y_arr_val, y_arr_test
 
+
 def calculate_features(feature_list, columns_to_drop, source_forecasted, feature_forecasted, sources):
     if columns_to_drop is None:
         columns_to_drop = []
@@ -175,6 +184,7 @@ def calculate_features(feature_list, columns_to_drop, source_forecasted, feature
     selected_feature = len(remaining_features) * source_forecasted + feature_forecasted
     num_features = len(sources) * len(remaining_features)
     return remaining_features, selected_feature, num_features
+
 
 def preprocess_data(config_data, dataset_name):
     sources = config_data['sources']
@@ -209,4 +219,3 @@ def preprocess_data(config_data, dataset_name):
     logger.info(f"num_features: {num_features}")
 
     return df, x_arr, y_arr, z_mean, z_std, selected_feature, num_features
-

@@ -1,6 +1,6 @@
-from hyperparameter_pipeline.hyperparameter_tuning_pipeline import HyperparameterTuningPipeline
+from training_pipeline.training_pipeline import HyperparameterTuningPipeline
 
-class HyperparameterTuningPipelineBuilder:
+class TrainingPipelineBuilder:
     def __init__(self):
         self.model = None
         self.wrapper = None
@@ -56,6 +56,5 @@ class HyperparameterTuningPipelineBuilder:
             "callback_manager": self.callback_manager
         }
 
-        # Create and return the HyperparameterTuningPipeline instance
         return HyperparameterTuningPipeline(pipeline_config, self.wrapper)
 
