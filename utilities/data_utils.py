@@ -13,8 +13,7 @@ from utilities.logging_utils import get_logger
 logger = get_logger(__name__)
 
 
-# TODO -> change to CLASSES so it is somewhat separated???
-#
+
 
 # TODO REFACOTR to use FIEL MANAGER
 # Load configuration function
@@ -84,6 +83,7 @@ def z_score_denormalize(normalized_df, z_mean, z_std):
     return denormalized_df
 
 
+
 # Split sequences function
 def split_sequences(input_sequences, output_sequence, n_steps_in, n_steps_out):
     x, y = list(), list()
@@ -91,7 +91,8 @@ def split_sequences(input_sequences, output_sequence, n_steps_in, n_steps_out):
         end_ix = i + n_steps_in
         out_end_ix = end_ix + n_steps_out - 1
         if out_end_ix > len(input_sequences): break
-        seq_x, seq_y = input_sequences[i:end_ix], output_sequence[end_ix - 1:out_end_ix]
+        seq_x = input_sequences[i:end_ix]
+        seq_y = output_sequence[end_ix - 1:out_end_ix]
         x.append(seq_x)
         y.append(seq_y)
     return np.array(x), np.array(y)

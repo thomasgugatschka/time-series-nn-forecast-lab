@@ -2,6 +2,8 @@ class CallbackManager:
     def __init__(self, callbacks=None):
         self.callbacks = callbacks if callbacks else []
 
+# TODO -> move CallbackManager to callback folder
+
     def on_train_begin(self, wrapper, **kwargs):
         for callback in self.callbacks:
             if hasattr(callback, 'on_train_begin'):

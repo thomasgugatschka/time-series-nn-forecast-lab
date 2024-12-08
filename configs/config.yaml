@@ -1,16 +1,28 @@
-model_type: "Transformer"            # Implemented Models
+model_type: "RNN"            # Implemented Models
 dataset: "sinusoidal"       # Uncomment to select this dataset
 #dataset: "weather_station"    # Available Datasets from data folder
 num_samples: 25               # Number of trials to run during hyperparameter tuning
 cpu_per_trial: 10             # Number of CPU cores allocated per trial
 gpu_per_trial: 0.8            # Fraction of GPU allocated per trial
 max_concurrent_trials: 1      # Maximum number of trials to run concurrently
+
 trial_params:
   max_epochs: 200             # Maximum number of epochs for training each trial
   grace_period: 5             # Minimum number of epochs before stopping underperforming trials
   reduction_factor: 2         # Factor by which the learning rate is reduced (used by some schedulers)
+
+                              # TODO -> change name to data_params ??? so it is a bit more clear and makes more sense
+                              # TODO -> add to config_manager.py -> validate_config() so those new parameters are checked
+                              # TODO -> always fixed.... here at least maybe in train I will use the other splitters
+data_split:         # Ratios for splitting data; these values are overwritten by dataset-specific config if defined there
+  frac_train: 0.8
+  frac_val: 0.16
+  frac_test: 0.04           # TODO - integrate properly everywhere where it is needed (mostly data)
+                          # TODO - maybe add "offset" (optional) or something so the start can be shifted e.g. for model check
+
 train_val_test_split:         # Ratios for splitting data; these values are overwritten by dataset-specific config if defined there
-  frac_train: 0.8             # Fraction of data for training
-  frac_val: 0.14              # Fraction of data for validation
+  frac_train: 0.8
+  frac_val: 0.14
+
 search_algorithm: "optuna"    # Algorithm used for hyperparameter tuning; "optuna", "bayesopt", "random", "hyperopt"
 scheduler: "asha"             # Scheduler to control the execution of trials

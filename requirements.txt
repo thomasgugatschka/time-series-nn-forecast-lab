@@ -14,3 +14,4 @@ tensorboard>= 2.18.0
 optuna>=4.1.0
 hyperopt>= 0.2.7
 bayesian-optimization == 1.2.0
+h5py~=3.12.1

@@ -1,42 +1,108 @@
+import os
+
 from manager.path_manager import path_manager
 from manager.file_manager import file_manager
+from utilities.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 class ConfigManager:
-    def __init__(self, filepath):
-        # Convert to an absolute path using PathManager and load configuration using FileManager
-        # TODO maybe add something that absolute path is also allowed not only relative within the configs folder
-        abs_path = path_manager.get_path_config() / filepath
-        self.config = file_manager.load_yaml(abs_path)
-        self.validate_config()
+    def __init__(self, main_config_file='config.yaml'):
+        # Load main configuration
+        abs_main_config_path = path_manager.get_path_config() / main_config_file
+        self.main_config = file_manager.load_yaml(abs_main_config_path)
 
-    def validate_config(self):
-        # Updated validation logic to accommodate new keys and nested structures
-        required_keys = ['model_type', 'dataset', 'num_samples', 'cpu_per_trial', 'gpu_per_trial',
-                         'max_concurrent_trials', 'trial_params', 'train_val_test_split', 'search_algorithm', 'scheduler']
-        for key in required_keys:
-            if key not in self.config:
-                raise ValueError(f"Missing required config key: {key}")
+        # Load additional configs (dataset-specific and model-specific)
+        self.dataset_config = None
+        self._load_additional_configs()
 
-        # Validate trial_params keys
-        trial_params_required_keys = ['max_epochs', 'grace_period', 'reduction_factor']
-        trial_params = self.config.get('trial_params', {})
-        for key in trial_params_required_keys:
-            if key not in trial_params:
-                raise ValueError(f"Missing required trial_params key: {key}")
+        # Perform configuration validation
+        self.validate_config(self.main_config, "main_config")
+        self.validate_config(self.dataset_config, "dataset_config")
 
-        # Validate train_val_test_split keys
-        split_required_keys = ['frac_train', 'frac_val']
-        train_val_test_split = self.config.get('train_val_test_split', {})
-        for key in split_required_keys:
-            if key not in train_val_test_split:
-                raise ValueError(f"Missing required train_val_test_split key: {key}")
+    def _load_config(self, filepath):
+        """Load a configuration file using the FileManager"""
+        if os.path.isabs(filepath):
+            abs_path = filepath
+        else:
+            abs_path = path_manager.get_path_config() / filepath
+        logger.info(f"Loading configuration from {abs_path}")
+        return file_manager.load_yaml(abs_path)
+
+    def _load_additional_configs(self):
+        # Load dataset-specific config
+        dataset_name = self.main_config.get('dataset')
+        if dataset_name:
+            dataset_config_path = path_manager.get_path_dataset_config(dataset_name=dataset_name)
+            self.dataset_config = self._load_config(dataset_config_path)
+            logger.info(f"Loaded dataset-specific config for dataset: {dataset_name}")
+
+        # Load more config files here if needed
+
+
+    def validate_config(self, config, config_name):
+        """Validate configuration based on config_name (main_config, dataset_config, data_processing_config)"""
+        if config is None:
+            logger.warning(f"No configuration found for {config_name}. Skipping validation.")
+            return
+
+# TODO - CONFIRM THAT ALL RULES ALIGN WITH ACTUAL CONFIGURATION
+
+        validation_rules = {
+            "main_config": [
+                ('model_type', True),
+                ('dataset', True),
+                ('num_samples', True),
+                ('cpu_per_trial', True),
+                ('gpu_per_trial', True),
+                ('max_concurrent_trials', True),
+                ('trial_params.max_epochs', True),
+                ('trial_params.grace_period', True),
+                ('trial_params.reduction_factor', True),
+                ('data_split.frac_train', True),
+                ('data_split.frac_val', True),
+                ('data_split.frac_test', False), # Optional
+                ('train_val_test_split.frac_train', True), # TODO REMOVE
+                ('train_val_test_split.frac_val', True), # TODO REMOVE
+                ('search_algorithm', True),
+                ('scheduler', True)
+            ],
+            "dataset_config": [
+                ('sources', True),
+                ('feature_list', True),
+                ('ts_past', True),
+                ('ts_future', True),
+                ('crop_start', False),
+                ('crop_end', False),
+                ('columns_to_drop', False)
+            ]
+        }
+
+        rules = validation_rules.get(config_name, [])
+        for rule in rules:
+            key, required = rule
+            if not self._validate_key(config, key) and required:
+                raise ValueError(f"Missing required key '{key}' in {config_name}")
+
+    def _validate_key(self, config, key):
+        """Check if a nested key exists in a config dictionary"""
+        keys = key.split('.')
+        current = config
+        for k in keys:
+            if k in current:
+                current = current[k]
+            else:
+                return False
+        return True
 
     def get(self, key, default=None):
-        return self.config.get(key, default)
+        return self.main_config.get(key, default)
+
+    def get_dataset_config(self):
+        return self.dataset_config
 
     def __getitem__(self, key):
-        return self.config[key]
+        return self.main_config[key]
 
-
+# Example usage
 config_manager = ConfigManager('config.yaml')
-

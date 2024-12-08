@@ -4,7 +4,7 @@ class TrainingPipelineBuilder:
     def __init__(self):
         self.model = None
         self.wrapper = None
-        self.data_loaders = None
+        self.data_loaders = {}
         self.epochs = None
         self.callback_manager = None
 
@@ -16,13 +16,30 @@ class TrainingPipelineBuilder:
         self.wrapper = wrapper
         return self
 
-    def set_data_loaders(self, train_loader, val_loader, test_loader):
-        self.data_loaders = {
-            "train": train_loader,
-            "val": val_loader,
-            "test": test_loader
-        }
+    def set_data_loaders(self, **loaders):
+        """
+        Set data loaders dynamically.
+
+        Args:
+            loaders (dict): Key-value pairs for loaders, e.g., train=train_loader, val=val_loader.
+
+        Returns:
+            TrainingPipelineBuilder: The builder instance for chaining.
+        """
+        valid_keys = {"train", "val", "test"}
+        for key, loader in loaders.items():
+            if key not in valid_keys:
+                raise ValueError(f"Invalid loader key '{key}'. Valid keys are: {valid_keys}")
+            self.data_loaders[key] = loader
         return self
+
+#    def set_data_loaders(self, train_loader, val_loader, test_loader):
+#        self.data_loaders = {
+#            "train": train_loader,
+#            "val": val_loader,
+#            "test": test_loader
+#        }
+#        return self
 
     def set_epochs(self, epochs):
         self.epochs = epochs

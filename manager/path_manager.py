@@ -30,6 +30,7 @@ class PathManager:
             'base_dir': self.base_dir,
             'model_dir': self.base_dir / 'models',
             'data_dir': self.base_dir / 'data',
+            'data_pipeline_dir': self.base_dir / 'data_pipeline',
             'log_dir': self.base_dir / 'logs',
             'result_dir': self.base_dir / 'results',
             'experiment_dir': self.base_dir / 'experiments',
@@ -59,6 +60,9 @@ class PathManager:
             return self.paths['data_dir'] / dataset_name
         return self.paths['data_dir']
 
+    def get_path_data_pipeline(self) -> Path:
+        return self.paths['data_pipeline_dir']
+
     def get_path_log(self) -> Path:
         return self.paths['log_dir']
 
@@ -76,10 +80,8 @@ class PathManager:
     def get_path_experiment(self) -> Path:
         return self.paths['experiment_dir']
 
-
     def get_ray_results_dir(self) -> Path:
         return self.paths['ray_results_dir']
-
 
     def get_path_config(self) -> Path:
         return self.paths['config_dir']
@@ -131,6 +133,8 @@ class PathManager:
 
         # Return the final path to the JSON file
         return hyperparameters_dir / 'best_hyperparameters.json'
+
+
 
 
 # Create an instance at the module level (global scope)
