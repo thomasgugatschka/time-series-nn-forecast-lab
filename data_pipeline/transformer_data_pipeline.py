@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 import torch
 
 from data_pipeline.base_data_pipeline import BaseDataPipeline
@@ -5,148 +7,181 @@ from utilities.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
+
+class TimeSeriesWindowGenerator:
+    @staticmethod
+    def generate_fixed_time_series_windows(input_data, target_data, ts_past, ts_future=None):
+        """
+        Generate fixed time-series windows for features (input) and labels (target).
+
+        Args:
+            input_data (np.ndarray): Input data array with shape (num_samples, num_features).
+            target_data (np.ndarray): Target data array with shape (num_samples,) for a single feature.
+            ts_past (int): Number of time steps in the input sequence.
+            ts_future (int, optional): Number of time steps to predict. If None, no target windows are created.
+
+        Returns:
+            tuple: Arrays for input sequences (`x`) and output sequences (`y` if `ts_future` is provided).
+        """
+        logger.info(f"Generating time-series windows with ts_past={ts_past}, ts_future={ts_future or 0}")
+        x, y = [], []
+
+        for i in range(len(input_data) - ts_past - (ts_future or 0) + 1):
+            x_window = input_data[i:i + ts_past]  # Input sequence
+            x.append(x_window)
+
+            if ts_future:
+                y_window = target_data[i + ts_past:i + ts_past + ts_future]  # Target sequence
+                y.append(y_window)
+
+        logger.info(f"Generated {len(x)} windows for input.")
+        if ts_future:
+            logger.info(f"Generated {len(y)} windows for target.")
+            return np.array(x), np.array(y)
+        return np.array(x), None
+
+
 class TransformerDataPipeline(BaseDataPipeline):
     def __init__(self, dataset_config, data_transformer, data_splitter):
         super().__init__(dataset_config=dataset_config, data_transformer=data_transformer, data_splitter=data_splitter)
 
-        logger.info("Initializing data pipeline for Transformer-based model architectures.")
-
-    """
-
-
-    - Generate Sequences: Create variable-length or fixed-length sequences (if needed).
-    - Add Positional Encoding: Integrate positional encodings to the sequences.
+#        self.mode = dataset_config.get('mode', 'full-sequence')  # Default mode: full-sequence
+        self.mode = dataset_config.get('mode', 'fixed-window')  # Default mode: full-sequence
 
 
-    """
+        logger.info(f"Initializing Transformer pipeline in {self.mode} mode.")
 
     def preprocess(self, df):
         """
-        Preprocessing pipeline for Transformer-based models.
+        Preprocesses the data for Transformer-based models.
 
         Args:
             df (pd.DataFrame): Input dataframe to preprocess.
 
         Returns:
-            tuple: Preprocessed data (tensor_data, array_data, metadata)
+            tuple: Processed tensor data, split data, and metadata.
         """
-
         metadata = {}
+        logger.info("Starting preprocessing pipeline for Transformer-based models.")
 
-        logger.info("Starting the preprocessing pipeline for Transformer-based model architectures.")
-
-        logger.info("Preprocessing Step: Cropping data")
-        crop_start = self.dataset_config.get('crop_start')
-        crop_end = self.dataset_config.get('crop_end')
-        df = self.crop_data(df, crop_start, crop_end)
-
-        logger.info("Preprocessing Step: Normalizing data")
+        # Step 1: Crop and normalize the data
+        df = self.crop_data(df, self.dataset_config.get('crop_start'), self.dataset_config.get('crop_end'))
         df, metadata_scaler = self.normalize(df, method="z_score")
         metadata.update(metadata_scaler)
 
-        logger.info("Preprocessing Step: Calculating features")
+        # Step 2: Calculate features
         features = self.calculate_features()
         metadata.update(features)
-        num_features = features['num_features']
+        selected_feature, num_features = features['selected_feature'], features['num_features']
 
-        logger.info("Preprocessing Step: Splitting data into train, val, and test")
-        split_data = self.data_splitter.split(df, None)  # Split features only; labels are derived later
-        x_arr_train, x_arr_val, x_arr_test = (
-            split_data['x_arr_train'], split_data['x_arr_val'], split_data['x_arr_test'])
+        # Step 3: Handle splitting and label generation
+        ts_past = self.dataset_config['ts_past']
+        ts_future = self.dataset_config['ts_future']
 
-        logger.info("Preprocessing Step: Adding positional encodings")
-        x_arr_train = self.add_positional_encoding(x_arr_train, num_features)
-        x_arr_val = self.add_positional_encoding(x_arr_val, num_features)
-        x_arr_test = self.add_positional_encoding(x_arr_test, num_features)
+        if self.mode == 'fixed-window':
+            logger.info("Generating fixed time series windows.")
+            x_arr, y_arr = TimeSeriesWindowGenerator.generate_fixed_time_series_windows(
+                input_data=df.to_numpy(),
+                target_data=df.iloc[:, selected_feature].to_numpy(),  # Use only the selected feature as the target
+                ts_past=ts_past,
+                ts_future=ts_future
+            )
+            logger.info(f"x_arr shape: {x_arr.shape}, y_arr shape: {y_arr.shape}")
+            split_data = self.data_splitter.split(x_arr, y_arr)
+        elif self.mode == 'full-sequence':
+            logger.info("Using full-sequence mode.")
+            split_data = self.data_splitter.split(df.to_numpy(), None)
+            x_arr_train, x_arr_val, x_arr_test = (
+                split_data['x_arr_train'], split_data['x_arr_val'], split_data['x_arr_test']
+            )
+            y_arr_train, y_arr_val, y_arr_test = self.generate_labels_full_sequence(
+                x_arr_train, x_arr_val, x_arr_test
+            )
+            split_data.update({
+                "y_arr_train": y_arr_train,
+                "y_arr_val": y_arr_val,
+                "y_arr_test": y_arr_test,
+            })
+        else:
+            raise ValueError(f"Invalid mode: {self.mode}")
 
-        # In the Transformer case, labels (`y`) might be derived differently depending on the task
-        logger.info("Preprocessing Step: Generating labels")
-        y_arr_train, y_arr_val, y_arr_test = self.generate_labels(x_arr_train, x_arr_val, x_arr_test)
+        # Log shapes for debugging
+        logger.info(f"x_train shape: {split_data['x_arr_train'].shape}, y_train shape: {split_data['y_arr_train'].shape}")
+        logger.info(f"x_val shape: {split_data['x_arr_val'].shape}, y_val shape: {split_data['y_arr_val'].shape}")
+        logger.info(f"x_test shape: {split_data['x_arr_test'].shape}, y_test shape: {split_data['y_arr_test'].shape}")
 
-        logger.info("Preprocessing Step: Converting to tensors")
+        # Step 4: Add positional encodings
+        logger.info("Adding positional encodings.")
+        split_data['x_arr_train'] = self.add_positional_encoding(split_data['x_arr_train'], num_features)
+        split_data['x_arr_val'] = self.add_positional_encoding(split_data['x_arr_val'], num_features)
+        split_data['x_arr_test'] = self.add_positional_encoding(split_data['x_arr_test'], num_features)
+
+
+        # Step 5: Convert to tensors
+        logger.info("Converting to tensors.")
         tensor_data = self.convert_to_tensors(
-            x_arr_train=x_arr_train, x_arr_val=x_arr_val, x_arr_test=x_arr_test,
-            y_arr_train=y_arr_train, y_arr_val=y_arr_val, y_arr_test=y_arr_test
+            x_arr_train=split_data['x_arr_train'],
+            x_arr_val=split_data['x_arr_val'],
+            x_arr_test=split_data['x_arr_test'],
+            y_arr_train=split_data['y_arr_train'],
+            y_arr_val=split_data['y_arr_val'],
+            y_arr_test=split_data['y_arr_test']
         )
-        x_train, x_val, x_test = tensor_data['x_train'], tensor_data['x_val'], tensor_data['x_test']
-        y_train, y_val, y_test = tensor_data['y_train'], tensor_data['y_val'], tensor_data['y_test']
 
-        tensor_data = {
-            'x_train': x_train,
-            'x_val': x_val,
-            'x_test': x_test,
-            'y_train': y_train,
-            'y_val': y_val,
-            'y_test': y_test,
-        }
-
-        array_data = {
-            'x_arr_train': x_arr_train,
-            'x_arr_val': x_arr_val,
-            'x_arr_test': x_arr_test,
-            'y_arr_train': y_arr_train,
-            'y_arr_val': y_arr_val,
-            'y_arr_test': y_arr_test,
-        }
-
-        logger.info("Preprocessing pipeline completed for Transformer-based model architectures.")
-
-        return tensor_data, array_data, metadata
+        logger.info("Preprocessing pipeline completed for Transformer-based models.")
+        return tensor_data, split_data, metadata
 
     def add_positional_encoding(self, x_arr, num_features):
-        """
-        Add positional encoding to input data.
-
-        Args:
-            x_arr (pd.DataFrame): Input feature array.
-            num_features (int): Number of features.
-
-        Returns:
-            np.ndarray: Input array with positional encoding added.
-        """
-        # Convert DataFrame to a Numpy array
         if isinstance(x_arr, pd.DataFrame):
             x_arr = x_arr.to_numpy()
 
-        seq_len = x_arr.shape[0]
+        if x_arr.ndim == 2:
+            x_arr = x_arr[:, None, :]  # Add seq_len=1 dimension if missing
+
+        seq_len = x_arr.shape[1]
         pe = torch.zeros(seq_len, num_features)
         position = torch.arange(0, seq_len, dtype=torch.float).unsqueeze(1)
 
-        # Ensure num_features is even for sinusoidal encoding
         if num_features % 2 != 0:
-            logger.warning("Number of features is odd. Padding to make it even.")
-            num_features += 1  # Increment to the nearest even number
-            pe = torch.zeros(seq_len, num_features)  # Update positional encoding tensor
+            num_features += 1
+            pe = torch.zeros(seq_len, num_features)
 
-        div_term = torch.exp(
-            torch.arange(0, num_features, 2).float() * (-torch.log(torch.tensor(10000.0)) / num_features)
-        )
+        div_term = torch.exp(torch.arange(0, num_features, 2).float() * (-torch.log(torch.tensor(10000.0)) / num_features))
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe[:seq_len, :x_arr.shape[2]]
 
-        pe = pe[:, :x_arr.shape[1]]  # Ensure the size matches the original array
-        x_arr_with_pe = torch.tensor(x_arr) + pe
-        return x_arr_with_pe.numpy()
+        return (torch.tensor(x_arr) + pe).numpy()
 
-    def generate_labels(self, x_train, x_val, x_test):
-        """
-        Generate labels for the Transformer model.
+    def generate_labels_full_sequence(self, x_train, x_val, x_test):
+        ts_future = self.dataset_config["ts_future"]
 
-        Args:
-            x_train, x_val, x_test (np.ndarray): Input features for train, val, and test splits.
-
-        Returns:
-            tuple: Labels (y_train, y_val, y_test) corresponding to the input splits.
-        """
-        ts_future = self.dataset_config['ts_future']
-
-        # For forecasting, labels are the next `ts_future` steps
         def extract_labels(x):
-            return x[:, -ts_future:]  # Assuming data is already windowed for transformers
+            return x[:, -ts_future:]
 
         y_train = extract_labels(x_train)
         y_val = extract_labels(x_val)
         y_test = extract_labels(x_test)
+
+        return y_train, y_val, y_test
+
+    def generate_labels(self, x_train, x_val, x_test):
+        ts_future = self.dataset_config['ts_future']
+
+        def extract_labels(x):
+            if x.shape[1] < ts_future:
+                logger.error(
+                    f"Cannot extract labels: Sequence length ({x.shape[1]}) is smaller than ts_future ({ts_future}).")
+                return None
+            logger.info(f"Extracting labels for input with shape: {x.shape}")
+            return x[:, -ts_future:]
+
+        y_train = extract_labels(x_train)
+        y_val = extract_labels(x_val)
+        y_test = extract_labels(x_test)
+
+        if y_train is None or y_val is None or y_test is None:
+            logger.error("Label generation failed for one or more splits.")
 
         return y_train, y_val, y_test
 
@@ -165,3 +200,13 @@ class TransformerDataPipeline(BaseDataPipeline):
         logger.info("Postprocessing Step: Denormalizing predictions")
         df = self.denormalize(predictions, metadata, method="z_score")
         return df
+
+
+
+
+
+
+
+
+
+

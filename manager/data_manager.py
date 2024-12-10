@@ -94,6 +94,10 @@ class DataManager:
 
         self._tensor_data, self._array_data, self._metadata = self.pipeline_preprocessing.preprocess(df)
 
+
+        logger.info(f"x_train shape: {self._tensor_data['x_train'].shape}, y_train shape: {self._tensor_data['y_train'].shape}")
+        logger.info(f"x_val shape: {self._tensor_data['x_val'].shape}, y_val shape: {self._tensor_data['y_val'].shape}")
+
         preprocessed_data = {
             'tensor_data': self._tensor_data,
             'array_data': self._array_data,

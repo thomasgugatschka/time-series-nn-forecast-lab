@@ -31,6 +31,7 @@ class DataLoaderCreator:
         """
         logger.info(f"Creating data loader with batch_size={batch_size}, shuffle={shuffle}")
         dataset = TensorDataset(x, y)
+
         return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=0)
 
     def create_data_loaders(self, x_train, y_train, x_val, y_val, x_test, y_test, batch_size):

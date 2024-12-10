@@ -81,6 +81,10 @@ class BaseDataPipeline(ABC):
         Returns:
             dict: A dictionary of PyTorch tensors with keys corresponding to the input data names.
         """
+
+        if any(v is None for v in [x_arr_train, x_arr_val, x_arr_test, y_arr_train, y_arr_val, y_arr_test]):
+            raise ValueError("One or more input arrays are None. Check the preprocessing steps.")
+
         return {
             "x_train": torch.tensor(x_arr_train, dtype=torch.float32),
             "x_val": torch.tensor(x_arr_val, dtype=torch.float32),

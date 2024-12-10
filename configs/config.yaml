@@ -1,7 +1,7 @@
-model_type: "RNN"            # Implemented Models
-dataset: "sinusoidal"       # Uncomment to select this dataset
-#dataset: "weather_station"    # Available Datasets from data folder
-num_samples: 25               # Number of trials to run during hyperparameter tuning
+model_type: "Transformer"            # Implemented Models
+#dataset: "sinusoidal"       # Uncomment to select this dataset
+dataset: "weather_station"    # Available Datasets from data folder
+num_samples: 50               # Number of trials to run during hyperparameter tuning
 cpu_per_trial: 10             # Number of CPU cores allocated per trial
 gpu_per_trial: 0.8            # Fraction of GPU allocated per trial
 max_concurrent_trials: 1      # Maximum number of trials to run concurrently
@@ -15,9 +15,9 @@ trial_params:
                               # TODO -> add to config_manager.py -> validate_config() so those new parameters are checked
                               # TODO -> always fixed.... here at least maybe in train I will use the other splitters
 data_split:         # Ratios for splitting data; these values are overwritten by dataset-specific config if defined there
-  frac_train: 0.8
-  frac_val: 0.16
-  frac_test: 0.04           # TODO - integrate properly everywhere where it is needed (mostly data)
+  frac_train: 0.7
+  frac_val: 0.15
+  frac_test: 0.15           # TODO - integrate properly everywhere where it is needed (mostly data)
                           # TODO - maybe add "offset" (optional) or something so the start can be shifted e.g. for model check
 
 train_val_test_split:         # Ratios for splitting data; these values are overwritten by dataset-specific config if defined there

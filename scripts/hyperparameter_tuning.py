@@ -111,9 +111,13 @@ def objective(hyperparameter_config, model_type, data_manager):
     # endregion
 
     # region ### SET VARIABLES from CONFIG ###
+    # TODO -> CHANGE NAMING of MODEL PARAMETER....
+    # TODO -> Tooo Confusing if input_size is num_features and output_size is ts_future
     model_params = hyperparameter_config["model_params"]
     model_params["input_size"] = num_features
     model_params["output_size"] = dataset_config["ts_future"]
+
+    model_params["seq_len"] = dataset_config["ts_past"]
 
     epochs = hyperparameter_config["training_params"]["epochs"]
     learning_rate = hyperparameter_config["training_params"]["learning_rate"]
@@ -127,6 +131,13 @@ def objective(hyperparameter_config, model_type, data_manager):
         batch_size=batch_size, loaders_to_create=['train', 'val'], shuffle_train=True) # TODO if shuffle_train=True works
     train_loader, val_loader = split_loader['train_loader'], split_loader['val_loader']
     # endregion
+
+    # TODO - DEBUG
+    for x_batch, y_batch in train_loader:
+        logger.debug(f"x_batch shape: {x_batch.shape}, y_batch shape: {y_batch.shape}")
+        break
+
+    #
 
     # region ### INITIALIZE MODEL and WRAPPER, OPTIMIZER, LOSS FUNCTION ###
     device = get_device()
@@ -154,7 +165,7 @@ def objective(hyperparameter_config, model_type, data_manager):
         log_dir=tensorboard_trial_log_dir,
         hparams=hparams,
         model=model,
-        example_input_tensor=torch.randn(ts_past, batch_size, num_features) # Create example input tensor so model graph can be logged to TensorBoard
+        example_input_tensor=torch.randn(batch_size, ts_past, num_features) # Create example input tensor so model graph can be logged to TensorBoard
     )
 
     callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback, tensorboard_callback])

@@ -23,7 +23,7 @@ columns_to_drop:
 crop_start: 5_000
 crop_end: 10_000
 ts_past: 200
-ts_future: 50
+ts_future: 51
     # Optional: Override split ratios for specific dataset needs
 #train_val_test_split:
 #  frac_train: 0.7
