@@ -1,9 +1,10 @@
 import torch
 import torch.nn as nn
 from torch.nn.utils.parametrizations import weight_norm
-from abc import ABC
-
 from models.base_model import BaseModel
+
+from utilities.logging_utils import get_logger
+logger = get_logger(__name__)
 
 # For original implementation: https://github.com/locuslab/TCN/blob/master/TCN/adding_problem/add_test.py
 
@@ -48,8 +49,13 @@ class TemporalCausalLayer(nn.Module):
 class TemporalConvolutionNetwork(nn.Module):
     def __init__(self, num_inputs, num_channels, kernel_size=2, dropout=0.2, dilation=2, num_layers=None):
         super(TemporalConvolutionNetwork, self).__init__()
-        layers = []
+
+        # Ensure num_channels matches num_layers
         num_levels = num_layers if num_layers is not None else len(num_channels)
+        if len(num_channels) < num_levels:
+            num_channels = num_channels + [num_channels[-1]] * (num_levels - len(num_channels))
+
+        layers = []
         dilation_rate = dilation
         tcl_param = {
             'kernel_size': kernel_size,
@@ -72,12 +78,43 @@ class TemporalConvolutionNetwork(nn.Module):
 
 # TCN Model Using BaseModel
 class TCN(BaseModel):
-    def __init__(self, input_size, output_size, num_channels, kernel_size, dropout, dilation, num_layers=None, model_name="TCN"):
-        super(TCN, self).__init__(model_name=model_name)
+    def __init__(self, input_size, output_size, num_channels, kernel_size, dropout, dilation, num_layers=None, **kwargs):
+        super(TCN, self).__init__(model_name='TCN')
+
+        # Validate the parameters
+        self.validate_parameters(
+            input_size=input_size,
+            output_size=output_size,
+            num_channels=num_channels,
+            kernel_size=kernel_size,
+            dropout=dropout,
+            dilation=dilation,
+            num_layers=num_layers
+        )
+
+        # Initialize model parameters
+        self.input_size = input_size
+        self.output_size = output_size
+        self.num_channels = num_channels
+        self.kernel_size = kernel_size
+        self.dropout = dropout
+        self.dilation = dilation
+        self.num_layers = num_layers
+
+
         self.tcn = TemporalConvolutionNetwork(input_size, num_channels, kernel_size=kernel_size, dropout=dropout, dilation=dilation, num_layers=num_layers)
         self.linear = nn.Linear(num_channels[-1], output_size)
 
+        if kwargs:
+            logger.debug(f"Unused keyword arguments: {kwargs}")
+
     def forward(self, x):
+
+        # TODO - BUGIX
+        # Transpose input to match the expected shape for Conv1d: [batch_size, input_channels, seq_len]
+        x = x.transpose(1, 2)  # Change from [batch_size, seq_len, input_channels] to [batch_size, input_channels, seq_len]
+        # TODO - BUGFIX - test - end
+
         y = self.tcn(x)
         # Use the last time step for prediction
         return self.linear(y[:, :, -1])

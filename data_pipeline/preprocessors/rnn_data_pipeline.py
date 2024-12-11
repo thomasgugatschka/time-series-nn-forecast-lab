@@ -1,5 +1,4 @@
-from data_pipeline.base_data_pipeline import BaseDataPipeline
-from data_pipeline.data_splitter import FixedDataSplitter
+from data_pipeline.preprocessors.base_data_pipeline import BaseDataPipeline
 from utilities.logging_utils import get_logger
 
 logger = get_logger(__name__)

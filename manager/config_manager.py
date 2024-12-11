@@ -39,14 +39,11 @@ class ConfigManager:
 
         # Load more config files here if needed
 
-
     def validate_config(self, config, config_name):
         """Validate configuration based on config_name (main_config, dataset_config, data_processing_config)"""
         if config is None:
             logger.warning(f"No configuration found for {config_name}. Skipping validation.")
             return
-
-# TODO - CONFIRM THAT ALL RULES ALIGN WITH ACTUAL CONFIGURATION
 
         validation_rules = {
             "main_config": [
@@ -62,8 +59,6 @@ class ConfigManager:
                 ('data_split.frac_train', True),
                 ('data_split.frac_val', True),
                 ('data_split.frac_test', False), # Optional
-                ('train_val_test_split.frac_train', True), # TODO REMOVE
-                ('train_val_test_split.frac_val', True), # TODO REMOVE
                 ('search_algorithm', True),
                 ('scheduler', True)
             ],

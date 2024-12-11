@@ -5,14 +5,25 @@ from models.base_model import BaseModel
 # https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html
 
 class BiLSTM(BaseModel):
-    def __init__(self, output_size, input_size, hidden_size, num_layers, dropout=0.2):
-        super().__init__()
+    def __init__(self, output_size, input_size, hidden_size, num_layers, dropout, **kwargs):
+        super().__init__(model_name='BiLSTM')
+
+        # Validate the parameters
+        self.validate_parameters(
+            output_size=output_size,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            dropout=dropout
+        )
+
         self.output_size = output_size  # output size
         self.num_layers = num_layers  # number of recurrent layers in the lstm
         self.input_size = input_size  # input size
         self.hidden_size = hidden_size  # neurons in each lstm layer
+        self.dropout = dropout
         self.batch_first = True
-        self.model_name = 'BiLSTM'
+
 
         # Bi-LSTM model with one dropout layer after BiLSTM
         self.lstm = nn.LSTM(
@@ -34,7 +45,7 @@ class BiLSTM(BaseModel):
 
         # Propagate input through Bi-LSTM with one dropout layer
         output, (hn, cn) = self.lstm(x, (h_0, c_0))  # (input, hidden, and internal state)
-        output = self.dropout_lstm(output)
+        output = self.dropout_lstm(output) # TODO is the output used somewhere??????
         hn = hn.view(self.num_layers, -1,
                      self.hidden_size * 2)  # reshape hidden states for Dense layer, multiply by 2 for bidirectional
         out = self.relu(hn[-1])  # take the output from the last layer

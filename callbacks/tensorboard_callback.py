@@ -112,10 +112,10 @@ class TensorBoardCallback(BaseCallback):
         if final_train_loss is float('nan'):
             logger.warning("Final training loss not provided, defaulting to NaN.")
 
-        logger.info(f"Final validation loss: {final_val_loss}")
-        logger.info(f"Final training loss: {final_train_loss}")
-        logger.info(f"Datatype of final validation loss: {type(final_val_loss)}")
-        logger.info(f"Datatype of final training loss: {type(final_train_loss)}")
+        logger.debug(f"Final validation loss: {final_val_loss}")
+        logger.debug(f"Final training loss: {final_train_loss}")
+        logger.debug(f"Datatype of final validation loss: {type(final_val_loss)}")
+        logger.debug(f"Datatype of final training loss: {type(final_train_loss)}")
 
         # Log hyperparameters and final losses to TensorBoard
         metrics = {

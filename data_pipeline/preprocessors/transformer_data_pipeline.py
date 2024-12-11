@@ -2,12 +2,13 @@ import numpy as np
 import pandas as pd
 import torch
 
-from data_pipeline.base_data_pipeline import BaseDataPipeline
+from data_pipeline.preprocessors.base_data_pipeline import BaseDataPipeline
 from utilities.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
 
+# TODO -> move out to it's own file
 class TimeSeriesWindowGenerator:
     @staticmethod
     def generate_fixed_time_series_windows(input_data, target_data, ts_past, ts_future=None):
@@ -45,24 +46,16 @@ class TransformerDataPipeline(BaseDataPipeline):
     def __init__(self, dataset_config, data_transformer, data_splitter):
         super().__init__(dataset_config=dataset_config, data_transformer=data_transformer, data_splitter=data_splitter)
 
-#        self.mode = dataset_config.get('mode', 'full-sequence')  # Default mode: full-sequence
-        self.mode = dataset_config.get('mode', 'fixed-window')  # Default mode: full-sequence
+        self.mode = dataset_config.get('mode', 'full-sequence')  # Default mode: full-sequence
+        #self.mode = dataset_config.get('mode', 'fixed-window')  # Default mode: full-sequence
 
 
         logger.info(f"Initializing Transformer pipeline in {self.mode} mode.")
 
-    def preprocess(self, df):
-        """
-        Preprocesses the data for Transformer-based models.
-
-        Args:
-            df (pd.DataFrame): Input dataframe to preprocess.
-
-        Returns:
-            tuple: Processed tensor data, split data, and metadata.
-        """
-        metadata = {}
+    def preprocess(self, df: pd.DataFrame):
         logger.info("Starting preprocessing pipeline for Transformer-based models.")
+        metadata = {}
+
 
         # Step 1: Crop and normalize the data
         df = self.crop_data(df, self.dataset_config.get('crop_start'), self.dataset_config.get('crop_end'))
@@ -88,16 +81,32 @@ class TransformerDataPipeline(BaseDataPipeline):
             )
             logger.info(f"x_arr shape: {x_arr.shape}, y_arr shape: {y_arr.shape}")
             split_data = self.data_splitter.split(x_arr, y_arr)
+            # Step 3: Handle splitting and label generation
         elif self.mode == 'full-sequence':
             logger.info("Using full-sequence mode.")
+
             split_data = self.data_splitter.split(df.to_numpy(), None)
+
             x_arr_train, x_arr_val, x_arr_test = (
                 split_data['x_arr_train'], split_data['x_arr_val'], split_data['x_arr_test']
             )
-            y_arr_train, y_arr_val, y_arr_test = self.generate_labels_full_sequence(
-                x_arr_train, x_arr_val, x_arr_test
+
+            # Generate labels for the selected feature
+            logger.info(
+                f"x_arr_train shape: {x_arr_train.shape}, x_arr_val shape: {x_arr_val.shape}, x_arr_test shape: {x_arr_test.shape}")
+            x_arr_train, y_arr_train, x_arr_val, y_arr_val, x_arr_test, y_arr_test = self.generate_labels_full_sequence(
+                x_arr_train, x_arr_val, x_arr_test, selected_feature
             )
+
+            # Truncate x to match y
+ #           x_arr_train = x_arr_train[:len(y_arr_train)]
+ #           x_arr_val = x_arr_val[:len(y_arr_val)]
+ #           x_arr_test = x_arr_test[:len(y_arr_test)]
+
             split_data.update({
+                "x_arr_train": x_arr_train,
+                "x_arr_val": x_arr_val,
+                "x_arr_test": x_arr_test,
                 "y_arr_train": y_arr_train,
                 "y_arr_val": y_arr_val,
                 "y_arr_test": y_arr_test,
@@ -139,8 +148,14 @@ class TransformerDataPipeline(BaseDataPipeline):
             x_arr = x_arr[:, None, :]  # Add seq_len=1 dimension if missing
 
         seq_len = x_arr.shape[1]
+
+        logger.info(f"Adding positional encodings to input data with shape: {x_arr.shape}")
+        logger.info(f"Sequence length: {seq_len}, Number of features: {num_features}")
+
         pe = torch.zeros(seq_len, num_features)
         position = torch.arange(0, seq_len, dtype=torch.float).unsqueeze(1)
+
+        logger.info(f"Position shape: {position.shape}, PE shape: {pe.shape}")
 
         if num_features % 2 != 0:
             num_features += 1
@@ -153,17 +168,44 @@ class TransformerDataPipeline(BaseDataPipeline):
 
         return (torch.tensor(x_arr) + pe).numpy()
 
-    def generate_labels_full_sequence(self, x_train, x_val, x_test):
-        ts_future = self.dataset_config["ts_future"]
+    def generate_labels_full_sequence(self, x_train, x_val, x_test, selected_feature):
+        ts_past = self.dataset_config['ts_past']
+        ts_future = self.dataset_config['ts_future']
 
-        def extract_labels(x):
-            return x[:, -ts_future:]
+        def reshape_and_extract(x):
+            # Ensure input data has enough samples
+            num_samples = len(x) - ts_past - ts_future + 1
+            if num_samples <= 0:
+                raise ValueError(f"Insufficient data points for ts_past={ts_past} and ts_future={ts_future}.")
 
-        y_train = extract_labels(x_train)
-        y_val = extract_labels(x_val)
-        y_test = extract_labels(x_test)
+            logger.info(f"Reshaping input with shape {x.shape} into windows for labels.")
 
-        return y_train, y_val, y_test
+            # Create input windows (x_reshaped) of shape (num_samples, ts_past, num_features)
+            x_reshaped = np.array([x[i:i + ts_past] for i in range(num_samples)])
+
+            # Create target sequences (y_reshaped) of shape (num_samples, ts_future)
+            y_reshaped = np.array(
+                [x[i + ts_past:i + ts_past + ts_future, selected_feature] for i in range(num_samples)])
+
+            logger.info(f"Generated labels with shapes: x_reshaped={x_reshaped.shape}, y_reshaped={y_reshaped.shape}")
+
+            return x_reshaped, y_reshaped
+
+        # Apply windowing to training, validation, and test splits
+        x_train, y_train = reshape_and_extract(x_train)
+        x_val, y_val = reshape_and_extract(x_val)
+        x_test, y_test = reshape_and_extract(x_test)
+
+        logger.info(
+            f"Generated labels with shapes: x_train={x_train.shape}, y_train={y_train.shape}, "
+            f"x_val={x_val.shape}, y_val={y_val.shape}, x_test={x_test.shape}, y_test={y_test.shape}"
+        )
+
+        # Return both x_reshaped and y_reshaped
+        return x_train, y_train, x_val, y_val, x_test, y_test
+
+
+
 
     def generate_labels(self, x_train, x_val, x_test):
         ts_future = self.dataset_config['ts_future']

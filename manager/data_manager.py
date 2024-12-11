@@ -1,14 +1,9 @@
-import os
+from data_pipeline.preparation.data_loader_creator import DataLoaderCreator
+from data_pipeline.preparation.data_splitter import FixedDataSplitter
+from data_pipeline.utils.data_transformation import DataTransformation
+from data_pipeline.ingestion.raw_data_loader import RawDataLoader
 
-import torch
-import numpy as np
-
-from data_pipeline.data_loader_creator import DataLoaderCreator
-from data_pipeline.data_splitter import FixedDataSplitter
-from data_pipeline.data_transformation import DataTransformation
-from data_pipeline.raw_data_loader import RawDataLoader
-
-from data_pipeline.data_pipeline_factory import DataPipelineFactory
+from data_pipeline.utils.data_pipeline_factory import DataPipelineFactory
 
 from manager.file_manager import file_manager
 from manager.path_manager import path_manager
@@ -34,6 +29,9 @@ class DataManager:
 
         self.dataset_config = config_manager.get_dataset_config()
 
+
+        # TODO -> add somewhere the fixed-window or full-sequence option
+
         # Internal state for storing intermediate results
         self._raw_df = None
         self._tensor_data = None
@@ -45,7 +43,7 @@ class DataManager:
         self.data_transformation = DataTransformation()
         self.data_loader = DataLoaderCreator()
         self.data_splitter = FixedDataSplitter(config_manager['data_split'])
-        self.pipeline_preprocessing = (DataPipelineFactory.get_pipeline(
+        self.pipeline_preprocessing = (DataPipelineFactory.create_data_pipeline(
             model_type=self.model_type,
             dataset_config=self.dataset_config,
             data_transformer=self.data_transformation,

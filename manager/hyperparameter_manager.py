@@ -13,7 +13,6 @@ class HyperparameterManager:
             raise ValueError(f"Model type '{model_type}' not found in the hyperparameter configuration!")
 
         # Parse the JSON-like dictionary to generate Ray Tune search space
-
         def parse_value(key, value):
             if isinstance(value, list):
                 # Handle list of lists case (e.g., TCN num_channels)
@@ -73,8 +72,9 @@ class HyperparameterManager:
             for key, value in chosen_config.get(param_group, {}).items():
                 # Since we're getting a chosen config, it should be a single sampled value
                 if isinstance(value, list):
-                    raise ValueError(f"Hyperparameter '{key}' has a list value in the chosen config. "
-                                     f"Expected a single value for TensorBoard logging.")
+                    # Convert list to a string representation
+                    logger.warning(f"Hyperparameter '{key}' is a list and will be converted to a string: {value}")
+                    flat_hparams[key] = str(value)  # Represent as a string
                 flat_hparams[key] = value
 
         # Add the trial seed if it exists

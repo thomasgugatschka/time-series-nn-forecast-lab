@@ -4,7 +4,7 @@ from models.bilstm.bilstm_wrapper import BiLSTMWrapper
 from models.gru.gru_wrapper import GRUWrapper
 from models.transformer.transformer_wrapper import TransformerWrapper
 from models.tcn.tcn_wrapper import TCNWrapper
-# from models.cnn.cnn_wrapper import CNNWrapper
+from models.cnn.cnn_wrapper import CNNWrapper
 
 
 class WrapperFactory:
@@ -22,7 +22,7 @@ class WrapperFactory:
             return TransformerWrapper(model, optimizer, loss_fn, device)
         elif model_type == 'TCN':
             return TCNWrapper(model, optimizer, loss_fn, device)
-        # elif model_type == 'CNN':
-        #     return CNNWrapper(model, optimizer, loss_fn)
+        elif model_type == 'CNN':
+            return CNNWrapper(model, optimizer, loss_fn, device)
         else:
             raise ValueError(f"Unknown model type: {model_type}")

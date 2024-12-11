@@ -102,8 +102,6 @@ def objective(hyperparameter_config, model_type, data_manager):
     data_manager.load_raw_data()
     data = data_manager.preprocess_data()
 
-    # tensor_data = data['tensor_data']
-    # array_data = data['array_data']
     metadata = data['metadata']
 
     num_features = metadata['num_features']
@@ -125,6 +123,7 @@ def objective(hyperparameter_config, model_type, data_manager):
     loss_function_name = hyperparameter_config["training_params"].get('loss_function')
     batch_size = hyperparameter_config["training_params"]["batch_size"]
     # endregion
+
 
     # region ### DATALOADER ###
     split_loader = data_manager.create_data_loaders(

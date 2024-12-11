@@ -3,8 +3,11 @@
 import torch
 import torch.nn as nn
 import numpy as np
-
 from models.base_model import BaseModel
+from utilities.logging_utils import get_logger
+
+logger = get_logger(__name__)
+
 
 class PositionalEncoding(nn.Module):
     def __init__(self, embed_dim, max_len=5000):
@@ -31,14 +34,30 @@ class PositionalEncoding(nn.Module):
 
 
 class Transformer(BaseModel):
-    def __init__(self, input_size, output_size, embed_dim, num_heads, num_layers, forward_dim, dropout, seq_len, predict_single_feature=True):
-        super(Transformer, self).__init__()
+    def __init__(self, input_size, output_size, embed_dim, num_heads, num_layers, forward_dim, dropout, seq_len, **kwargs):
+        super(Transformer, self).__init__(model_name='Transformer')
 
-        self.model_name = 'Transformer'
+        # Validate the parameters
+        self.validate_parameters(
+            input_size=input_size,
+            output_size=output_size,
+            embed_dim=embed_dim,
+            num_heads=num_heads,
+            num_layers=num_layers,
+            forward_dim=forward_dim,
+            dropout=dropout,
+            seq_len=seq_len
+        )
 
-        self.seq_len = seq_len
-        self.output_size = output_size
-        self.predict_single_feature = predict_single_feature
+        # Initialize model parameters
+        self.input_size = input_size         # The dimensionality of input features for each time step
+        self.output_size = output_size       # The number of time steps or features to predict as output
+        self.embed_dim = embed_dim           # The size of the embedding space for input tokens (used in self-attention)
+        self.num_heads = num_heads           # The number of attention heads in the multi-head self-attention mechanism
+        self.num_layers = num_layers         # The number of stacked Transformer layers (encoders/decoders)
+        self.forward_dim = forward_dim       # The dimensionality of the feed-forward network in each Transformer layer
+        self.dropout = dropout               # The dropout rate applied in attention and feed-forward layers for regularization
+        self.seq_len = seq_len               # The length of the input sequence (number of time steps considered in the model)
 
         # Embedding layer to project input features into embedding space
         self.embedding = nn.Linear(input_size, embed_dim)
@@ -57,7 +76,11 @@ class Transformer(BaseModel):
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
         # Output layer
-        self.fc_out = nn.Linear(embed_dim, 1 if predict_single_feature else output_size)
+        self.fc_out = nn.Linear(embed_dim, 1)  # Always predict a single feature
+
+
+        if kwargs:
+            logger.debug(f"Unused keyword arguments: {kwargs}")
 
     def forward(self, x):
         """
@@ -71,18 +94,26 @@ class Transformer(BaseModel):
                     otherwise (batch_size, ts_future, num_features).
         """
 
+        #logger.info(f"Input tensor shape before forward pass: {x.shape}")
+
         # Transformer forward pass
         x = self.embedding(x)  # Shape: (batch_size, seq_len, embed_dim)
+        #logger.info(f"Embedding output shape: {x.shape}")
         x = self.positional_encoding(x)
+        #logger.info(f"Positional encoding output shape: {x.shape}")
         x = self.transformer_encoder(x)  # Shape: (batch_size, seq_len, embed_dim)
+        #logger.info(f"Transformer output shape: {x.shape}")
 
         # Apply a linear layer to project to output size
         x = self.fc_out(x)  # Shape: (batch_size, seq_len, 1) if predict_single_feature else (batch_size, seq_len, num_features)
 
+        #logger.info(f"Sliced output shape: {x.shape}")
+
         # Return the last `ts_future` time steps
         x = x[:, -self.output_size:, :]  # Shape: (batch_size, ts_future, 1) or (batch_size, ts_future, num_features)
+        #logger.info(f"Final output shape after fc_out: {x.shape}")
 
-        if self.predict_single_feature:
-            return x.squeeze(-1)  # Shape: (batch_size, ts_future)
-        return x
+
+        return x.squeeze(-1)  # Shape: (batch_size, ts_future)
+
 
