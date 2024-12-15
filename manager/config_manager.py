@@ -9,8 +9,8 @@ logger = get_logger(__name__)
 class ConfigManager:
     def __init__(self, main_config_file='config.yaml'):
         # Load main configuration
-        abs_main_config_path = path_manager.get_path_config() / main_config_file
-        self.main_config = file_manager.load_yaml(abs_main_config_path)
+        self.main_config_file_path = path_manager.get_path_config() / main_config_file
+        self.main_config = file_manager.load_yaml(self.main_config_file_path)
 
         # Load additional configs (dataset-specific and model-specific)
         self.dataset_config = None
@@ -56,9 +56,10 @@ class ConfigManager:
                 ('trial_params.max_epochs', True),
                 ('trial_params.grace_period', True),
                 ('trial_params.reduction_factor', True),
-                ('data_split.frac_train', True),
-                ('data_split.frac_val', True),
-                ('data_split.frac_test', False), # Optional
+                ('data_params.data_split.frac_train', True),
+                ('data_params.data_split.frac_val', True),
+                ('data_params.data_split.frac_test', False), # Optional
+                ('data_params.time_series_window', False), # Optional
                 ('search_algorithm', True),
                 ('scheduler', True)
             ],
@@ -95,6 +96,14 @@ class ConfigManager:
 
     def get_dataset_config(self):
         return self.dataset_config
+
+    def get_main_config(self):
+        """Return the main configuration."""
+        return self.main_config
+
+    def get_main_config_path(self):
+        """Get the absolute path of the main configuration file."""
+        return str(self.main_config_file_path)
 
     def __getitem__(self, key):
         return self.main_config[key]

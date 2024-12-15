@@ -22,7 +22,7 @@ from manager.config_manager import ConfigManager
 from manager.hyperparameter_manager import HyperparameterManager
 from manager.file_manager import file_manager
 from manager.path_manager import path_manager
-from manager.experiment_manager import experiment_manager
+from manager.experiment_manager import ExperimentManager
 
 from manager.data_manager import DataManager
 
@@ -94,7 +94,7 @@ def objective(hyperparameter_config, model_type, data_manager):
     # region ### PREPARE DIRECTORY for TENSORBOARD ###
     # Generate a unique directory for each trial
     timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
-    tensorboard_trial_log_dir = tensorboard_log_dir / timestamp # tensorboard_log_dir from __main__
+    tensorboard_trial_log_dir = tensorboard_path / timestamp # tensorboard_log_dir from __main__
     logger.info(f"Tensorboard log directory for this trial: {tensorboard_trial_log_dir}")
     # endregion
 
@@ -196,21 +196,24 @@ if __name__ == "__main__":
     config = args.config_path
     config_manager = ConfigManager(config)
     data_manager = DataManager(config_manager)
+    experiment_manager = ExperimentManager(config_manager)
 
-    # Load parameters from the configuration file
-    model_type = config_manager.get('model_type')
-    dataset = config_manager.get('dataset')
-    num_samples = config_manager.get('num_samples')
-    cpu_per_trial = config_manager.get('cpu_per_trial')
-    gpu_per_trial = config_manager.get('gpu_per_trial')
-    max_concurrent_trials = config_manager.get('max_concurrent_trials')
-    data_split = config_manager.get('train_val_test_split')
-    trial_params = config_manager.get('trial_params')
-    search_algorithm_name = config_manager.get("search_algorithm")
-    scheduler_name = config_manager.get('scheduler')
-
+    # Load main configuration (->config.yaml)
+    main_config = config_manager.get_main_config()
     # Load configuration for the dataset (->config_data_{dataset}.yaml)
     dataset_config = config_manager.get_dataset_config()
+
+    # Load parameters from the configuration file
+    model_type = main_config.get('model_type')
+    dataset = main_config.get('dataset')
+    num_samples = main_config.get('num_samples')
+    cpu_per_trial = main_config.get('cpu_per_trial')
+    gpu_per_trial = main_config.get('gpu_per_trial')
+    max_concurrent_trials = main_config.get('max_concurrent_trials')
+    data_split = main_config.get('train_val_test_split')
+    trial_params = main_config.get('trial_params')
+    search_algorithm_name = main_config.get("search_algorithm")
+    scheduler_name = main_config.get('scheduler')
 
     ts_future = dataset_config['ts_future']
     ts_past = dataset_config['ts_past']
@@ -227,23 +230,14 @@ if __name__ == "__main__":
     search_algorithm = StrategyFactory.create_search_algorithm(search_algorithm_name, "val_loss", "min")
     scheduler = StrategyFactory.create_scheduler(scheduler_name, "val_loss", "min", trial_params)
 
-    # Manage experiment: Check if it's a new experiment or should resume
-    config_path = path_manager.get_path_config() / config
-    experiment_name, resume = (
-        experiment_manager.manage_experiment(model_type, dataset, ts_future, ts_past, config_path))
-
-    # Set up the experiment paths
-    experiment_path = path_manager.get_ray_results_dir() / experiment_name
-    tensorboard_log_dir = path_manager.get_tensorboard_log_dir(model_type, experiment_name)
+    # Manage experiment
+    experiment_name, experiment_path, resume = experiment_manager.manage_experiment()
+    tensorboard_path = path_manager.get_path_tensorboard(experiment_path)
 
     logger.info(f"Experiment name: {experiment_name}")
-    logger.info(f"Experiment path: {experiment_path}")
     logger.info(f"Resume: {resume}")
-    logger.info(f"Tensorboard log directory: {tensorboard_log_dir}")
-
-    # Start TensorBoard if needed (optional)
-#    tensorboard_view_dir = path_manager.get_tensorboard_log_dir()
-#    start_tensorboard(str(tensorboard_view_dir))
+    logger.info(f"Experiment path: {experiment_path}")
+    logger.info(f"Tensorboard path: {tensorboard_path}")
 
     # Initialize Ray
     ray.init(include_dashboard=False, local_mode=True) # CHANGE for local_mode=False for CLOUD
@@ -263,38 +257,14 @@ if __name__ == "__main__":
         search_alg=search_algorithm,
         resume=True,
         max_concurrent_trials=max_concurrent_trials,
-        name=experiment_name,
+        # name=experiment_name,
+        name="ray_results", # naming logic is in the path
         storage_path=experiment_path
- #       log_to_file=True
+        # log_to_file=True
     )
-
 
     # region ### SAVE BEST HYPERPARAMETERS ###
-    best_config = analysis.get_best_config(metric="val_loss", mode="min")
-    best_config_extended = {
-        "model_type": model_type,
-        "dataset": dataset,
-        "data_split": data_split,
-        "ts_future": ts_future,
-        "ts_past": ts_past,
-        "tuning_timestamp": datetime.datetime.now().isoformat(),
-        "best_hyperparameters": best_config
-    }
-
-    experiment_manager.save_best_config(
-        best_config_extended,
-        model_name=model_type,
-        dataset_name=dataset,
-        ts_future=ts_future,
-        ts_past=ts_past,
-        split_id=data_split
-    )
-
-    # Now, to get the best trial, explicitly specify the metric and mode
-    best_trial = analysis.get_best_trial(metric="val_loss", mode="min", scope="all")
-    best_result = best_trial.last_result
-
-    experiment_manager.generate_summary_report(best_config_extended, best_result)
+    experiment_manager.save_analysis_results(analysis)
     # endregion
 
     # Shutdown Ray

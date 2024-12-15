@@ -47,7 +47,7 @@ class HyperparameterTuningPipeline:
                     break
 
                 # Report the validation loss to Ray Tune
-                session.report({"val_loss": val_loss})
+                session.report({"val_loss": val_loss, "train_loss": train_loss})
 
         finally:
             if self.callback_manager:

@@ -43,12 +43,12 @@ class TimeSeriesWindowGenerator:
 
 
 class TransformerDataPipeline(BaseDataPipeline):
-    def __init__(self, dataset_config, data_transformer, data_splitter):
+    def __init__(self, dataset_config, data_transformer, data_splitter, window_size=None, **kwargs):
         super().__init__(dataset_config=dataset_config, data_transformer=data_transformer, data_splitter=data_splitter)
 
-        self.mode = dataset_config.get('mode', 'full-sequence')  # Default mode: full-sequence
-        #self.mode = dataset_config.get('mode', 'fixed-window')  # Default mode: full-sequence
-
+        if window_size is None:
+            self.mode = 'fixed_window'
+        self.mode = window_size
 
         logger.info(f"Initializing Transformer pipeline in {self.mode} mode.")
 

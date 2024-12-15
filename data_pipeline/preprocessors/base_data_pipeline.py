@@ -131,7 +131,6 @@ class BaseDataPipeline(ABC):
         # TODO np oder eher mit pd.DataFrame? !!!!!
         return np.array(x), np.array(y)
 
-
     def calculate_features(self):
         """
         TODO: Add docstring
@@ -164,7 +163,6 @@ class BaseDataPipeline(ABC):
 
         logger.info("Splitting data into train, validation, and test sets.")
         return self.data_splitter.split(x_arr, y_arr)
-
 
     def normalize(self, df, method):
         # TODO: change over to SCALER -> first confirm if no dependencies to metadata for z-scor / min-max

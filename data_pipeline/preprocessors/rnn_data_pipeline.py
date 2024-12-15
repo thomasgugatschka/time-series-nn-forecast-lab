@@ -4,7 +4,7 @@ from utilities.logging_utils import get_logger
 logger = get_logger(__name__)
 
 class RNNDataPipeline(BaseDataPipeline):
-    def __init__(self, dataset_config, data_transformer, data_splitter):
+    def __init__(self, dataset_config, data_transformer, data_splitter, **kwargs):
         super().__init__(dataset_config=dataset_config, data_transformer=data_transformer, data_splitter=data_splitter)
 
         logger.info("Initializing data pipeline for RNN-based model architectures.")

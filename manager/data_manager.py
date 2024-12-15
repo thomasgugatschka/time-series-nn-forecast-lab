@@ -27,6 +27,8 @@ class DataManager:
         self.model_type = config_manager['model_type']
         self.dataset = config_manager['dataset']
 
+        self.data_params = config_manager['data_params']
+
         self.dataset_config = config_manager.get_dataset_config()
 
 
@@ -42,12 +44,13 @@ class DataManager:
         self.raw_data_loader = RawDataLoader()
         self.data_transformation = DataTransformation()
         self.data_loader = DataLoaderCreator()
-        self.data_splitter = FixedDataSplitter(config_manager['data_split'])
+        self.data_splitter = FixedDataSplitter(self.data_params.get('data_split'))
         self.pipeline_preprocessing = (DataPipelineFactory.create_data_pipeline(
             model_type=self.model_type,
             dataset_config=self.dataset_config,
             data_transformer=self.data_transformation,
-            data_splitter=self.data_splitter)
+            data_splitter=self.data_splitter,
+            window_size=self.data_params.get('time_series_window'))
         )
 
         logger.info(f"DataManager initialized for dataset: {self.dataset} and model type: {self.model_type}")

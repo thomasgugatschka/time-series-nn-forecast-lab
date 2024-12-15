@@ -66,19 +66,25 @@ class PathManager:
     def get_path_log(self) -> Path:
         return self.paths['log_dir']
 
-    def get_tensorboard_log_dir(self, model_name: Optional[str] = None, experiment_name: Optional[str] = None) -> Path:
-        log_path = self.paths['tensorboard_log_dir']
-        if model_name and experiment_name:
-            return log_path / model_name / experiment_name
-        return log_path
+    def get_path_tensorboard(self, experiment_path) -> Path:
+        """
+        Get the TensorBoard log directory for a given experiment path.
+
+        Args:
+            experiment_path (Path or str): Base path for the experiment.
+
+        Returns:
+            Path: The TensorBoard log directory.
+        """
+        # Ensure experiment_path is a Path object
+        experiment_path = Path(experiment_path)
+        tensorboard_log_path = experiment_path / "tensorboard"
+        return tensorboard_log_path
 
     def get_path_result(self, model_name: Optional[str] = None) -> Path:
         if model_name:
             return self.paths['result_dir'] / model_name
         return self.paths['result_dir']
-
-    def get_path_experiment(self) -> Path:
-        return self.paths['experiment_dir']
 
     def get_ray_results_dir(self) -> Path:
         return self.paths['ray_results_dir']
@@ -104,36 +110,56 @@ class PathManager:
     def get_path_hyperparameter_config(self) -> Path:
         return self.paths['config_dir'] / 'model_hyperparameter_config.json'
 
-    def get_path_best_hyperparameters(self, model_name: str, dataset_name: str, split_id: str,
-                                      ts_future: Optional[int] = None, ts_past: Optional[int] = None) -> Path:
+
+    def get_path_experiment(self) -> Path:
+        return self.paths['experiment_dir']
+
+    def get_path_experiment_metadata(self) -> Path:
+        return self.get_path_experiment() / 'experiment_metadata.json'
+
+    def create_experiment_folder(self, model_type: str, dataset_name: str, experiment_name: str) -> Path:
         """
-        Generate a unique path for storing the best hyperparameters, based on model type, dataset, and parameters.
+        Create a structured folder path for an experiment.
 
         Args:
-            model_name (str): Name of the model.
+            model_type (str): Type of the model (e.g., RNN, Transformer).
             dataset_name (str): Name of the dataset.
-            split_id (str): Identifier for the data split (e.g., 'default', 'split1').
-            ts_future (Optional[int]): Future time steps.
-            ts_past (Optional[int]): Past time steps.
+            experiment_name (str): Unique name for the experiment.
 
         Returns:
-            Path: Path where the best hyperparameters JSON file should be saved.
+            Path: The full path to the experiment folder.
         """
-        # Create a directory structure based on model, dataset, split, ts_future, and ts_past parameters at the same level
-        hyperparameters_dir = self.paths['best_hyperparameters_dir'] / model_name / dataset_name
+        # Construct the folder structure
+        experiment_path = self.get_path_experiment() / model_type / dataset_name / experiment_name
 
-        # Create folder name for the split and optional ts_future and ts_past
-        split_folder_name = f'split_{split_id}'
-        if ts_future is not None:
-            split_folder_name += f'_ts_f_{ts_future}'
-        if ts_past is not None:
-            split_folder_name += f'_ts_p_{ts_past}'
+        # Ensure the directory exists
+        experiment_path.mkdir(parents=True, exist_ok=True)
 
-        hyperparameters_dir = hyperparameters_dir / split_folder_name
+        # Return the full experiment path
+        return experiment_path
 
-        # Return the final path to the JSON file
-        return hyperparameters_dir / 'best_hyperparameters.json'
+    def create_experiment_subfolders(self, experiment_path: Path) -> dict:
+        """
+        Create required subfolders ('ray_results' and 'tensorboard') within an experiment folder.
 
+        Args:
+            experiment_path (Path): Base path for the experiment.
+
+        Returns:
+            dict: Dictionary containing paths to the created subfolders.
+                  Example: {"ray_results": Path, "tensorboard": Path}
+        """
+        # Define subfolder names
+        subfolders = ["ray_results", "tensorboard"]
+
+        # Create subfolders and store their paths in a dictionary
+        subfolder_paths = {}
+        for subfolder in subfolders:
+            folder_path = experiment_path / subfolder
+            folder_path.mkdir(parents=True, exist_ok=True)
+            subfolder_paths[subfolder] = folder_path
+
+        return subfolder_paths
 
 
 
