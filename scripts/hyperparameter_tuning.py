@@ -20,19 +20,16 @@ from strategies.strategy_factory import StrategyFactory
 # Manager
 from manager.config_manager import ConfigManager
 from manager.hyperparameter_manager import HyperparameterManager
+from manager.experiment_manager import ExperimentManager
+from manager.data_manager import DataManager
 from manager.file_manager import file_manager
 from manager.path_manager import path_manager
-from manager.experiment_manager import ExperimentManager
-
-from manager.data_manager import DataManager
 
 from training_pipeline.training_pipeline_builder import TrainingPipelineBuilder
 
 # Utilities
-from utilities.tensorboard_utils import start_tensorboard
 from utilities.experiment_utils import get_device
 from utilities.experiment_utils import set_seed
-from utilities.data_utils import load_and_preprocess_data, create_data_loaders
 
 # Models and Pipeline
 from models.model_factory import ModelFactory
@@ -91,31 +88,24 @@ def objective(hyperparameter_config, model_type, data_manager):
     trial_seed = hyperparameter_config.get("trial_seed")
     set_seed(trial_seed)
 
-    # region ### PREPARE DIRECTORY for TENSORBOARD ###
-    # Generate a unique directory for each trial
-    timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
-    tensorboard_trial_log_dir = tensorboard_path / timestamp # tensorboard_log_dir from __main__
-    logger.info(f"Tensorboard log directory for this trial: {tensorboard_trial_log_dir}")
-    # endregion
-
     # region ### LOAD and PREPROCESS DATA ###
     data_manager.load_raw_data()
     data = data_manager.preprocess_data()
-
-    metadata = data['metadata']
-
-    num_features = metadata['num_features']
-    z_mean, z_std, selected_feature = metadata['z_mean'], metadata['z_std'], metadata['selected_feature']
+    num_features = data['metadata']['num_features']
+    z_mean, z_std, selected_feature = (data['metadata'][key] for key in ['z_mean', 'z_std', 'selected_feature'])
     # endregion
 
     # region ### SET VARIABLES from CONFIG ###
     # TODO -> CHANGE NAMING of MODEL PARAMETER....
     # TODO -> Tooo Confusing if input_size is num_features and output_size is ts_future
+
+    ts_future = dataset_config["ts_future"]
+    ts_past = dataset_config["ts_past"]
+
     model_params = hyperparameter_config["model_params"]
     model_params["input_size"] = num_features
-    model_params["output_size"] = dataset_config["ts_future"]
-
-    model_params["seq_len"] = dataset_config["ts_past"]
+    model_params["output_size"] = ts_future
+    model_params["seq_len"] = ts_past
 
     epochs = hyperparameter_config["training_params"]["epochs"]
     learning_rate = hyperparameter_config["training_params"]["learning_rate"]
@@ -124,19 +114,11 @@ def objective(hyperparameter_config, model_type, data_manager):
     batch_size = hyperparameter_config["training_params"]["batch_size"]
     # endregion
 
-
     # region ### DATALOADER ###
     split_loader = data_manager.create_data_loaders(
-        batch_size=batch_size, loaders_to_create=['train', 'val'], shuffle_train=True) # TODO if shuffle_train=True works
+        batch_size=batch_size, loaders_to_create=['train', 'val'], shuffle_train=True) # TODO - Check if shuffle=True is correct and works for TS data
     train_loader, val_loader = split_loader['train_loader'], split_loader['val_loader']
     # endregion
-
-    # TODO - DEBUG
-    for x_batch, y_batch in train_loader:
-        logger.debug(f"x_batch shape: {x_batch.shape}, y_batch shape: {y_batch.shape}")
-        break
-
-    #
 
     # region ### INITIALIZE MODEL and WRAPPER, OPTIMIZER, LOSS FUNCTION ###
     device = get_device()
@@ -157,11 +139,20 @@ def objective(hyperparameter_config, model_type, data_manager):
 #    checkpoint_dir = path_manager.get_path_checkpoint(model_name=model_type, experiment_name=experiment_name)
 #    model_checkpoint_callback = ModelCheckpointCallback(checkpoint_dir=checkpoint_dir, monitor='val_loss')
 
-    hparams = hyperparameter_manager.get_hyperparameter_dict_for_tensorboard(hyperparameter_config) # Config chosen by RayTune
+
+
+    # region ### PREPARE DIRECTORY for TENSORBOARD ###
+    # Generate a unique directory for each trial
+    timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+    tensorboard_trial_dir = tensorboard_path / timestamp # tensorboard_log_dir from __main__
+    logger.info(f"Tensorboard log directory for this trial: {tensorboard_trial_dir}")
+    # endregion
+
+    hparams = hyperparameter_manager.get_hyperparameter_dict_for_tensorboard(hyperparameter_config)  # Config chosen by RayTune
 
     # Create an instance of the ExtendedTensorBoardCallback
     tensorboard_callback = TensorBoardCallback(
-        log_dir=tensorboard_trial_log_dir,
+        log_dir=tensorboard_trial_dir,
         hparams=hparams,
         model=model,
         example_input_tensor=torch.randn(batch_size, ts_past, num_features) # Create example input tensor so model graph can be logged to TensorBoard
@@ -170,7 +161,7 @@ def objective(hyperparameter_config, model_type, data_manager):
     callback_manager = CallbackManager(callbacks=[logging_callback, plotting_callback, early_stopping_callback, tensorboard_callback])
     # endregion
 
-    # region ### Assemble the Training Pipeline ###
+    # region ### ASSEMBLE and RUN the TRAINING PIPELINE ###
     builder = TrainingPipelineBuilder()
     training_pipeline = (builder
                          .set_model(model)
@@ -179,9 +170,7 @@ def objective(hyperparameter_config, model_type, data_manager):
                          .set_epochs(epochs)
                          .set_callback_manager(callback_manager)
                          .build())
-    # endregion
 
-    # region ### Run the Training Pipeline ###
     training_pipeline.run()
     # endregion
 
@@ -200,7 +189,6 @@ if __name__ == "__main__":
 
     # Load main configuration (->config.yaml)
     main_config = config_manager.get_main_config()
-    # Load configuration for the dataset (->config_data_{dataset}.yaml)
     dataset_config = config_manager.get_dataset_config()
 
     # Load parameters from the configuration file
@@ -215,11 +203,7 @@ if __name__ == "__main__":
     search_algorithm_name = main_config.get("search_algorithm")
     scheduler_name = main_config.get('scheduler')
 
-    ts_future = dataset_config['ts_future']
-    ts_past = dataset_config['ts_past']
-
     # Load hyperparameters for search space (->model_hyperparameter_config.json)
-    # TODO - refactor that hyperparameter_config is also loaded through config_manager
     hyperparameter_config_path = path_manager.get_path_hyperparameter_config()
     hyperparameter_config = file_manager.load_json(hyperparameter_config_path)
     hyperparameter_manager = HyperparameterManager(hyperparameter_config)
