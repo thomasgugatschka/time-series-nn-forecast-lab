@@ -863,6 +863,7 @@ feature_list:
   - '858'
   - '859'
   - '860'
+  - '0T'
 feature_forecasted: 0
 columns_to_drop:
   - 'date'

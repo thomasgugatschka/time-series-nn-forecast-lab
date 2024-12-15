@@ -22,6 +22,7 @@ feature_list:
   - 'PAR (μmol/m²/s)'
   - 'max. PAR (μmol/m²/s)'
   - 'Tlog (degC)'
+  - '0T'
 feature_forecasted: 1
 columns_to_drop:
   - 'date'

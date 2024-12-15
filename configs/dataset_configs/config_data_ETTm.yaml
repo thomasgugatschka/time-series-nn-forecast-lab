@@ -10,6 +10,7 @@ feature_list:
   - 'MULL'
   - 'LUFL'
   - 'LULL'
+  - '0T'
 feature_forecasted: 0
 columns_to_drop:
   - 'date'
