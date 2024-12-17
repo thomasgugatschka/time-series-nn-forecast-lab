@@ -1,0 +1,81 @@
+project_root/
+│
+├── data/                                  # Contains all raw datasets
+│   ├── ETTh1.csv
+│   ├── Solar-Energy.csv
+│   └── M4/                                # Different time series from M4
+│
+├── configs/                               # Configuration files for different datasets/models
+│   ├── etth1_config.yaml
+│   ├── solarenergy_config.yaml
+│   └── m4_config.yaml
+│
+├── models/                                # Different neural network model implementations
+│   ├── rnn_model.py
+│   ├── gru_model.py
+│   ├── lstm_model.py
+│   └── transformer_model.py               # Additional models can go here
+│
+├── utilities/                             # Utility functions to make the pipeline generic and reusable
+│   ├── data_loader.py                     # Data loading functions for different formats
+│   ├── preprocessing.py                   # Preprocessing utilities for normalization, etc.
+│   ├── model_factory.py                   # Model instantiation logic based on config
+│   ├── metrics.py                         # Script to calculate and log metrics (e.g., MAPE, RMSE)
+│   └── hyperparameter_search.py           # Functions to perform grid or random search for hyperparameters
+│
+├── scripts/                               # Scripts that will actually run the training, evaluation, etc.
+│   ├── train.py                           # Main training script that uses config file as input
+│   ├── evaluate.py                        # Evaluation script to evaluate saved models on test data
+│   ├── predict.py                         # Script for making predictions using trained models
+│   └── plot_results.py                    # Script for generating plots for model training/testing
+│
+├── docs/                                  # Documentation for the project
+│   ├── index.md                           # Main README or documentation file for the project overview
+│   ├── usage.md                           # Guide on how to use and run the scripts
+│   ├── api_reference.md                   # Detailed documentation of the utility functions, scripts, etc.
+│   ├── cloud_setup.md                     # Instructions for setting up Docker, Google Cloud, and parallel training
+│   └── config_details.md                  # Explanation of different configuration parameters and their impact
+│
+├── trained_models/                        # Directory for saving trained models
+│   ├── rnn_trained_model_0.pt             # Saved PyTorch models for future evaluation/prediction
+│   ├── gru_trained_model_1.pt
+│   ├── lstm_trained_model.pt
+│   └── transformer_trained_model.pt
+│
+├── results/                               # Results from training, evaluation, and experiments
+│   ├── plots/                             # Plots from training/validation/test (e.g., loss curves, predictions)
+│   │   ├── rnn_training_progress.png
+│   │   ├── rnn_predictions.png
+│   │   └── comparison_plot.png
+│   ├── parameter_iterations.csv           # CSV file to log the tried hyperparameter settings and corresponding results
+│   ├── evaluation_metrics.csv             # CSV file containing evaluation metrics for all trained models
+│   └── experiment_summary.md              # Summary of the various experiments, settings, and their performance
+│
+├── docker/                                # Docker-related files for containerizing the application
+│   ├── Dockerfile                         # Dockerfile for creating the Docker image
+│   ├── docker-compose.yaml                # Optional: Docker Compose setup if there are multiple services
+│   └── cloud_instructions.md              # Instructions for deploying Docker containers to Google Cloud
+│
+├── notebooks/                             # Jupyter Notebooks for exploration and experimentation
+│   ├── data_exploration.ipynb             # Data exploration, feature analysis, etc.
+│   ├── model_testing.ipynb                # Quick tests of model architectures and hyperparameters
+│   └── visualization.ipynb                # Data and result visualization notebooks
+│
+├── experiments/                           # Saved configurations and results for various hyperparameter tuning runs
+│   ├── grid_search_configs/               # Configuration files used for grid search experiments
+│   │   ├── experiment_01.yaml
+│   │   └── experiment_02.yaml
+│   ├── random_search_results.csv          # Summary of hyperparameter combinations and their performance
+│   └── best_models/                       # Best models saved after tuning experiments
+│       ├── best_rnn_model.pt
+│       └── best_gru_model.pt
+│
+├── logs/                                  # Log files to track training, errors, etc.
+│   ├── training.log                       # Logs from the training process
+│   ├── evaluation.log                     # Logs from model evaluation
+│   └── hyperparameter_search.log          # Logs from hyperparameter search/tuning
+│
+├── requirements.txt                       # Dependencies and packages required for running the project
+├── setup.py                               # Installation script if this project is to be packaged
+├── README.md                              # High-level overview and instructions for the project
+└── .gitignore                             # Files and directories to be ignored by Git

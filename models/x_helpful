@@ -1,0 +1,26 @@
+
+
+https://github.com/pedrolarben/TimeSeriesForecasting-DeepLearning/blob/master/experiments/preprocessing.py
+
+
+MLP and other models
+https://github.com/radi-cho/tsai/blob/32f24d55ee58df1a14d1e68618f230097a266c77/tsai/models/MLP.py
+
+RNN
+https://www.kaggle.com/code/namanmanchanda/rnn-in-pytorch/notebook
+https://github.com/matthewswogger/Surge-Forecast-with-RNN/blob/master/run_model.py
+
+LSTM
+https://github.com/hyliush/deep-time-series/blob/3fea4f62ea740c721c559a0d413e4b3a3e214b3e/models/Lstm.py
+https://github.com/pmnyc/my_tools/blob/master/Multivariate%20Time%20Series%20Forecasting%20with%20LSTMs%20in%20PyTorch.ipynb
+
+CNN
+https://www.kaggle.com/code/hanjoonchoe/cnn-time-series-forecasting-with-pytorch
+https://github.com/readytensor/rt_forecasting_cnn_pytorch/blob/main/src/train.py
+https://github.com/Zero0right/TS-BSHM/blob/aaf2b2f84b943cd525d5906cdc9605db671e8f2c/time-series-forecasting/models/CNN_LINEAR.py
+
+Hyperparameter Config
+https://github.com/readytensor/rt_forecasting_cnn_pytorch/blob/0ae5b1697704af807acbd72e780cee9876fbd9c7/src/config/default_hyperparameters.json
+
+Metrics
+https://github.com/pedrolarben/TimeSeriesForecasting-DeepLearning/blob/master/experiments/metrics.py
