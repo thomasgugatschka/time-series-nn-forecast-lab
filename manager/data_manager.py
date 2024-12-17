@@ -98,6 +98,7 @@ class DataManager:
 
         logger.info(f"x_train shape: {self._tensor_data['x_train'].shape}, y_train shape: {self._tensor_data['y_train'].shape}")
         logger.info(f"x_val shape: {self._tensor_data['x_val'].shape}, y_val shape: {self._tensor_data['y_val'].shape}")
+        logger.info(f"x_test shape: {self._tensor_data['x_test'].shape}, y_test shape: {self._tensor_data['y_test'].shape}")
 
         preprocessed_data = {
             'tensor_data': self._tensor_data,

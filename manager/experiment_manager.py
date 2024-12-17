@@ -194,7 +194,7 @@ class ExperimentManager:
         # Save top 10 hyperparameters
         top_trials_results = all_trials_results.nsmallest(10, "val_loss")
         top_trials_results_json = top_trials_results.to_dict(orient="records")
-        top_hyperparams_path = self.experiment_path / "top_10_hyperparameters.json"
+        top_hyperparams_path = self.experiment_path / "top_hyperparameters.json"
         file_manager.save_json(top_trials_results_json, top_hyperparams_path)
         logger.info(f"Top 10 hyperparameter configurations saved to {top_hyperparams_path}")
 

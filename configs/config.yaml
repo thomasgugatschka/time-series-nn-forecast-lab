@@ -1,7 +1,7 @@
-model_type: "RNN"            # Implemented Models
-dataset: "exchange_rate"
+model_type: "Transformer"            # Implemented Models
+dataset: "sinusoidal"
 #dataset: "weather_station"    # Available Datasets from data folder
-num_samples: 3               # Number of trials to run during hyperparameter tuning
+num_samples: 2               # Number of trials to run during hyperparameter tuning
 cpu_per_trial: 10             # Number of CPU cores allocated per trial
 gpu_per_trial: 0.8            # Fraction of GPU allocated per trial
 max_concurrent_trials: 1      # Maximum number of trials to run concurrently
@@ -16,7 +16,7 @@ data_params:
     frac_train: 0.6
     frac_val: 0.15
     frac_test: 0.15
-  time_series_window: "full-sequence" # Transformer only - "full-sequence" / "fixed-window"
+  time_series_window: "fixed-window" # Transformer only - "full-sequence" / "fixed-window"
 
 search_algorithm: "optuna"    # Algorithm used for hyperparameter tuning; "optuna", "bayesopt", "random", "hyperopt"
 scheduler: "asha"             # Scheduler to control the execution of trials

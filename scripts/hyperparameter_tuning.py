@@ -84,7 +84,7 @@ def get_loss_function(loss_function_name):
 # endregion
 
 # region ### TRAINING FUNCTION ##
-def objective(hyperparameter_config, model_type, data_manager):
+def objective(hyperparameter_config, model_type, dataset_config, data_manager):
     trial_seed = hyperparameter_config.get("trial_seed")
     set_seed(trial_seed)
 
@@ -177,7 +177,8 @@ def objective(hyperparameter_config, model_type, data_manager):
 # endregion
 
 
-
+#def main(): # TODO - refactor to use def main() and if __name__ == "__main__"
+            # TODO -> is cleaner approach since no acidental variables are used which are just set in __main__
 if __name__ == "__main__":
     args = parse_args()
 
@@ -203,8 +204,8 @@ if __name__ == "__main__":
     search_algorithm_name = main_config.get("search_algorithm")
     scheduler_name = main_config.get('scheduler')
 
-    # Load hyperparameters for search space (->model_hyperparameter_config.json)
-    hyperparameter_config_path = path_manager.get_path_hyperparameter_config()
+    # Load hyperparameters for search space (->model_hyperparameter_search_space.json)
+    hyperparameter_config_path = path_manager.get_path_hyperparameter_search_space()
     hyperparameter_config = file_manager.load_json(hyperparameter_config_path)
     hyperparameter_manager = HyperparameterManager(hyperparameter_config)
 
@@ -231,6 +232,7 @@ if __name__ == "__main__":
         tune.with_parameters(
             objective,
             model_type=model_type,
+            dataset_config=dataset_config,
             data_manager=data_manager,
             ),
         config=search_space_config,
@@ -253,3 +255,8 @@ if __name__ == "__main__":
 
     # Shutdown Ray
     ray.shutdown()
+
+
+ # TODO - refactor to use def main() and if __name__ == "__main__"
+#if __main__ = "__main__":
+#    main()

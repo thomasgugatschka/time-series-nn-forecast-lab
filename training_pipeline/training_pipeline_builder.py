@@ -1,4 +1,4 @@
-from training_pipeline.training_pipeline import HyperparameterTuningPipeline
+from training_pipeline.training_pipeline import TrainingPipeline
 
 class TrainingPipelineBuilder:
     def __init__(self):
@@ -73,5 +73,5 @@ class TrainingPipelineBuilder:
             "callback_manager": self.callback_manager
         }
 
-        return HyperparameterTuningPipeline(pipeline_config, self.wrapper)
+        return TrainingPipeline(pipeline_config, self.wrapper)
 

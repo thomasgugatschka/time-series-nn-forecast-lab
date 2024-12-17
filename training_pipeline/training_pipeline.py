@@ -4,7 +4,7 @@ from ray.air import session
 from utilities.logging_utils import get_logger
 logger = get_logger(__name__)
 
-class HyperparameterTuningPipeline:
+class TrainingPipeline:
     def __init__(self, pipeline_config, wrapper):
         self.model = pipeline_config["model"]
         self.data_loaders = pipeline_config["data_loaders"]

@@ -25,14 +25,16 @@ class MetricsUtility:
         epsilon = 1e-10
         targets = np.where(targets == 0, epsilon, targets)
 
+    # TODO - FIX METRICS!!!!!
+
         # Core Metrics
         mse = mean_squared_error(targets, predictions)
         rmse = np.sqrt(mse)
         mae = mean_absolute_error(targets, predictions)
         mape = np.mean(np.abs((targets - predictions) / targets)) * 100
         smape = np.mean(2 * np.abs(targets - predictions) / (np.abs(targets) + np.abs(predictions))) * 100
-        msle = mean_squared_error(np.log1p(targets), np.log1p(predictions))
-        rmsle = np.sqrt(msle)
+#        msle = mean_squared_error(np.log1p(targets), np.log1p(predictions))
+#        rmsle = np.sqrt(msle)
 
         # Weighted Absolute Percentage Error (WAPE)
         wape = np.sum(np.abs(targets - predictions)) / np.sum(np.abs(targets))
@@ -44,8 +46,8 @@ class MetricsUtility:
             "rmse": rmse,
             "mape": mape,
             "smape": smape,
-            "msle": msle,
-            "rmsle": rmsle,
+  #          "msle": msle,
+  #          "rmsle": rmsle,
             "wape": wape,
         }
 

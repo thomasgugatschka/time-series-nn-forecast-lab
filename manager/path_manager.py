@@ -107,8 +107,8 @@ class PathManager:
             raise ValueError("Model name is required for checkpoint path.")
         return self.paths['model_dir'] / model_name / 'checkpoints'
 
-    def get_path_hyperparameter_config(self) -> Path:
-        return self.paths['config_dir'] / 'model_hyperparameter_config.json'
+    def get_path_hyperparameter_search_space(self) -> Path:
+        return self.paths['config_dir'] / 'model_hyperparameter_search_space.json'
 
 
     def get_path_experiment(self) -> Path:
@@ -150,7 +150,7 @@ class PathManager:
                   Example: {"ray_results": Path, "tensorboard": Path}
         """
         # Define subfolder names
-        subfolders = ["ray_results", "tensorboard"]
+        subfolders = ["ray_results", "tensorboard", "trained_models", "evaluation_results"]
 
         # Create subfolders and store their paths in a dictionary
         subfolder_paths = {}
