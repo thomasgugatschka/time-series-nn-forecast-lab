@@ -12,7 +12,7 @@ class BaseDataPipeline(ABC):
     Abstract base class for all data pipelines. Provides common preprocessing and
     postprocessing methods while enforcing the implementation of architecture-specific methods.
     """
-
+# TODO -> rename data_transformer to data_transformation -> so it has the same class as filename
     def __init__(self, dataset_config, data_transformer, data_splitter):
         self.dataset_config = dataset_config
         self.data_transformer = data_transformer
@@ -133,7 +133,10 @@ class BaseDataPipeline(ABC):
 
     def calculate_features(self):
         """
-        TODO: Add docstring
+        Calculate and store metadata for combined features after merging multiple sources.
+
+        Returns:
+            dict: Dictionary containing the combined feature list, selected feature index, and total number of features.
         """
         feature_list = self.dataset_config['feature_list']
         columns_to_drop = self.dataset_config['columns_to_drop']
@@ -141,13 +144,32 @@ class BaseDataPipeline(ABC):
         feature_forecasted = self.dataset_config['feature_forecasted']
         sources = self.dataset_config['sources']
 
+        # Ensure columns_to_drop is a list
         if columns_to_drop is None:
             columns_to_drop = []
-        remaining_features = [feature for feature in feature_list if feature not in columns_to_drop]
-        selected_feature = len(remaining_features) * source_forecasted + feature_forecasted
-        num_features = len(sources) * len(remaining_features)
 
-        return {'selected_feature': selected_feature, 'num_features': num_features}
+        # Remove columns to drop from the feature list
+        remaining_features = [feature for feature in feature_list if feature not in columns_to_drop]
+
+        # Dynamically generate the combined feature list based on the number of sources
+        combined_feature_list = []
+        for source in sources:
+            combined_feature_list.extend([f"{source}_{feature}" for feature in remaining_features])
+
+        # Calculate the index of the selected feature
+        selected_feature = len(remaining_features) * source_forecasted + feature_forecasted
+        num_features = len(combined_feature_list)
+
+        # Extract the selected feature name
+        selected_feature_name = combined_feature_list[selected_feature]
+
+        logger.info(
+            f"Selected feature: {selected_feature} ({selected_feature_name}), Number of features: {num_features}")
+        return {
+            'combined_feature_list': combined_feature_list,
+            'selected_feature': selected_feature,
+            'num_features': num_features
+        }
 
     def split_data(self, x_arr, y_arr):
         """
@@ -165,25 +187,53 @@ class BaseDataPipeline(ABC):
         return self.data_splitter.split(x_arr, y_arr)
 
     def normalize(self, df, method):
-        # TODO: change over to SCALER -> first confirm if no dependencies to metadata for z-scor / min-max
-        """Apply normalization."""
-        if method == "z_score":
-            logger.info("Applying z-score normalization")
-            return self.data_transformer.apply_z_score(df)
-        elif method == "min_max":
-            logger.info("Applying min-max normalization")
-            return self.data_transformer.apply_min_max(df)
-        else:
-            raise ValueError(f"Unsupported normalization method: {method}")
+        """
+        Apply normalization using sklearn scalers.
 
-    def denormalize(self, df, metadata, method):
-        """Apply denormalization."""
-        if method == "z_score":
-            logger.info("Reversing z-score normalization")
-            return self.data_transformer.reverse_z_score(df, metadata)
-        elif method == "min_max":
-            logger.info("Reversing min-max normalization")
-            return self.data_transformer.reverse_min_max(df, metadata)
-        else:
-            raise ValueError(f"Unsupported denormalization method: {method}")
+        Args:
+            df (pd.DataFrame): The dataframe to normalize.
+            method (str): The normalization method, either 'z_score' or 'min_max'.
+
+        Returns:
+            tuple: Scaled dataframe and the fitted scaler for reversing the transformation.
+        """
+        logger.info(f"Applying {method} normalization using sklearn scaler.")
+        return self.data_transformer.apply_scaler(df, method)
+
+    def denormalize(self, df, scaler):
+        """
+        Apply denormalization using the fitted sklearn scaler.
+
+        Args:
+            df (pd.DataFrame): The scaled dataframe.
+            scaler (sklearn Scaler): The fitted scaler used during normalization.
+
+        Returns:
+            pd.DataFrame: The denormalized dataframe.
+        """
+        logger.info("Reversing normalization using sklearn scaler.")
+        return self.data_transformer.reverse_scaler(df, scaler)
+
+    # def normalize(self, df, method):
+    #     # TODO: change over to SCALER -> first confirm if no dependencies to metadata for z-scor / min-max
+    #     """Apply normalization."""
+    #     if method == "z_score":
+    #         logger.info("Applying z-score normalization")
+    #         return self.data_transformer.apply_z_score(df)
+    #     elif method == "min_max":
+    #         logger.info("Applying min-max normalization")
+    #         return self.data_transformer.apply_min_max(df)
+    #     else:
+    #         raise ValueError(f"Unsupported normalization method: {method}")
+    #
+    # def denormalize(self, df, metadata, method):
+    #     """Apply denormalization."""
+    #     if method == "z_score":
+    #         logger.info("Reversing z-score normalization")
+    #         return self.data_transformer.reverse_z_score(df, metadata)
+    #     elif method == "min_max":
+    #         logger.info("Reversing min-max normalization")
+    #         return self.data_transformer.reverse_min_max(df, metadata)
+    #     else:
+    #         raise ValueError(f"Unsupported denormalization method: {method}")
 

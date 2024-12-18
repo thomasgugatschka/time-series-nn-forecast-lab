@@ -44,7 +44,7 @@ class TimeSeriesWindowGenerator:
 
 class TransformerDataPipeline(BaseDataPipeline):
     def __init__(self, dataset_config, data_transformer, data_splitter, window_size=None, **kwargs):
-        super().__init__(dataset_config=dataset_config, data_transformer=data_transformer, data_splitter=data_splitter)
+        super().__init__(dataset_config=dataset_config, data_transformation=data_transformer, data_splitter=data_splitter)
 
         if window_size is None:
             self.mode = 'fixed_window'
@@ -58,9 +58,8 @@ class TransformerDataPipeline(BaseDataPipeline):
 
 
         # Step 1: Crop and normalize the data
-        df = self.crop_data(df, self.dataset_config.get('crop_start'), self.dataset_config.get('crop_end'))
-        df, metadata_scaler = self.normalize(df, method="z_score")
-        metadata.update(metadata_scaler)
+        cropped_df = self.crop_data(df, self.dataset_config.get('crop_start'), self.dataset_config.get('crop_end'))
+        df, scaler = self.normalize(cropped_df, method="z_score")
 
         # Step 2: Calculate features
         features = self.calculate_features()
@@ -138,7 +137,7 @@ class TransformerDataPipeline(BaseDataPipeline):
         )
 
         logger.info("Preprocessing pipeline completed for Transformer-based models.")
-        return tensor_data, split_data, metadata
+        return cropped_df, tensor_data, split_data, scaler, metadata
 
     def add_positional_encoding(self, x_arr, num_features):
         if isinstance(x_arr, pd.DataFrame):

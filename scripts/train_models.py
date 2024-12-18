@@ -91,6 +91,7 @@ def train_model(hyperparameter_config, model_type, dataset_config, data_manager)
     train_loader, val_loader = loaders["train_loader"], loaders["val_loader"]
 
     # Initialize model, optimizer, and loss function
+    # TODO -> get correct optimizer and loss function
     device = get_device()
     model = ModelFactory.create_model(model_type, **model_params).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=training_params["learning_rate"])
@@ -99,6 +100,7 @@ def train_model(hyperparameter_config, model_type, dataset_config, data_manager)
     wrapper = WrapperFactory.create_wrapper(model_type, model, optimizer, loss_fn, device)
 
     # Callbacks
+    # TODO - ADD Plotting and Logging Callback -> Plotting stored in own folder "train_plots"
     callback_manager = CallbackManager(callbacks=[])
 
     # Assemble training pipeline

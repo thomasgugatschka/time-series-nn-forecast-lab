@@ -5,7 +5,7 @@ from utilities.logging_utils import get_logger
 logger = get_logger(__name__)
 
 class PlottingCallback(BaseCallback):
-    def __init__(self, z_mean, z_std, selected_feature):
+    def __init__(self, data_manager):
         """
         Initialize the PlottingCallback.
 
@@ -15,9 +15,7 @@ class PlottingCallback(BaseCallback):
             selected_feature: The index of the selected feature for plotting.
         """
         super().__init__()
-        self.z_mean = z_mean
-        self.z_std = z_std
-        self.selected_feature = selected_feature
+        self.data_manager = data_manager
 
     def on_epoch_end(self, epoch, wrapper, **kwargs):
         """
@@ -36,11 +34,6 @@ class PlottingCallback(BaseCallback):
         if x_val is not None and y_val is not None:
             logger.info(f"Plotting model performance at epoch {epoch}")
             # Import the plot utility here to avoid circular imports if needed
-            plot_performance_during_training(
-                wrapper, x_val, y_val,
-                self.z_mean, self.z_std,
-                self.selected_feature, epoch,
-                wrapper.get_model_name()
-            )
+            plot_performance_during_training(wrapper, x_val, y_val, epoch, wrapper.get_model_name(), self.data_manager)
         else:
             logger.warning(f"Validation data is missing for epoch {epoch}, skipping plotting.")

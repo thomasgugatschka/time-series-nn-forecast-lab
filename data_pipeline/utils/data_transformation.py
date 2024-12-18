@@ -1,6 +1,9 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
+from utilities.logging_utils import get_logger
+logger = get_logger(__name__)
+
 
 class DataTransformation:
     """
@@ -31,110 +34,82 @@ class DataTransformation:
         if df.isnull().values.any():
             raise ValueError("The input dataframe contains NaN values.")
 
-    # Z-Score Methods
-    def apply_z_score(self, df):
-        """
-        Applies z-score normalization to the dataframe.
-
-        Args:
-            df (pd.DataFrame): The dataframe to normalize.
-
-        Returns:
-            tuple: Normalized dataframe and metadata for reversing the transformation.
-        """
-        self.validate_dataframe(df)
-        z_mean = df.mean()
-        z_std = df.std()
-        metadata = {"z_mean": z_mean, "z_std": z_std}
-        normalized_df = (df - z_mean) / z_std
-        return normalized_df, metadata
-
-    def reverse_z_score(self, df, metadata):
-        """
-        Reverses z-score normalization.
-
-        Args:
-            df (pd.DataFrame): The normalized dataframe to denormalize.
-            metadata (dict): Metadata containing mean and std deviation for each column.
-
-        Returns:
-            pd.DataFrame: The denormalized dataframe.
-        """
-        z_mean = metadata["z_mean"]
-        z_std = metadata["z_std"]
-        return (df * z_std) + z_mean
-
-    # Min-Max Methods
-    def apply_min_max(self, df, feature_range=(0, 1)):
-        """
-        Applies min-max scaling to the dataframe.
-
-        Args:
-            df (pd.DataFrame): The dataframe to scale.
-            feature_range (tuple): Desired range of transformed data. Defaults to (0, 1).
-
-        Returns:
-            tuple: Scaled dataframe and metadata for reversing the transformation.
-        """
-        self.validate_dataframe(df)
-        min_vals = df.min()
-        max_vals = df.max()
-        min_range, max_range = feature_range
-
-        scaled_df = ((df - min_vals) / (max_vals - min_vals)) * (max_range - min_range) + min_range
-        metadata = {"min_vals": min_vals, "max_vals": max_vals, "min_range": min_range, "max_range": max_range}
-        return scaled_df, metadata
-
-    def reverse_min_max(self, df, metadata):
-        """
-        Reverses min-max scaling.
-
-        Args:
-            df (pd.DataFrame): The scaled dataframe to revert.
-            metadata (dict): Metadata containing min and max values for each feature, as well as feature range.
-
-        Returns:
-            pd.DataFrame: The dataframe scaled back to its original values.
-        """
-        min_vals = metadata["min_vals"]
-        max_vals = metadata["max_vals"]
-        min_range = metadata["min_range"]
-        max_range = metadata["max_range"]
-
-        original_df = ((df - min_range) / (max_range - min_range)) * (max_vals - min_vals) + min_vals
-        return original_df
-
-    # Optional sklearn-based methods
     def apply_scaler(self, df, method):
         """
         Applies a scaler from sklearn for normalization or scaling.
-
-        Args:
-            df (pd.DataFrame): The dataframe to scale.
-            method (str): The scaler method, either 'z_score' or 'min_max'.
-
-        Returns:
-            tuple: Scaled dataframe and the fitted scaler for reversing the transformation.
         """
         self.validate_dataframe(df)
+
         if method not in self.scalers:
-            raise ValueError(f"Unsupported scaling method: {method}")
+            raise ValueError(f"Unsupported scaling method: {method}. Supported methods: {list(self.scalers.keys())}")
 
         scaler = self.scalers[method]
-        scaled_df = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
-        return scaled_df, scaler
+        scaled_array = scaler.fit_transform(df)
 
-    def reverse_scaler(self, df, scaler):
+        if isinstance(df, pd.DataFrame):
+            return pd.DataFrame(scaled_array, columns=df.columns), scaler
+        else:
+            return scaled_array, scaler
+
+    def reverse_scaler(self, data, scaler, selected=True, feature=None):
         """
-        Reverses a transformation applied using sklearn scaler.
+        Reverses a transformation (denormalizes) using the provided scaler.
 
         Args:
-            df (pd.DataFrame): The scaled dataframe.
-            scaler (sklearn Scaler): The fitted scaler used for transformation.
+            data (np.ndarray or pd.DataFrame): Scaled data to be denormalized.
+            scaler: Fitted sklearn scaler (StandardScaler or MinMaxScaler).
+            selected (bool): If True, denormalize only a selected feature.
+            feature (int, optional): Index of the selected feature to denormalize.
 
         Returns:
-            pd.DataFrame: The dataframe scaled back to its original values.
+            np.ndarray or pd.DataFrame: Denormalized data, preserving DataFrame structure if input was a DataFrame.
+
+        Raises:
+            ValueError: If the scaler is not provided or required arguments are missing.
         """
-        if not scaler:
-            raise ValueError("Scaler instance is required to reverse transformation.")
-        return pd.DataFrame(scaler.inverse_transform(df), columns=df.columns)
+        if scaler is None:
+            raise ValueError("Scaler is not provided. Ensure preprocessing has been done.")
+
+        # Check if input is DataFrame and extract column names
+        is_dataframe = isinstance(data, pd.DataFrame)
+        columns = data.columns if is_dataframe else None
+
+        # Convert data to NumPy array if it's a DataFrame
+        data_array = data.to_numpy() if is_dataframe else data
+
+        if selected:
+            # Validate selected_feature
+            if feature is None:
+                raise ValueError("selected_feature must be specified when selected=True.")
+
+            # Get the column name for the selected feature (if DataFrame)
+            column_name = columns[feature] if is_dataframe else f"Feature_{feature}"
+            logger.info(f"Denormalizing selected feature at index {feature} (Column: {column_name}).")
+
+            # Perform manual denormalization for a single feature
+            if hasattr(scaler, 'mean_') and hasattr(scaler, 'scale_'):  # StandardScaler
+                mean = scaler.mean_[feature]
+                scale = scaler.scale_[feature]
+                denorm_data = (data_array * scale) + mean
+
+            elif hasattr(scaler, 'min_') and hasattr(scaler, 'scale_'):  # MinMaxScaler
+                min_val = scaler.min_[feature]
+                scale = scaler.scale_[feature]
+                feature_range_min = 0  # Default R_min in MinMaxScaler
+
+                # Reverse MinMax scaling formula
+                denorm_data = (data_array - feature_range_min) / scale + min_val
+            else:
+                raise ValueError("Unsupported scaler type for single feature denormalization.")
+
+        else:
+            # Denormalize the full dataset
+            logger.info("Denormalizing the full dataset using scaler's inverse_transform.")
+            denorm_data = scaler.inverse_transform(data_array)
+
+        # Convert back to DataFrame if input was a DataFrame
+        if is_dataframe:
+            denorm_data = pd.DataFrame(denorm_data, columns=columns)
+
+        return denorm_data
+

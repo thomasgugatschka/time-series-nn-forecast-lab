@@ -12,32 +12,36 @@ from utilities.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
-# TODO - move DataManager to data_pipeline folder
-# TODO -> change to SINGELTON class -> so the data is loaded only once and the DataTransformation is only created once
-# TODO - so the sklearn keep their metadata information !!!!
 
 class DataManager:
-    def __init__(self, config_manager):
-        self.config_manager = config_manager
+    _instance = None
 
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(DataManager, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self, config_manager):
+        if hasattr(self, "_initialized") and self._initialized:
+            return
+
+        self.config_manager = config_manager
         self.file_manager = file_manager
         self.path_manager = path_manager
 
-        # Load dataset-specific and model-specific configurations
-        self.model_type = config_manager['model_type']
-        self.dataset = config_manager['dataset']
-
-        self.data_params = config_manager['data_params']
-
         self.dataset_config = config_manager.get_dataset_config()
+        self.main_config = config_manager.get_main_config()
 
-
-        # TODO -> add somewhere the fixed-window or full-sequence option
+        self.model_type = self.main_config['model_type']
+        self.dataset = self.main_config['dataset']
+        self.data_params = self.main_config['data_params']
 
         # Internal state for storing intermediate results
         self._raw_df = None
+        self._cropped_df = None
         self._tensor_data = None
         self._array_data = None
+        self._scaler = None
         self._metadata = None
 
         # Initialize components
@@ -53,6 +57,7 @@ class DataManager:
             window_size=self.data_params.get('time_series_window'))
         )
 
+        self._initialized = True
         logger.info(f"DataManager initialized for dataset: {self.dataset} and model type: {self.model_type}")
 
     def load_raw_data(self):
@@ -62,16 +67,16 @@ class DataManager:
         Returns:
             pd.DataFrame: Loaded raw dataframe.
         """
+        if self._raw_df is None:
+            data_dir = self.path_manager.get_path_data(dataset_name=self.dataset)
+            sources = self.dataset_config['sources']
+            columns_to_drop = self.dataset_config.get('columns_to_drop', [])
 
-        data_dir = self.path_manager.get_path_data(dataset_name=self.dataset)
-        sources = self.dataset_config['sources']
-        columns_to_drop = self.dataset_config.get('columns_to_drop', [])
-
-        logger.info("Loading data using RawDataLoader.")
-        self._raw_df = self.raw_data_loader.load_data(data_dir, sources, columns_to_drop)
-        logger.info(f"Data loaded with shape: {self._raw_df.shape}")
-        logger.info("Data stored in memory for further processing.")
-
+            logger.info("Loading data using RawDataLoader.")
+            self._raw_df = self.raw_data_loader.load_data(data_dir, sources, columns_to_drop)
+            logger.info(f"Data loaded with shape: {self._raw_df.shape}")
+        else:
+            logger.info("Using cached raw data.")
         return self._raw_df
 
     def preprocess_data(self, raw_df=None):
@@ -84,28 +89,58 @@ class DataManager:
         Returns:
             pd.DataFrame: Preprocessed dataframe.
         """
-        if raw_df is not None:
-            logger.info("Using overridden raw data for pipeline.")
-            df = raw_df
-        elif self._raw_df is not None:
-            logger.info("Using cached raw df for pipeline.")
-            df = self._raw_df
-        else:
-            raise ValueError("No raw df available for pipeline. Load data first or provide it explicitly.")
+        if self._tensor_data is None or raw_df is not None:
+            logger.info("Starting data preprocessing pipeline.")
+            df = raw_df if raw_df is not None else self._raw_df
+            if df is None:
+                raise ValueError("No raw data available. Load data first or provide a dataframe.")
 
-        self._tensor_data, self._array_data, self._metadata = self.pipeline_preprocessing.preprocess(df)
+            self._cropped_df, self._tensor_data, self._array_data, self._scaler, self._metadata = (
+                self.pipeline_preprocessing.preprocess(df))
+
+        else:
+            logger.info("Using cached preprocessed data.")
 
 
         logger.info(f"x_train shape: {self._tensor_data['x_train'].shape}, y_train shape: {self._tensor_data['y_train'].shape}")
         logger.info(f"x_val shape: {self._tensor_data['x_val'].shape}, y_val shape: {self._tensor_data['y_val'].shape}")
         logger.info(f"x_test shape: {self._tensor_data['x_test'].shape}, y_test shape: {self._tensor_data['y_test'].shape}")
 
-        preprocessed_data = {
+        return {
+            'cropped_df': self._cropped_df,
             'tensor_data': self._tensor_data,
             'array_data': self._array_data,
+            'scaler': self._scaler,
             'metadata': self._metadata
         }
-        return preprocessed_data
+
+    # TODO -> check if okay to directly use the Transformation Class or rather we go through pipeline
+    def postprocess_data(self, data, selected: bool):
+        """
+        Postprocess (denormalize) data using the DataTransformation class.
+
+        Args:
+            data (np.ndarray): Scaled data to be denormalized.
+            selected (bool): If True, denormalize only the selected feature.
+
+        Returns:
+            np.ndarray: Denormalized data.
+        """
+        if self._scaler is None:
+            raise ValueError("Scaler is not available. Ensure preprocessing was completed first.")
+
+        if selected:
+            if 'selected_feature' not in self._metadata:
+                raise ValueError("Metadata missing 'selected_feature' for denormalization.")
+
+            selected_feature = self._metadata['selected_feature']
+            logger.info("Delegating single-feature denormalization to DataTransformation.")
+            return (self.data_transformation.reverse_scaler(
+                data, self._scaler, selected=True, feature=selected_feature
+            ))
+
+        logger.info("Delegating full dataset denormalization to DataTransformation.")
+        return self.data_transformation.reverse_scaler(data, self._scaler, selected=False)
 
     def get_data(self, key):
         """
@@ -122,8 +157,10 @@ class DataManager:
         """
         valid_keys = {
             'raw_data': self._raw_df,
+            'cropped_data': self._cropped_df,
             'tensor_data': self._tensor_data,
             'array_data': self._array_data,
+            'scaler': self._scaler,
             'metadata': self._metadata
         }
 

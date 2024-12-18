@@ -15,7 +15,7 @@ feature_list:
   - feature_4
   - feature_5
 # Index of the feature to forecast (keep at 0 if only one feature) relates a bit to training but kept in here for simplicity
-feature_forecasted: 0
+feature_forecasted: 2
 # List of columns to drop from the data
 columns_to_drop:
 #  - feature_2

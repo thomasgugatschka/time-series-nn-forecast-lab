@@ -6,7 +6,7 @@ from utilities.logging_utils import get_logger
 logger = get_logger(__name__)
 
 class TensorBoardCallback(BaseCallback):
-    def __init__(self, log_dir, hparams=None, model=None, example_input_tensor=None):
+    def __init__(self, log_dir, hparams, model=None, example_input_tensor=None):
         """
         Initialize the TensorBoard callback.
 
@@ -18,9 +18,38 @@ class TensorBoardCallback(BaseCallback):
         """
         super().__init__()
         self.writer = SummaryWriter(log_dir)
-        self.hparams = hparams
+        self.hparams = self._format_hyperparameters(hparams)
         self.model = model
         self.example_input = example_input_tensor
+
+
+    def _format_hyperparameters(self, chosen_config):
+        """
+        Extracts a flat dictionary of hyperparameters for logging in TensorBoard.
+
+        Args:
+            chosen_config (dict): The chosen configuration (after sampling by Ray Tune).
+
+        Returns:
+            dict: A dictionary of hyperparameters formatted for TensorBoard.
+        """
+        # Flatten the configuration dictionary for TensorBoard
+        flat_hparams = {}
+        for param_group in ["model_params", "training_params"]:
+            for key, value in chosen_config.get(param_group, {}).items():
+                # Since we're getting a chosen config, it should be a single sampled value
+                if isinstance(value, list):
+                    # Convert list to a string representation
+                    logger.warning(f"Hyperparameter '{key}' is a list and will be converted to a string: {value}")
+                    flat_hparams[key] = str(value)  # Represent as a string
+                flat_hparams[key] = value
+
+        # Add the trial seed if it exists
+        if "trial_seed" in chosen_config:
+            flat_hparams["trial_seed"] = chosen_config["trial_seed"]
+
+        logger.info(f"Formatted hyperparameter dictionary for TensorBoard: {flat_hparams}")
+        return flat_hparams
 
     def on_train_begin(self, wrapper, **kwargs):
         """

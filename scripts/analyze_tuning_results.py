@@ -288,4 +288,8 @@ if __name__ == "__main__":
     main(args.file, args.output_dir, args.top_n)
 
 
+# TODO -> rewrite so it also works with the main config and argparse like everything else!!!!
+# TODO -> also results should be stored to experiment folder, like everything else!!!
+
+
 # python analyze_tuning_results.py --file C:\Users\Thomas\localgit\time-series-nn-forecast-lab\ray_results\RNN_sinusoidal_51_200_20241214-222217/all_trials_results.json --output_dir C:\Users\Thomas\localgit\time-series-nn-forecast-lab\results

@@ -1,4 +1,4 @@
-model_type: "Transformer"            # Implemented Models
+model_type: "GRU"            # Implemented Models
 dataset: "sinusoidal"
 #dataset: "weather_station"    # Available Datasets from data folder
 num_samples: 2               # Number of trials to run during hyperparameter tuning

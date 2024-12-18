@@ -108,7 +108,7 @@ class PathManager:
         return self.paths['model_dir'] / model_name / 'checkpoints'
 
     def get_path_hyperparameter_search_space(self) -> Path:
-        return self.paths['config_dir'] / 'model_hyperparameter_search_space.json'
+        return self.paths['config_dir'] / 'hyperparameter_search_space.json'
 
 
     def get_path_experiment(self) -> Path:

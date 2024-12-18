@@ -2,7 +2,8 @@ import os
 import matplotlib.pyplot as plt
 import imageio.v2 as imageio
 
-from utilities.data_utils import z_score_denormalize
+
+
 
 from manager.path_manager import path_manager
 from manager.file_manager import file_manager
@@ -28,8 +29,12 @@ def setup_plot_style():
     plt.rcParams['legend.fontsize'] = 12
     plt.rcParams['lines.linewidth'] = 2.5
 
+
+
 # Call the setup_plot_style function when this module is imported
 setup_plot_style()
+
+
 
 
 def plot_training_progress(training_loss, validation_loss, model_name):
@@ -127,16 +132,14 @@ def plot_prediction_with_context(df, y_arr_test, rnn_prediction, feature_list, s
     file_manager.save_plot(plt, figure_path)
 
 
-def plot_performance_during_training(wrapper, x_val, y_val, z_mean, z_std, selected_feature, epochs, model_name):
-    # TODO - modify... and store with some sort of logic th pngs.... because now everything is in the same folder so
-    #  no idendification at all
+def plot_performance_during_training(wrapper, x_val, y_val, epochs, model_name, data_manager):
 
-    # TODO -> call to data_manager -> postprocessing pipeline ??? !!! -> so denomr is done properly
 
     prediction = wrapper.predict(x_val).detach().numpy()
-    prediction_denorm = z_score_denormalize(prediction, z_mean.iloc[selected_feature], z_std.iloc[selected_feature])
-    y_val_denorm = z_score_denormalize(y_val.detach().numpy(), z_mean.iloc[selected_feature],
-                                       z_std.iloc[selected_feature])
+    y_val = y_val.detach().numpy()
+
+    prediction_denorm = data_manager.postprocess_data(prediction, selected=True)
+    y_val_denorm = data_manager.postprocess_data(y_val, selected=True)
 
     # Plot denormalized values
     plt.figure(figsize=(14, 8))
@@ -144,6 +147,13 @@ def plot_performance_during_training(wrapper, x_val, y_val, z_mean, z_std, selec
     plt.plot(prediction_denorm[:, 0], label='Prediction')
     plt.title('Denormalized Prediction vs Actual | Epoch: ' + str(epochs))
     plt.legend()
+
+
+    # TODO ###########
+    # TODO - should be stored in EXPERIMENT folder
+    # TODO -> for each model a new folder which should link to tensorboard logs -> so timestamp??!!
+    # TODO -> depending on hyper or train -> own folder!!!!
+
     plot_results_directory = path_manager.get_path_training_plot(model_name=model_name)
     os.makedirs(plot_results_directory, exist_ok=True)
     figure_path = os.path.join(plot_results_directory, f"epoch_{epochs:04d}.png")
@@ -153,6 +163,13 @@ def plot_performance_during_training(wrapper, x_val, y_val, z_mean, z_std, selec
     plt.show()
 
     plt.close()  # Close the plot to ensure it is rendered correctly
+
+
+
+
+
+
+
 
 
 def create_gif_from_plots(model_name, gif_name='training_progress.gif', duration=0.3):

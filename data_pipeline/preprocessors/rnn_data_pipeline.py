@@ -28,17 +28,15 @@ class RNNDataPipeline(BaseDataPipeline):
         logger.info("Preprocessing Step: Cropping data")
         crop_start = self.dataset_config.get('crop_start')
         crop_end = self.dataset_config.get('crop_end')
-        df = self.crop_data(df, crop_start, crop_end)
+        cropped_df = self.crop_data(df, crop_start, crop_end)
 
         logger.info("Preprocessing Step: Normalizing data")
-        df, metadata_scaler = self.normalize(df, method="z_score")
-        metadata.update(metadata_scaler)
-        # TODO - use scaler from data_transformer rather than own implementation
+        df, scaler = self.normalize(cropped_df, method="z_score")
 
         logger.info("Preprocessing Step: Calculating features")
         features = self.calculate_features()
         metadata.update(features)
-        selected_feature, num_features = features['selected_feature'], features['num_features']
+        selected_feature = features['selected_feature']
 
         logger.info("Preprocessing Step: Generating fixed time series windows")
         ts_past = self.dataset_config['ts_past']
@@ -78,7 +76,7 @@ class RNNDataPipeline(BaseDataPipeline):
 
         logger.info("Preprocessing pipeline completed for RNN-based model architectures.")
 
-        return tensor_data, array_data, metadata
+        return cropped_df, tensor_data, array_data, scaler, metadata
 
     def postprocess(self, predictions, metadata):
         """
