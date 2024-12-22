@@ -144,6 +144,7 @@ class FileManager:
             plt_obj: Matplotlib plot object.
             file_path (str): Path to save the plot.
         """
+        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
         plt_obj.savefig(file_path)
 
     def create_directory(self, dir_path: str):

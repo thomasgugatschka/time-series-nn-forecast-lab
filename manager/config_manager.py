@@ -108,5 +108,5 @@ class ConfigManager:
     def __getitem__(self, key):
         return self.main_config[key]
 
-# Example usage
-config_manager = ConfigManager('config.yaml')
+
+#config_manager = ConfigManager('config.yaml')

@@ -15,7 +15,7 @@ feature_list:
   - feature_4
   - feature_5
 # Index of the feature to forecast (keep at 0 if only one feature) relates a bit to training but kept in here for simplicity
-feature_forecasted: 2
+feature_forecasted: 0
 # List of columns to drop from the data
 columns_to_drop:
 #  - feature_2
@@ -23,7 +23,7 @@ columns_to_drop:
 crop_start: 5_000
 crop_end: 10_000
 ts_past: 200
-ts_future: 51
+ts_future: 50
     # Optional: Override split ratios for specific dataset needs
 #train_val_test_split:
 #  frac_train: 0.7

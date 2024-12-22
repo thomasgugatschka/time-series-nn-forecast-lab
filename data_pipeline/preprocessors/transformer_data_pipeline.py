@@ -44,7 +44,7 @@ class TimeSeriesWindowGenerator:
 
 class TransformerDataPipeline(BaseDataPipeline):
     def __init__(self, dataset_config, data_transformer, data_splitter, window_size=None, **kwargs):
-        super().__init__(dataset_config=dataset_config, data_transformation=data_transformer, data_splitter=data_splitter)
+        super().__init__(dataset_config=dataset_config, data_transformer=data_transformer, data_splitter=data_splitter)
 
         if window_size is None:
             self.mode = 'fixed_window'
@@ -58,9 +58,12 @@ class TransformerDataPipeline(BaseDataPipeline):
 
 
         # Step 1: Crop and normalize the data
-        cropped_df = self.crop_data(df, self.dataset_config.get('crop_start'), self.dataset_config.get('crop_end'))
+        crop_start = self.dataset_config.get('crop_start')
+        crop_end = self.dataset_config.get('crop_end')
+        cropped_df = self.crop_data(df, crop_start, crop_end)
         df, scaler = self.normalize(cropped_df, method="z_score")
 
+        metadata.update({'crop_start': crop_start, 'crop_end': crop_end})
         # Step 2: Calculate features
         features = self.calculate_features()
         metadata.update(features)

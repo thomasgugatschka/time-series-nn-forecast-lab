@@ -35,9 +35,8 @@ class ExperimentManager:
             self.config_manager = config_manager
             self._experiment_name = None
             self._experiment_path = None
-            self.metadata_path = path_manager.get_path_experiment_metadata()
+            self.metadata_path = path_manager.get_path("experiment_dir") / "experiment_metadata.json"
             self._initialized = True
-
 
     @property
     def experiment_name(self):
@@ -57,6 +56,8 @@ class ExperimentManager:
             value = Path(value)  # Convert to Path if not already
         self._experiment_path = value
 
+
+    # TODO -> add DATASET Config to the HASH ?!?!?! in case ts_future / ts_past etc. change
     def _hash_config(self, config_path):
         """Generate a hash for the configuration file."""
         logger.info(f"Hashing configuration file: {config_path}")
@@ -81,9 +82,12 @@ class ExperimentManager:
         Returns:
             tuple: (experiment_name, experiment_path, resume) - name, path, and resume flag.
         """
-
+        resume = False
         timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
         config_path = self.config_manager.get_main_config_path()
+
+        main_config = self.config_manager.get_main_config()
+        dataset_config = self.config_manager.get_dataset_config()
 
         # Compute hash for the configuration file
         config_hash = self._hash_config(config_path)
@@ -93,29 +97,25 @@ class ExperimentManager:
 
         # Check if the experiment already exists
         if config_hash in metadata:
-            # Experiment exists, resume
+            # Resume existing experiment
             experiment_info = metadata[config_hash]
             self.experiment_name = experiment_info["experiment_name"]
-            self.experiment_path = experiment_info["experiment_path"]
+            #self.experiment_path = Path(experiment_info["experiment_path"])
             resume = True
-            logger.info(f"Resuming experiment with hash: {config_hash} -> {self.experiment_name}")
         else:
-            # New experiment
-            main_config = self.config_manager.get_main_config()
-            dataset_config = self.config_manager.get_dataset_config()
-
-            # Generate experiment name
+            # New experiment - Generate experiment name
             self.experiment_name = self.generate_experiment_name(main_config, dataset_config, timestamp)
 
-            # Create experiment folder and store path
-            self.experiment_path = path_manager.create_experiment_folder(
-                model_type=main_config["model_type"],
-                dataset_name=main_config["dataset"],
-                experiment_name=self.experiment_name
-            )
+        # Create experiment folder and store path
+        self.experiment_path = path_manager.create_experiment_folder(
+            model_type=main_config["model_type"],
+            dataset_name=main_config["dataset"],
+            experiment_name=self.experiment_name
+        )
 
-            path_manager.create_experiment_subfolders(self.experiment_path)
+        path_manager.create_experiment_subfolders()
 
+        if not resume:
             # Save metadata for the new experiment
             metadata[config_hash] = {
                 "experiment_name": self.experiment_name,
@@ -124,9 +124,6 @@ class ExperimentManager:
             }
             self._save_experiment_metadata(metadata)
 
-            logger.info(f"Starting new experiment: {self.experiment_name}")
-
-            resume = False
 
         return self.experiment_name, self.experiment_path, resume
 

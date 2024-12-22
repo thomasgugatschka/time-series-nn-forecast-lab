@@ -1,17 +1,22 @@
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 
-# TODO nice Description of the class
-# TODO which pattern was used
-# Singleton class to manage paths and directories
-# This class is used to store and retrieve paths to various directories in the project.
-# It is implemented as a singleton to ensure that there is only one instance of the class throughout the project.
-# This is useful because it allows us to access the same set of paths from different parts of the codebase.
+from manager.env_manager import EnvManager
+
+# Initialize logging
+from utilities.logging_utils import get_logger
+logger = get_logger(__name__)
 
 
 class PathManager:
+    """
+    Singleton class to manage paths and directories in the project.
+    The root directory (PROJECT_BASE_DIR) is dynamically resolved based on the .env file.
+    """
 
     _instance = None
+
+    DATASET_CONFIG_FILE_TEMPLATE = "config_data_{dataset_name}.yaml"
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
@@ -22,100 +27,106 @@ class PathManager:
         if hasattr(self, 'initialized') and self.initialized:
             return
 
-        # If not yet initialized, proceed with initialization
-        self.base_dir = Path(__file__).resolve().parent.parent
 
-        # TODO - CLEANUP ALL DEFINITIONS HERE WHICH ARE NOT NEEDED / REDUNDANT
+        # Initialize and load environment variables
+        env_manager = EnvManager()
+        env_manager.load_env()
+
+        # Retrieve PROJECT_BASE_DIR, ensuring the default value is a string
+        default_base_dir = str(Path(__file__).resolve().parent.parent)
+        self.base_dir = Path(env_manager.get_env_variable('PROJECT_BASE_DIR', default_base_dir)).resolve()
+
+        logger.info(f"Project Base Directory: {self.base_dir}")
+
+
         self.paths = {
             'base_dir': self.base_dir,
-            'model_dir': self.base_dir / 'models',
             'data_dir': self.base_dir / 'data',
-            'data_pipeline_dir': self.base_dir / 'data_pipeline',
             'log_dir': self.base_dir / 'logs',
-            'result_dir': self.base_dir / 'results',
             'experiment_dir': self.base_dir / 'experiments',
             'config_dir': self.base_dir / 'configs',
             'dataset_config_dir': self.base_dir / 'configs' / 'dataset_configs',
-            'best_hyperparameters_dir': self.base_dir / 'configs' / 'best_hyperparameters',
-            'ray_results_dir': self.base_dir / 'ray_results',
-            'script_dir': self.base_dir / 'scripts',
-            'script_train_dir': self.base_dir / 'scripts' / 'train',
-            'script_eval_dir': self.base_dir / 'scripts' / 'evaluate',
-            'script_preprocess_dir': self.base_dir / 'scripts' / 'preprocessing',
-            'tensorboard_log_dir': self.base_dir / 'logs' / 'tensorboard'
         }
+
+        # Create core directories
+        self._ensure_directories(self.paths.values())
+
+        # Placeholder for dynamically added paths
+        self.dynamic_paths: Dict[str, Path] = {}
 
         self.initialized = True
 
-    def get_path_base(self) -> Path:
-        return self.paths['base_dir']
 
-    def get_path_model(self, model_name: Optional[str] = None) -> Path:
-        if model_name:
-            return self.paths['model_dir'] / model_name
-        return self.paths['model_dir']
-
-    def get_path_data(self, dataset_name: Optional[str] = None) -> Path:
-        if dataset_name:
-            return self.paths['data_dir'] / dataset_name
-        return self.paths['data_dir']
-
-    def get_path_data_pipeline(self) -> Path:
-        return self.paths['data_pipeline_dir']
-
-    def get_path_log(self) -> Path:
-        return self.paths['log_dir']
-
-    def get_path_tensorboard(self, experiment_path) -> Path:
+    @staticmethod
+    def _ensure_directories(directories):
         """
-        Get the TensorBoard log directory for a given experiment path.
+        Ensure all directories exist.
+        """
+        for path in directories:
+            path.mkdir(parents=True, exist_ok=True)
+
+    def get_path(self, path_name: str) -> Path:
+        """
+        Retrieve a core or dynamically added path by its name.
+        Args:
+            path_name (str): The name of the path.
+        Returns:
+            Path: Resolved path.
+        Raises:
+            KeyError: If the path_name is not defined.
+        """
+        if path_name in self.paths:
+            return self.paths[path_name]
+        if path_name in self.dynamic_paths:
+            return self.dynamic_paths[path_name]
+        raise KeyError(f"Path '{path_name}' is not defined.")
+
+    def add_path(self, path_name: str, path_value: Path):
+        """
+        Add or update a dynamically defined path.
 
         Args:
-            experiment_path (Path or str): Base path for the experiment.
-
-        Returns:
-            Path: The TensorBoard log directory.
+            path_name (str): Name of the path.
+            path_value (Path): Path to associate with the name.
         """
-        # Ensure experiment_path is a Path object
-        experiment_path = Path(experiment_path)
-        tensorboard_log_path = experiment_path / "tensorboard"
-        return tensorboard_log_path
-
-    def get_path_result(self, model_name: Optional[str] = None) -> Path:
-        if model_name:
-            return self.paths['result_dir'] / model_name
-        return self.paths['result_dir']
-
-    def get_ray_results_dir(self) -> Path:
-        return self.paths['ray_results_dir']
+        self.dynamic_paths[path_name] = path_value.resolve()
+        path_value.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Dynamically added path: {path_name} -> {path_value}")
 
     def get_path_config(self) -> Path:
-        return self.paths['config_dir']
+        """
+        Retrieve the path to the configuration directory.
+        """
+        return self.get_path("config_dir")
+
+    def get_path_data(self, dataset_name: Optional[str] = None) -> Path:
+        """
+        Retrieve the path to the data directory, optionally for a specific dataset.
+        Args:
+            dataset_name (str, optional): The name of the dataset.
+        Returns:
+            Path: Path to the data directory or dataset directory.
+        """
+        data_path = self.get_path("data_dir")
+        return data_path / dataset_name if dataset_name else data_path
 
     def get_path_dataset_config(self, dataset_name: Optional[str] = None) -> Path:
+        """
+        Retrieve the path to the dataset configuration directory or a specific dataset configuration file.
+        Args:
+            dataset_name (str, optional): Name of the dataset.
+        Returns:
+            Path: Path to the dataset configuration directory or file.
+        """
+        dataset_config_dir = self.get_path("dataset_config_dir")
         if dataset_name:
-            return self.paths['dataset_config_dir'] / f'config_data_{dataset_name}.yaml'
-        return self.paths['dataset_config_dir']
+            return dataset_config_dir / self.DATASET_CONFIG_FILE_TEMPLATE.format(dataset_name=dataset_name)
+        return dataset_config_dir
 
-    def get_path_training_plot(self, model_name: str) -> Path:
-        if not model_name:
-            raise ValueError("Model name is required for training plot path.")
-        return self.paths['result_dir'] / model_name / 'plots_training'
-
-    def get_path_checkpoint(self, model_name: str) -> Path:
-        if not model_name:
-            raise ValueError("Model name is required for checkpoint path.")
-        return self.paths['model_dir'] / model_name / 'checkpoints'
-
-    def get_path_hyperparameter_search_space(self) -> Path:
-        return self.paths['config_dir'] / 'hyperparameter_search_space.json'
-
-
-    def get_path_experiment(self) -> Path:
-        return self.paths['experiment_dir']
-
-    def get_path_experiment_metadata(self) -> Path:
-        return self.get_path_experiment() / 'experiment_metadata.json'
+    def get_path_dataset_plots(self, dataset_name: str) -> Path:
+        dataset_plots_dir = self.get_path("experiment_dir") / "dataset_plots" / dataset_name
+        dataset_plots_dir.mkdir(parents=True, exist_ok=True)
+        return dataset_plots_dir
 
     def create_experiment_folder(self, model_type: str, dataset_name: str, experiment_name: str) -> Path:
         """
@@ -129,34 +140,37 @@ class PathManager:
         Returns:
             Path: The full path to the experiment folder.
         """
-        # Construct the folder structure
-        experiment_path = self.get_path_experiment() / model_type / dataset_name / experiment_name
-
-        # Ensure the directory exists
+        experiment_path = self.get_path("experiment_dir") / model_type / dataset_name / experiment_name
         experiment_path.mkdir(parents=True, exist_ok=True)
 
-        # Return the full experiment path
+        # Add experiment path dynamically for later use
+        # self.add_path(f"experiment:{experiment_name}", experiment_path) # Relevant in case of multiple experiments
+        self.add_path(f"experiment", experiment_path)
         return experiment_path
 
-    def create_experiment_subfolders(self, experiment_path: Path) -> dict:
+    def create_experiment_subfolders(self, subfolders: Optional[list] = None) -> Dict[str, Path]:
         """
-        Create required subfolders ('ray_results' and 'tensorboard') within an experiment folder.
+        Create subfolders within an experiment folder dynamically.
 
         Args:
-            experiment_path (Path): Base path for the experiment.
+            subfolders (list, optional): List of subfolder names to create. Defaults to standard subfolders.
 
         Returns:
-            dict: Dictionary containing paths to the created subfolders.
-                  Example: {"ray_results": Path, "tensorboard": Path}
+            dict: Dictionary containing created subfolder paths.
         """
-        # Define subfolder names
-        subfolders = ["ray_results", "tensorboard", "trained_models", "evaluation_results"]
+        if subfolders is None:
+            subfolders = ["ray_results", "tensorboard", "trained_models", "evaluation_results",
+                          "plots_tuning", "plots_training", "plots_evaluation"]
 
-        # Create subfolders and store their paths in a dictionary
+        #experiment_path = self.get_path(f"experiment:{experiment_name}")
+        experiment_path = self.get_path(f"experiment")
         subfolder_paths = {}
+
         for subfolder in subfolders:
             folder_path = experiment_path / subfolder
             folder_path.mkdir(parents=True, exist_ok=True)
+            #self.add_path(f"{experiment_name}:{subfolder}", folder_path) # Relevant in case of multiple experiments
+            self.add_path(f"experiment_{subfolder}", folder_path)
             subfolder_paths[subfolder] = folder_path
 
         return subfolder_paths

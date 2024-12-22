@@ -2,6 +2,7 @@ import argparse
 import torch
 import ray
 import datetime
+
 from ray import tune
 
 # Callbacks
@@ -19,7 +20,9 @@ from strategies.strategy_factory import StrategyFactory
 from manager.config_manager import ConfigManager
 from manager.hyperparameter_manager import HyperparameterManager
 from manager.experiment_manager import ExperimentManager
+from manager.plot_manager import PlotManager
 from manager.data_manager import DataManager
+from manager.env_manager import EnvManager
 from manager.file_manager import file_manager
 from manager.path_manager import path_manager
 
@@ -48,17 +51,19 @@ def parse_args():
 # endregion
 
 # region ### TRAINING FUNCTION ##
-def objective(hyperparameter_config, model_type, dataset_config, data_manager, experiment_path):
+def objective(hyperparameter_config, model_type, dataset_config, data_manager, plot_manager):
     """Objective function for hyperparameter tuning."""
 
     set_seed(hyperparameter_config.get("trial_seed"))
     device = get_device()
 
+    # Workaround... could not pass trail name to the objective function
+    trial_name = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+
     # region ### LOAD and PREPROCESS DATA ###
     data_manager.load_raw_data()
     data = data_manager.preprocess_data()
     num_features = data['metadata']['num_features']
-###    z_mean, z_std, selected_feature = (data['metadata'][key] for key in ['z_mean', 'z_std', 'selected_feature'])
     # endregion
 
     # region ### SET VARIABLES from CONFIG ###
@@ -94,11 +99,11 @@ def objective(hyperparameter_config, model_type, dataset_config, data_manager, e
 
     # region ### CALLBACKS ###
     logging_callback = LoggingCallback(log_every_n_epochs=1)
-###    plotting_callback = PlottingCallback(z_mean, z_std, selected_feature)
-    plotting_callback = PlottingCallback(data_manager)
+    plotting_callback = PlottingCallback(plot_manager, trial_name)
     early_stopping_callback = EarlyStoppingCallback(patience=10)
     tensorboard_callback = TensorBoardCallback(
-        log_dir=path_manager.get_path_tensorboard(experiment_path) / datetime.datetime.now().strftime('%Y%m%d-%H%M%S'),
+        #log_dir=experiment_path / "tensorboard" / trial_name,
+        log_dir=path_manager.get_path('experiment_tensorboard') / trial_name,
         hparams=hyperparameter_config,
         model=model,
         example_input_tensor=torch.randn(batch_size, ts_past, num_features)
@@ -127,21 +132,24 @@ def objective(hyperparameter_config, model_type, dataset_config, data_manager, e
 # region ### MAIN FUNCTION ###
 def main():
     args = parse_args()
+
     config_manager = ConfigManager(args.config_path)
     data_manager = DataManager(config_manager)
+    env_manager = EnvManager()
     experiment_manager = ExperimentManager(config_manager)
+    experiment_name, experiment_path, resume = experiment_manager.manage_experiment()
+    plot_manager = PlotManager(config_manager, data_manager, phase='tuning')
 
     # Load main configuration (->config.yaml)
     main_config = config_manager.get_main_config()
     dataset_config = config_manager.get_dataset_config()
-    hyperparameter_config = file_manager.load_json(path_manager.get_path_hyperparameter_search_space())
+    hyperparameter_config = file_manager.load_json(path_manager.get_path("config_dir") / "hyperparameter_search_space.json")
     hyperparameter_manager = HyperparameterManager(hyperparameter_config)
 
-    # Experiment Setup
-    experiment_name, experiment_path, resume = experiment_manager.manage_experiment()
+    # Experiment Paths
     logger.info(f"Experiment name: {experiment_name} || Resume: {resume}")
     logger.info(f"Experiment path: {experiment_path}")
-    logger.info(f"Tensorboard path: {path_manager.get_path_tensorboard(experiment_path)}")
+
 
     # Load parameters from the configuration file
     model_type = main_config.get('model_type')
@@ -160,8 +168,10 @@ def main():
     search_algorithm = StrategyFactory.create_search_algorithm(search_algorithm_name, "val_loss", "min")
     scheduler = StrategyFactory.create_scheduler(scheduler_name, "val_loss", "min", trial_params)
 
+    local_mode = env_manager.get_env_variable("LOCAL_MODE", default="True", as_bool=True)
+
     # Initialize Ray
-    ray.init(include_dashboard=False, local_mode=True) # CHANGE for local_mode=False for CLOUD
+    ray.init(include_dashboard=False, local_mode=local_mode)
 
     # Run hyperparameter tuning with Ray Tune
     analysis = tune.run(
@@ -170,20 +180,17 @@ def main():
             model_type=model_type,
             dataset_config=dataset_config,
             data_manager=data_manager,
-            experiment_path=experiment_path
+            plot_manager=plot_manager
             ),
         config=search_space_config,
         num_samples=num_samples,
         resources_per_trial={"cpu": cpu_per_trial, "gpu": gpu_per_trial},
-
-        # TODO -> check if possible to CHANGE this to be the EXACT same as the tensorboard path
-        # TODO -> also needed for plotts (plottingcallback)
-        trial_dirname_creator=lambda trial: f"trial_{trial.trial_id}",
+        trial_dirname_creator=lambda trial: f"{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}_{trial.trial_id}",
         scheduler=scheduler,
         search_alg=search_algorithm,
-        resume=resume, # True
+        resume=resume,
         max_concurrent_trials=max_concurrent_trials,
-        name="ray_results", # experiment_name
+        name="ray_results",
         storage_path=experiment_path
     )
 

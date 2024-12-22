@@ -2,17 +2,29 @@
 import logging
 import logging.config
 import yaml
+from dotenv import load_dotenv
+import os
+from pathlib import Path
 
-from manager.path_manager import path_manager
+# TODO - CLEANUP
+
+# TODO -> GOAL is that logger does not need any class or function from the project
+# so no path_manager or file_manager
+
 
 def setup_logging():
-    #from manager.file_manager import file_manager
+
+    # Load environment variables from .env file
+    load_dotenv()
 
     # Load logging configuration from YAML file
-    config_path = path_manager.get_path_config() / 'logging.yaml'
+    base_dir = Path(os.getenv("PROJECT_BASE_DIR", Path(__file__).resolve().parent.parent)).resolve()
+    config_path = base_dir / 'configs' / 'logging.yaml'
+
+
     with open(config_path, 'r') as file:
         config = yaml.safe_load(file) # NOT doen through file manager due circular dependency
-        config['handlers']['file']['filename'] = str(path_manager.get_path_log() / 'app.log')
+        config['handlers']['file']['filename'] = str(base_dir / 'logs' / 'app.log')
         logging.config.dictConfig(config)
 
 def get_logger(module_name):

@@ -1,16 +1,20 @@
 import argparse
 import datetime
 import torch
+
+from callbacks.plotting_callback import PlottingCallback
+
 from manager.callback_manager import CallbackManager
 from manager.config_manager import ConfigManager
 from manager.experiment_manager import ExperimentManager
 from manager.data_manager import DataManager
 from manager.file_manager import file_manager
 from manager.path_manager import path_manager
+from manager.plot_manager import PlotManager
 from models.model_factory import ModelFactory
 from models.wrapper_factory import WrapperFactory
 from training_pipeline.training_pipeline_builder import TrainingPipelineBuilder
-from utilities.experiment_utils import get_device, set_seed
+from utilities.experiment_utils import get_device, set_seed, get_optimizer, get_loss_function
 from utilities.logging_utils import setup_logging, get_logger
 
 setup_logging()
@@ -47,7 +51,16 @@ def save_model(model, model_name, save_path, hyperparameter_config):
     logger.info(f"Hyperparameters saved at {hyperparams_save_path}")
 
 
-def train_model(hyperparameter_config, model_type, dataset_config, data_manager):
+# TODO #### TODO ##### TODO ####
+
+# TODO -> SOMETHING IS NOT CORRECT with EPOCHS -> TRAINING vs. HYPERPARAMETER TUNING ?????
+# TODO -> TRAINING MUCH MORE EPOCHS for SOME REASON ??????
+
+# TODO -> probably need to USE   "training_iteration": xx isntead of "epoch"
+
+# TODO -> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+def train_model(hyperparameter_config, model_type, dataset_config, data_manager, plot_manager):
     """
     Train a single model based on the provided hyperparameter configuration.
 
@@ -56,13 +69,15 @@ def train_model(hyperparameter_config, model_type, dataset_config, data_manager)
         model_type (str): Type of the model.
         dataset_config (dict): Dataset-specific configuration.
         data_manager (DataManager): Instance to manage data loading and preprocessing.
-
+        plot_manager (PlotManager): Instance to manage plotting.
     Returns:
         torch.nn.Module: Trained model.
     """
 
     #TODO -> maybe train with different SEEDS ??? -> is it worth the check???
     set_seed(hyperparameter_config.get("config/trial_seed"))
+
+    trial_name = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
 
     # Load and preprocess data
     data_manager.load_raw_data()
@@ -91,17 +106,19 @@ def train_model(hyperparameter_config, model_type, dataset_config, data_manager)
     train_loader, val_loader = loaders["train_loader"], loaders["val_loader"]
 
     # Initialize model, optimizer, and loss function
-    # TODO -> get correct optimizer and loss function
+
     device = get_device()
     model = ModelFactory.create_model(model_type, **model_params).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=training_params["learning_rate"])
-    loss_fn = torch.nn.MSELoss()
+    #optimizer = torch.optim.Adam(model.parameters(), lr=training_params["learning_rate"])
+    #loss_fn = torch.nn.MSELoss()
+    optimizer = get_optimizer(training_params["optimizer"], model.parameters(), training_params["learning_rate"])
+    loss_fn = get_loss_function(training_params["loss_function"])
 
     wrapper = WrapperFactory.create_wrapper(model_type, model, optimizer, loss_fn, device)
 
     # Callbacks
-    # TODO - ADD Plotting and Logging Callback -> Plotting stored in own folder "train_plots"
-    callback_manager = CallbackManager(callbacks=[])
+    plotting_callback = PlottingCallback(plot_manager, trial_name)
+    callback_manager = CallbackManager(callbacks=[plotting_callback])
 
     # Assemble training pipeline
     builder = TrainingPipelineBuilder()
@@ -126,15 +143,17 @@ def main():
 
     # Load configurations
     config_manager = ConfigManager(args.config_path)
-    experiment_manager = ExperimentManager(config_manager)
     data_manager = DataManager(config_manager)
+    experiment_manager = ExperimentManager(config_manager)
+    experiment_name, experiment_path, _ = experiment_manager.manage_experiment()
+    plot_manager = PlotManager(config_manager, data_manager, phase="training")
 
     dataset_config = config_manager.get_dataset_config()
     main_config = config_manager.get_main_config()
     model_type = main_config["model_type"]
 
     # Load top hyperparameters from experiment folder
-    experiment_name, experiment_path, _ = experiment_manager.manage_experiment()
+
     hyperparameter_config_path = experiment_path / "top_hyperparameters.json"
     top_hyperparameters = file_manager.load_json(hyperparameter_config_path)
 
@@ -147,7 +166,7 @@ def main():
     # Train and save models
     for i, hyperparameter_config in enumerate(top_hyperparameters):
         logger.info(f"Training model {i + 1}/{args.num_models} with configuration: {hyperparameter_config}")
-        model = train_model(hyperparameter_config, model_type, dataset_config, data_manager)
+        model = train_model(hyperparameter_config, model_type, dataset_config, data_manager, plot_manager)
         val_loss = hyperparameter_config.get("val_loss", "unknown")
         model_name = f"{model_type}_{i + 1}_val_loss={val_loss:.4f}".replace("/", "-")
         save_model(model, model_name, model_save_path, hyperparameter_config)

@@ -28,6 +28,7 @@ class RNNDataPipeline(BaseDataPipeline):
         logger.info("Preprocessing Step: Cropping data")
         crop_start = self.dataset_config.get('crop_start')
         crop_end = self.dataset_config.get('crop_end')
+        metadata.update({'crop_start': crop_start, 'crop_end': crop_end})
         cropped_df = self.crop_data(df, crop_start, crop_end)
 
         logger.info("Preprocessing Step: Normalizing data")

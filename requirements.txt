@@ -17,3 +17,4 @@ bayesian-optimization == 1.2.0
 h5py~=3.12.1
 seaborn~=0.13.2
 plotly~=5.24.1
+python-dotenv~=1.0.1
