@@ -8,7 +8,6 @@ from sklearn.ensemble import RandomForestRegressor
 from pathlib import Path
 import plotly.express as px
 
-
 def load_data(file_path):
     """Load JSON data and return as a Pandas DataFrame."""
     with open(file_path, 'r') as file:
@@ -276,6 +275,9 @@ def main(file_path, output_dir, top_n):
 #    save_results(filtered_df, output_dir)
 
 
+# TODO -> FIX SCRIPT so it works with NEW PATHS!!!
+# TODO -> or WRITE BATCH SCRIPT to run it with the correct paths!!!
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Analyze hyperparameter tuning results.")
     parser.add_argument("--file", type=str, required=True, help="Path to the tuning results JSON file.")
@@ -292,4 +294,5 @@ if __name__ == "__main__":
 # TODO -> also results should be stored to experiment folder, like everything else!!!
 
 
-# python analyze_tuning_results.py --file C:\Users\Thomas\localgit\time-series-nn-forecast-lab\ray_results\RNN_sinusoidal_51_200_20241214-222217/all_trials_results.json --output_dir C:\Users\Thomas\localgit\time-series-nn-forecast-lab\results
+# python analyze_tuning_results.py --file C:\Users\Thomas\localgit\time-series-nn-forecast-lab\experiments\GRU\sinusoidal\GRU_sinusoidal_200_50_0.70_0.15_0.15_20241222-215355/all_hyperparameters.json --output_dir C:\Users\Thomas\localgit\time-series-nn-forecast-lab\experiments\GRU\sinusoidal\GRU_sinusoidal_200_50_0.70_0.15_0.15_20241222-215355\tuning_results
+

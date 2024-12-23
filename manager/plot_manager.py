@@ -60,6 +60,41 @@ class PlotManager:
         plt.rcParams['legend.fontsize'] = 12
         plt.rcParams['lines.linewidth'] = 2.5
 
+    # TODO -> todo detailed control over legend and stuff -> apply everywhere!!!
+    @staticmethod
+    def apply_legend(ax, loc='upper right', ncol=1, title=None):
+        """
+        Apply consistent legend settings.
+
+        Args:
+            ax: The Axes object to apply the legend.
+            loc: Position of the legend (default is 'upper right').
+            ncol: Number of columns in the legend (default is 1).
+            title: Title for the legend (optional).
+        """
+        ax.legend(loc=loc, ncol=ncol, title=title, frameon=True, shadow=False, fancybox=True)
+
+    # TODO -> use this whenever a TEXT is needed in a plot
+    @staticmethod
+    def apply_text(ax, text, x=0.05, y=0.95, verticalalignment='top', fontsize=10):
+        """
+        Add consistent text annotations to a plot.
+
+        Args:
+            ax: The Axes object to apply the text.
+            text: Text string to add.
+            x: Horizontal position (default is 0.05).
+            y: Vertical position (default is 0.95).
+            verticalalignment: Vertical alignment of the text (default is 'top').
+            fontsize: Font size of the text (default is 10).
+        """
+        ax.text(
+            x, y, text,
+            transform=ax.transAxes,
+            verticalalignment=verticalalignment,
+            fontsize=fontsize,
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
+        )
 
     def _save_or_show_plot(self, filename):
         """
@@ -146,7 +181,10 @@ class PlotManager:
 
 
     # region EVALUATION PLOTS
-    def plot_evaluation(self, ts_past, ts_future, x_context, y_actual, y_predicted, model_name, plot_index, plot_title):
+
+    # TODO -> check if BOTH PLOTs can be merged together!!!! since it is very similar code
+
+    def plot_evaluation(self, ts_past, ts_future, x_context, y_actual, y_predicted, model_name, plot_index, plot_title, denormalized: bool, plot_info=None):
         """
         Plot and save the actual vs. predicted values with context.
 
@@ -159,6 +197,7 @@ class PlotManager:
             model_name (str): Name of the model being evaluated.
             plot_index (int): Index of the current plot.
             plot_title (str): Title of the plot including model and hyperparameter details.
+            plot_info (str): Additional information to display on the plot.
         """
         logger.info(f"Generating evaluation plot for {model_name}, plot index: {plot_index}")
 
@@ -171,8 +210,99 @@ class PlotManager:
         plt.xlabel("Time Steps")
         plt.ylabel("Value")
 
-        filename = f"{model_name}_plot_{plot_index}.png"
+        if plot_info:
+            plt.text(
+                0.02, 0.95,
+                plot_info,
+                transform=plt.gca().transAxes,
+                fontsize=12,
+                verticalalignment='top'
+            )
+
+        if denormalized:
+            filename = f"{model_name}_denormalized_plot_{plot_index}.png"
+        else:
+            filename = f"{model_name}_normalized_plot_{plot_index}.png"
+
         self._save_or_show_plot(filename)
+
+    def plot_evaluation_full_context(
+            self,
+            ts_past,
+            ts_future,
+            x_context,
+            y_actual,
+            y_predicted,
+            model_name,
+            plot_index,
+            plot_title,
+            denormalized: bool,
+            plot_info=None,
+            all_features_context=None
+    ):
+        """
+        Plot and save the actual vs. predicted values with context.
+
+        Args:
+            ts_past (int): Number of past time steps.
+            ts_future (int): Number of future time steps.
+            x_context (numpy.ndarray): Selected feature context data.
+            y_actual (numpy.ndarray): Actual values for the selected feature.
+            y_predicted (numpy.ndarray): Predicted values for the selected feature.
+            model_name (str): Name of the model being evaluated.
+            plot_index (int): Index of the current plot.
+            plot_title (str): Title of the plot including model and hyperparameter details.
+            denormalized (bool): Flag indicating if the data is denormalized.
+            plot_info (str, optional): Additional information to display on the plot.
+            all_features_context (numpy.ndarray, optional): Full context data for all features.
+        """
+        logger.info(f"Generating evaluation plot for {model_name}, plot index: {plot_index}")
+
+        # Plot all input features with lower alpha
+        if all_features_context is not None:
+            num_features = all_features_context.shape[1]
+            for feature_idx in range(num_features):
+                plt.plot(
+                    range(-ts_past, 0),
+                    all_features_context[:, feature_idx],
+                    label=f"Feature {feature_idx}" if feature_idx == 0 else None,
+                    color="gray",
+                    alpha=0.5,
+                    linewidth=1,
+                )
+
+        # Plot selected feature's context, actual, and predicted values
+        plt.plot(range(-ts_past, 0), x_context, label="Selected Feature (Context)", color="blue", linewidth=2)
+        plt.plot(range(0, ts_future), y_actual, label="Actual", color="green", linewidth=2)
+        plt.plot(range(0, ts_future), y_predicted, label="Predicted", color="red", linewidth=2)
+        plt.axvline(x=0, color="black", linestyle="--", linewidth=0.8)
+
+        # Add legend, title, and labels
+        plt.legend()
+        plt.title(plot_title)
+        plt.xlabel("Time Steps")
+        plt.ylabel("Value")
+
+        # Add optional info text
+        if plot_info:
+            plt.text(
+                0.02,
+                0.95,
+                plot_info,
+                transform=plt.gca().transAxes,
+                fontsize=12,
+                verticalalignment="top",
+                bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
+            )
+
+        # Generate filename
+        filename = f"{model_name}_{'denormalized' if denormalized else 'normalized'}_plot_{plot_index}_ALL.png"
+
+        # Save or show the plot
+        self._save_or_show_plot(filename)
+
+
+
 
     def plot_metric_trend(self, metrics, metric_name, title, filename):
         """
@@ -184,7 +314,6 @@ class PlotManager:
             title (str): Title for the plot.
             filename (str): File name to save the plot.
         """
-        import matplotlib.pyplot as plt
 
         plt.plot(metrics, marker="o", linestyle="-", color="green")
         plt.title(title)

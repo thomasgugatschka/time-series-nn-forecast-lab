@@ -62,8 +62,21 @@ def evaluate_model(wrapper, hyperparameters, test_data, ts_past, ts_future, data
     raw_metrics_norm = []
     raw_metrics_denorm = []
 
+                            # TODO is the , 0] the index of the feature ??? -> need to use the selected_feature
+    selected_feature_idx = 0  # TODO - Replace with the actual index of the selected feature
+
     for i in range(0, x_test.size(0), ts_future):  # Shift by ts_future instead of 1
-        x_context = x_test[i, -ts_past:, 0].cpu().numpy()
+
+
+        # Extract the context for all features
+        x_context_all_features = x_test[i, -ts_past:, :].cpu().numpy()  # Shape: [ts_past, num_features]
+
+        # Extract the selected feature from the context # TODO - not sure if needed, since original calcualtion works
+        x_context = x_context_all_features[:, selected_feature_idx]  # Shape: [ts_past]
+
+
+
+        x_context = x_test[i, -ts_past:, selected_feature_idx].cpu().numpy()
         y_actual = y_test[i].cpu().numpy()
 
         x_batch = x_test[i].unsqueeze(0).to(device)
@@ -73,7 +86,9 @@ def evaluate_model(wrapper, hyperparameters, test_data, ts_past, ts_future, data
         y_actual_denorm = data_manager.postprocess_data(y_actual, selected=True)
         y_pred_denorm = data_manager.postprocess_data(y_pred, selected=True)
         x_context_denorm = data_manager.postprocess_data(x_context, selected=True)
-        # TODO -> maybe context not rquired for select=True -> dendorm.. maybe I want to plot full context
+
+        # Reverse transformations for all features
+        x_context_denorm_all_features = data_manager.postprocess_data(x_context_all_features, selected=False)
 
         # Calculate metrics
         metrics_norm = MetricsUtility.calculate_metrics(y_pred, y_actual)
@@ -84,39 +99,46 @@ def evaluate_model(wrapper, hyperparameters, test_data, ts_past, ts_future, data
 
 
 
-
-
-        # Generate a generic plot title
-        # TODO maybe not title but some other info text ??
-        # TODO -> ADD plot_manager to handle this additonal text
-        # TODO -> maybe one time with and one time without additoinal text
-        # TODO -> x and Y coordinates for the text to be handled in plot_manager
+        # Generate a generic info text for plot
         model_params = {
             k.split("/")[-1]: v for k, v in hyperparameters.items() if k.startswith("config/model_params")
         }
         training_params = {
             k.split("/")[-1]: v for k, v in hyperparameters.items() if k.startswith("config/training_params")
         }
-
         model_param_str = ", ".join([f"{k}: {v}" for k, v in model_params.items()])
         training_param_str = ", ".join([f"{k}: {v}" for k, v in training_params.items()])
-        plot_info_text = (
+        info_text = (
             f"Model: {hyperparameters['config/model_type']}, Val Loss: {val_loss:.4f}\n"
             f"{model_param_str}\n{training_param_str}"
         )
 
-        logger.warning(f"plot_info_text: {plot_info_text}")
+        # TODO - make all calls the same like -> plot_evaluation_full_context
 
+        # Generate plot(s)
+        plot_title = f"Model: {hyperparameters['config/model_type']}, Val Loss: {val_loss:.4f} (Normalized)"
+        plot_manager.plot_evaluation(
+            ts_past, ts_future, x_context, y_actual, y_pred, model_name, i + 1, plot_title, denormalized=False, plot_info=info_text)
 
+        plot_title = f"Model: {hyperparameters['config/model_type']}, Val Loss: {val_loss:.4f} (Denormalized)"
+        plot_manager.plot_evaluation(
+            ts_past, ts_future, x_context_denorm, y_actual_denorm, y_pred_denorm, model_name, i + 1, plot_title, denormalized=True, plot_info=info_text)
 
+        plot_title = f"Model Evaluation (Denormalized) | Sample {i + 1}"
+        plot_manager.plot_evaluation_full_context(
+            ts_past=ts_past,
+            ts_future=ts_future,
+            x_context=x_context_denorm,
+            y_actual=y_actual_denorm,
+            y_predicted=y_pred_denorm,
+            model_name=model_name,
+            plot_index=i + 1,
+            plot_title=plot_title,
+            denormalized=True,
+            plot_info=info_text,
+            all_features_context=x_context_denorm_all_features,
+        )
 
-        # TODO add to filename -> norm / denorm -> adapt plot_manager to HANDLE IT
-        # Generate plot
-        plot_title = f"Model: {hyperparameters['config/model_type']}, Val Loss: {val_loss:.4f}"
-        plot_manager.plot_evaluation(ts_past, ts_future, x_context, y_actual, y_pred, model_name, i + 1, plot_title)
-
-        plot_title = f"DENORM - Model: {hyperparameters['config/model_type']}, Val Loss: {val_loss:.4f}"
-        plot_manager.plot_evaluation(ts_past, ts_future, x_context_denorm, y_actual_denorm, y_pred_denorm, model_name, i + 1, plot_title)
 
     # Aggregate metrics
     def aggregate_metrics(metrics, comparison_metric="mse"):
