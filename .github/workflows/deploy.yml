@@ -3,18 +3,18 @@ name: Deploy to Google Cloud
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04  # Explicitly specify the Ubuntu version
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v2
 
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v0
+      uses: google-github-actions/auth@v1  # Updated to v1
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
 
@@ -23,12 +23,15 @@ jobs:
 
     - name: Deploy Code to VM
       run: |
-        # Copy code to the VM
+        set -e
+        echo "Copying project files to VM..."
         gcloud compute scp --recurse . nn-instance:/home/nn-user/project --zone=us-central1-a
 
-        # SSH into the VM and set up the environment
+        echo "Installing dependencies and running the experiment..."
         gcloud compute ssh nn-instance --zone=us-central1-a --command="
         cd /home/nn-user/project &&
         pip install -r requirements.txt &&
-        python scripts/hyperparameter_tuning.py --config_path config.yaml
+        python scripts/hyperparameter_tuning.py --config_path configs/config.yaml > experiment.log 2>&1
         "
+        echo "Experiment completed. Fetching logs..."
+        gcloud compute scp nn-instance:/home/nn-user/project/experiment.log . --zone=us-central1-a
