@@ -31,8 +31,8 @@ def main():
     cropped_data = data_manager.get_data('cropped_data')
     metadata = data_manager.get_data('metadata')
 
-    crop_start = data_manager.get_data("metadata").get("crop_start", 0)
-    crop_end = data_manager.get_data("metadata").get("crop_end", len(raw_data))
+    crop_start = metadata.get("crop_start", 0)
+    crop_end = metadata.get("crop_end", len(raw_data))
 
 
     # Plot 1: Full Dataset (Selected Feature and All Features)

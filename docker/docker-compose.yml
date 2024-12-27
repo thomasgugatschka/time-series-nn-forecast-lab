@@ -1,0 +1,18 @@
+version: "3.12"
+
+services:
+  hyperparameter-tuning:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: hyperparameter-tuning
+    volumes:
+      - ../:/workspace/project_root
+    env_file:
+      - ../.env
+    command: ["python", "scripts/hyperparameter_tuning.py", "--config_path", "configs/config.yaml"]
+    working_dir: /workspace/project_root
+    ports:
+      - "8000:8000" # Optional: If you need to expose any services (e.g., TensorBoard)
+    environment:
+      LOCAL_MODE: "False" # Override environment variables from the .env if needed

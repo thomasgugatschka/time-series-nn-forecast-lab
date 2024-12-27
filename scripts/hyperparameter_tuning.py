@@ -43,7 +43,12 @@ logger = get_logger(__name__)
 
 # region ### PARSE ARGUMENTS ###
 def parse_args():
-    """Parse command line arguments."""
+    """
+    Parse command-line arguments for hyperparameter tuning.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser(description="Train different models with different datasets.")
     parser.add_argument("--config_path", type=str, default='config.yaml', help="Path to the configuration file.")
     logger.info(f'Parse Args: {parser.parse_args()}')
@@ -52,7 +57,16 @@ def parse_args():
 
 # region ### TRAINING FUNCTION ##
 def objective(hyperparameter_config, model_type, dataset_config, data_manager, plot_manager):
-    """Objective function for hyperparameter tuning."""
+    """
+    Objective function for hyperparameter tuning.
+
+    Args:
+        hyperparameter_config (dict): Configuration for the trial.
+        model_type (str): Type of the model being tuned.
+        dataset_config (dict): Dataset-specific configuration.
+        data_manager (DataManager): Manager for data loading and preprocessing.
+        plot_manager (PlotManager): Manager for creating plots during the trial.
+    """
 
     set_seed(hyperparameter_config.get("trial_seed"))
     device = get_device()

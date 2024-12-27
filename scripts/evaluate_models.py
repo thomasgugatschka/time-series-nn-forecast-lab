@@ -92,7 +92,9 @@ def evaluate_model(wrapper, hyperparameters, test_data, ts_past, ts_future, data
 
         # Calculate metrics
         metrics_norm = MetricsUtility.calculate_metrics(y_pred, y_actual)
+        MetricsUtility.print_metrics(metrics_norm)
         metrics_denorm = MetricsUtility.calculate_metrics(y_pred_denorm, y_actual_denorm)
+        MetricsUtility.print_metrics(metrics_denorm)
 
         raw_metrics_norm.append(metrics_norm)
         raw_metrics_denorm.append(metrics_denorm)

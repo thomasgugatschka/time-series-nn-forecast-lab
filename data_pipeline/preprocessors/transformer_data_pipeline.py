@@ -246,9 +246,12 @@ class TransformerDataPipeline(BaseDataPipeline):
         return df
 
 
+# TODO -> FIX OR MERGE TRANSFORMER AND RNN (or GENERIC) DATA PIPELINES....
+# TODO -> MAYBE ADD more RESTRICTIVE CONFIG FILES
+# TODO -> MAYBE ALL STEPS IN THERE... and then just TRUE / FALSE or the options -> z_score
+# TODO -> Positional Encoding -> TRUE / FALSE -> and only true for Transformer...
 
-
-
+# TODO -> z_scor or rather min_max for Transformer ??????????
 
 
 

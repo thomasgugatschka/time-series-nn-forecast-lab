@@ -22,6 +22,3 @@ class BaseCallback:
 
     def on_validation_end(self, wrapper, val_loss=None, **kwargs):
         pass
-
-# TODO add checkpoint saving and loading callbacks
-

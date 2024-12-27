@@ -1,8 +1,5 @@
-# File: strategies/scheduler_strategy.py
 from ray.tune.schedulers import ASHAScheduler
-from ray.tune.schedulers import FIFOScheduler  # Placeholder for other schedulers
-
-#TODO move to a different subfolder? so they are closer to where they are actually used
+from ray.tune.schedulers import FIFOScheduler
 
 class SchedulerStrategy:
     def __init__(self, scheduler_name="asha", metric="val_loss", mode="min", max_epochs=100, grace_period=5, reduction_factor=2):

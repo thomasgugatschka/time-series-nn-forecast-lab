@@ -5,7 +5,17 @@ from utilities.logging_utils import get_logger
 logger = get_logger(__name__)
 
 class TrainingPipeline:
+    """
+    Class to manage the training and validation process of a machine learning model.
+    """
     def __init__(self, pipeline_config, wrapper):
+        """
+        Initialize the TrainingPipeline with the given configuration.
+
+        Args:
+            pipeline_config (dict): Configuration for the training pipeline.
+            wrapper (object): Wrapper for handling model training.
+        """
         self.model = pipeline_config["model"]
         self.data_loaders = pipeline_config["data_loaders"]
         self.epochs = pipeline_config["epochs"]
@@ -13,7 +23,9 @@ class TrainingPipeline:
         self.callback_manager = pipeline_config.get("callback_manager")  # Optional, could be None
 
     def run(self):
-        """Runs the full training process."""
+        """
+        Execute the full training process, including training and validation.
+        """
         try:
             # Trigger training begin callback
             if self.callback_manager:
@@ -58,7 +70,15 @@ class TrainingPipeline:
 
 
     def train_epoch(self, epoch):
-        """Train the model for one epoch using the wrapper and data loader."""
+        """
+        Train the model for a single epoch.
+
+        Args:
+            epoch (int): The current epoch number.
+
+        Returns:
+            float: Average training loss for the epoch.
+        """
         train_loss_total = 0
         num_train_batches = 0
 
@@ -81,7 +101,15 @@ class TrainingPipeline:
         return avg_train_loss
 
     def validate_epoch(self, epoch):
-        """Validate the model for one epoch using the wrapper and data loader."""
+        """
+        Validate the model for a single epoch.
+
+        Args:
+            epoch (int): The current epoch number.
+
+        Returns:
+            tuple: Average validation loss and validation data (input and target).
+        """
         val_loss_total = 0
         num_val_batches = 0
 
