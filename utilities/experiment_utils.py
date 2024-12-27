@@ -72,6 +72,7 @@ def get_loss_function(loss_function_name):
 
     # https://pytorch.org/docs/stable/nn.html#loss-functions
 
+
     loss_functions = {
         'MSELoss': torch.nn.MSELoss,
         'MAELoss': torch.nn.L1Loss,
