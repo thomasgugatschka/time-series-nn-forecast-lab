@@ -7,14 +7,14 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-22.04  # Explicitly specify the Ubuntu version
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v2
 
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1  # Updated to v1
+      uses: google-github-actions/auth@v1
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
 
@@ -25,15 +25,17 @@ jobs:
       run: |
         set -e
         echo "Copying project files to VM..."
-        gcloud compute scp --recurse . nn-instance:/home/nn-user/project --zone=us-central1-a || {
+        gcloud compute scp --recurse ./ nn-instance:/home/nn-user/project --zone=us-central1-a || {
           echo "SSH key setup failed. Retrying...";
           gcloud compute ssh nn-instance --zone=us-central1-a --command="exit";
         }
 
         echo "Installing dependencies and running the experiment..."
         gcloud compute ssh nn-instance --zone=us-central1-a --command="
+        mkdir -p /home/nn-user/project &&
         cd /home/nn-user/project &&
         pip install -r requirements.txt &&
         python scripts/hyperparameter_tuning.py --config_path configs/config.yaml > experiment.log 2>&1
         "
-
+        echo "Experiment completed. Fetching logs..."
+        gcloud compute scp nn-instance:/home/nn-user/project/experiment.log . --zone=us-central1-a
