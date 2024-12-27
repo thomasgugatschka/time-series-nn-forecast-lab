@@ -24,18 +24,20 @@ jobs:
     - name: Deploy Code to VM
       run: |
         set -e
+        echo "Creating target directory on VM..."
+        gcloud compute ssh nn-instance --zone=us-central1-a --command="mkdir -p /home/runner/project"
+
         echo "Copying project files to VM..."
-        gcloud compute scp --recurse ./ nn-instance:/home/nn-user/project --zone=us-central1-a || {
-          echo "SSH key setup failed. Retrying...";
-          gcloud compute ssh nn-instance --zone=us-central1-a --command="exit";
+        gcloud compute scp --recurse "$(pwd)" nn-instance:/home/runner/project --zone=us-central1-a || {
+          echo "File copy failed.";
+          exit 1;
         }
 
         echo "Installing dependencies and running the experiment..."
         gcloud compute ssh nn-instance --zone=us-central1-a --command="
-        mkdir -p /home/nn-user/project &&
-        cd /home/nn-user/project &&
+        cd /home/runner/project &&
         pip install -r requirements.txt &&
         python scripts/hyperparameter_tuning.py --config_path configs/config.yaml > experiment.log 2>&1
         "
         echo "Experiment completed. Fetching logs..."
-        gcloud compute scp nn-instance:/home/nn-user/project/experiment.log . --zone=us-central1-a
+        gcloud compute scp nn-instance:/home/runner/project/experiment.log . --zone=us-central1-a
