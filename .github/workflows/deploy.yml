@@ -21,21 +21,22 @@ jobs:
     - name: Set Google Cloud Project
       run: gcloud config set project time-series-nn-forecast-lab
 
-    - name: Deploy Code to VM
+    - name: Archive Project Files
+      run: tar -czf project.tar.gz .
+
+    - name: Copy Project to VM
       run: |
-        set -e
-        echo "Creating target directory on VM..."
-        gcloud compute ssh nn-instance --zone=us-central1-a --command="mkdir -p /home/runner/project"
+        gcloud compute scp project.tar.gz nn-instance:/home/runner/project.tar.gz --zone=us-central1-a
+        gcloud compute ssh nn-instance --zone=us-central1-a --command="mkdir -p /home/runner/project && tar -xzf /home/runner/project.tar.gz -C /home/runner/project"
 
-        echo "Copying project files to VM..."
-        gcloud compute scp --recurse "$(pwd)" nn-instance:/home/runner/project --zone=us-central1-a || {
-          echo "File copy failed.";
-          exit 1;
-        }
-
-        echo "Installing dependencies and running the experiment..."
+    - name: Install Dependencies and Run Experiment
+      run: |
         gcloud compute ssh nn-instance --zone=us-central1-a --command="
         cd /home/runner/project &&
+        if [ ! -f requirements.txt ]; then
+          echo 'Error: requirements.txt not found.';
+          exit 1;
+        fi &&
         pip install -r requirements.txt &&
         python scripts/hyperparameter_tuning.py --config_path configs/config.yaml > experiment.log 2>&1
         "
