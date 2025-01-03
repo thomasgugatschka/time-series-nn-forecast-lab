@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from sklearn.metrics import mean_squared_error, mean_absolute_error
-from utilities.logging_utils import setup_logging, get_logger
+from utilities.logging_utils import get_logger
 logger = get_logger(__name__)
 
 class MetricsUtility:
