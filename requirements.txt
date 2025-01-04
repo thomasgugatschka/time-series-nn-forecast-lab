@@ -1,20 +1,21 @@
-torch>=2.5.1
-scipy>=1.14.1
-pandas>=2.2.0
-numpy>=2.1.2
-matplotlib>=3.9.2
-scikit-learn>=1.5.2
-colorlog>=6.0.0
-notebook>=7.2.2
+torch~=2.5.1
+scipy~=1.14.1
+pandas~=2.2.3
+numpy~=2.1.2
+matplotlib~=3.9.2
+scikit-learn~=1.5.2
+colorlog~=6.9.0
 requests~=2.32.3
 PyYAML~=6.0.2
-imageio>=2.36.0
+imageio~=2.36.0
 ray[all]==2.39.0
-tensorboard>= 2.18.0
-optuna>=4.1.0
-hyperopt>= 0.2.7
+tensorboard~= 2.18.0
+optuna~=4.1.0
+hyperopt~= 0.2.7
 bayesian-optimization == 1.2.0
 h5py~=3.12.1
 seaborn~=0.13.2
 plotly~=5.24.1
 python-dotenv~=1.0.1
+protobuf~=5.28.3
+google-cloud-storage~=2.19.0

@@ -1,0 +1,117 @@
+import torch
+import torch.nn as nn
+import numpy as np
+from src.models.base_model import BaseModel
+from src.utilities.logging_utils import get_logger
+
+logger = get_logger(__name__)
+
+
+class PositionalEncoding(nn.Module):
+    def __init__(self, embed_dim, max_len=5000):
+        super(PositionalEncoding, self).__init__()
+        pe = torch.zeros(max_len, embed_dim)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, embed_dim, 2).float() * (-np.log(10000.0) / embed_dim))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0)  # Add batch dimension
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        """
+        Add positional encoding to the input tensor.
+
+        Args:
+            x (Tensor): Input tensor of shape (batch_size, seq_len, embed_dim).
+
+        Returns:
+            Tensor: Input tensor with positional encoding added.
+        """
+        return x + self.pe[:, :x.size(1), :]  # Match seq_len dynamically
+
+
+class Transformer(BaseModel):
+    def __init__(self, input_size, output_size, embed_dim, num_heads, num_layers, forward_dim, dropout, seq_len, **kwargs):
+        super(Transformer, self).__init__(model_name='Transformer')
+
+        # Validate the parameters
+        self.validate_parameters(
+            input_size=input_size,
+            output_size=output_size,
+            embed_dim=embed_dim,
+            num_heads=num_heads,
+            num_layers=num_layers,
+            forward_dim=forward_dim,
+            dropout=dropout,
+            seq_len=seq_len
+        )
+
+        # Initialize model parameters
+        self.input_size = input_size         # The dimensionality of input features for each time step
+        self.output_size = output_size       # The number of time steps or features to predict as output
+        self.embed_dim = embed_dim           # The size of the embedding space for input tokens (used in self-attention)
+        self.num_heads = num_heads           # The number of attention heads in the multi-head self-attention mechanism
+        self.num_layers = num_layers         # The number of stacked Transformer layers (encoders/decoders)
+        self.forward_dim = forward_dim       # The dimensionality of the feed-forward network in each Transformer layer
+        self.dropout = dropout               # The dropout rate applied in attention and feed-forward layers for regularization
+        self.seq_len = seq_len               # The length of the input sequence (number of time steps considered in the model)
+
+        # Embedding layer to project input features into embedding space
+        self.embedding = nn.Linear(input_size, embed_dim)
+
+        # Positional encoding module
+        self.positional_encoding = PositionalEncoding(embed_dim=embed_dim, max_len=seq_len)
+
+        # Transformer Encoder Layers
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=embed_dim,
+            nhead=num_heads,
+            dim_feedforward=forward_dim,
+            dropout=dropout,
+            batch_first=True
+        )
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+
+        # Output layer
+        self.fc_out = nn.Linear(embed_dim, 1)  # Always predict a single feature
+
+
+        if kwargs:
+            logger.debug(f"Unused keyword arguments: {kwargs}")
+
+    def forward(self, x):
+        """
+        Forward pass for the Transformer model.
+
+        Args:
+            x (Tensor): Input tensor of shape (batch_size, seq_len, input_size).
+
+        Returns:
+            Tensor: Output tensor of shape (batch_size, ts_future) if predict_single_feature is True,
+                    otherwise (batch_size, ts_future, num_features).
+        """
+
+        #logger.info(f"Input tensor shape before forward pass: {x.shape}")
+
+        # Transformer forward pass
+        x = self.embedding(x)  # Shape: (batch_size, seq_len, embed_dim)
+        #logger.info(f"Embedding output shape: {x.shape}")
+        x = self.positional_encoding(x)
+        #logger.info(f"Positional encoding output shape: {x.shape}")
+        x = self.transformer_encoder(x)  # Shape: (batch_size, seq_len, embed_dim)
+        #logger.info(f"Transformer output shape: {x.shape}")
+
+        # Apply a linear layer to project to output size
+        x = self.fc_out(x)  # Shape: (batch_size, seq_len, 1) if predict_single_feature else (batch_size, seq_len, num_features)
+
+        #logger.info(f"Sliced output shape: {x.shape}")
+
+        # Return the last `ts_future` time steps
+        x = x[:, -self.output_size:, :]  # Shape: (batch_size, ts_future, 1) or (batch_size, ts_future, num_features)
+        #logger.info(f"Final output shape after fc_out: {x.shape}")
+
+
+        return x.squeeze(-1)  # Shape: (batch_size, ts_future)
+
+

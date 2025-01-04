@@ -1,0 +1,3 @@
+experiment_configs\config_rnn_ETTh_0.7-0.15.yaml
+experiment_configs\config_gru_ETTm_0.8-0.1.yaml
+experiment_configs\config_transformer_electricity_0.6-0.2.yaml
