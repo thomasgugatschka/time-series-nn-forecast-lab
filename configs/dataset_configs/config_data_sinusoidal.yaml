@@ -21,7 +21,7 @@ columns_to_drop:
 #  - feature_2
 # Indices for cropping the DataFrame for lower calc time // disable set to null
 crop_start: 5_000
-crop_end: 8_000
+crop_end: 6_500
 ts_past: 200
 ts_future: 50
     # Optional: Override split ratios for specific dataset needs

@@ -1,9 +1,16 @@
 import hashlib
+import tempfile
+import time
+
 import yaml
 import datetime
 import json
+import os
 from pathlib import Path
 
+from src.manager.gcs_manager import GCSManager
+
+from src.manager.env_manager import EnvManager
 from src.manager.path_manager import path_manager
 from src.manager.file_manager import file_manager
 from src.utilities.logging_utils import get_logger
@@ -33,11 +40,35 @@ class ExperimentManager:
                     "ExperimentManager must be initialized with a config_manager during the first instantiation."
                 )
 
+
+            # Initialize and load environment variables
+            self.env_manager = EnvManager()
+            self.env_manager.load_env()
+
+            self.gcs_use = self.env_manager.get_env_variable('USE_GCS', default='False', as_bool=True)
+            self.gcs_bucket = self.env_manager.get_env_variable('GCS_BUCKET', default=None)
+
+
+            if self.gcs_use:
+                if not self.gcs_bucket:
+                    raise ValueError("GCS_BUCKET must be set when USE_GCS is True")
+                self.sync_manager = ExperimentSync(self.gcs_bucket)
+                self.metadata_gcspath = "experiments/experiment_metadata.json"
+            else:
+                self.metadata_path = path_manager.get_path("experiment_dir") / "experiment_metadata.json"
+
             self.config_manager = config_manager
             self._experiment_name = None
             self._experiment_path = None
-            self.metadata_path = path_manager.get_path("experiment_dir") / "experiment_metadata.json"
+
+
+
+
+
+
             self._initialized = True
+
+
 
     @property
     def experiment_name(self):
@@ -76,6 +107,7 @@ class ExperimentManager:
         # Generate a hash of the normalized string
         return hashlib.md5(normalized_yaml_str.encode('utf-8')).hexdigest()
 
+    # TODO -> move within _hash_config ?? since it is only needed in that function so can be placed in the function itself
     def _sort_dict(self, d):
         """Recursively sort a dictionary to ensure consistent key order."""
         if isinstance(d, dict):
@@ -84,16 +116,32 @@ class ExperimentManager:
             return [self._sort_dict(v) for v in d]
         return d
 
+
+
+# TODO add more information into the metadata file like relevant infromation about experiment dataset, model, ts_past, ts_future etc.
+
     def _load_experiment_metadata(self):
-        """Load experiment metadata from the JSON file using file_manager."""
-        if file_manager.file_exists(self.metadata_path):
-            return file_manager.load_json(self.metadata_path)
-        return {}
+        """Load experiment metadata from GCS or local file."""
+        if self.gcs_use:
+            return self.sync_manager.load_metadata(self.metadata_gcspath)[0]
+        else:
+            if file_manager.file_exists(self.metadata_path):
+                return file_manager.load_json(self.metadata_path)
+            return {}
 
     def _save_experiment_metadata(self, metadata):
-        """Save updated experiment metadata to the JSON file using file_manager."""
-        logger.info(f"Saving experiment metadata to: {self.metadata_path}")
-        file_manager.save_json(metadata, self.metadata_path)
+        """Save experiment metadata to GCS or local file."""
+
+        if self.gcs_use:
+            logger.info(f"Saving experiment metadata to GCS: {self.metadata_gcspath}")
+            self.sync_manager.save_metadata_with_retries(metadata, self.metadata_gcspath)
+        else:
+            logger.info(f"Saving experiment metadata to: {self.metadata_path}")
+            file_manager.save_json(metadata, self.metadata_path)
+
+
+
+
 
     def manage_experiment(self):
         """
@@ -244,3 +292,119 @@ class ExperimentManager:
         file_manager.save_json(trial_data, trial_data_path)
         logger.info(f"Trial-specific data saved to {trial_data_path}")
 
+    def finalize_experiment(self):
+        """
+        Finalize the experiment by syncing data to GCS.
+        """
+        if self.gcs_use:
+            self.sync_manager.sync_experiment(self.experiment_path, f"experiments/{self.experiment_name}")
+
+        logger.info(f"Experiment {self.experiment_name} finalized.")
+
+
+
+
+class ExperimentSync:
+    RETRY_DELAY = 1  # Seconds
+    MAX_RETRIES = 5  # Number of retries for saving metadata
+
+    def __init__(self, bucket_name: str):
+        self.gcs_manager = GCSManager(bucket_name)
+
+    def sync_experiment(self, local_experiment_path: str, gcs_experiment_path: str):
+        """
+        Sync a local experiment folder to GCS, uploading only new or modified files.
+
+        Args:
+            local_experiment_path (str): Path to the local experiment folder.
+            gcs_experiment_path (str): Destination path in GCS.
+        """
+        logger.info(
+            f"Start syncing local experiment to GCS: {local_experiment_path} -> gs://{self.gcs_manager.bucket_name}/{gcs_experiment_path}")
+
+        local_path = Path(local_experiment_path)
+        if not local_path.exists():
+            logger.info(f"Local experiment path {local_path} does not exist. Skipping sync.")
+            return
+
+        for root, _, files in os.walk(local_path):
+            for file in files:
+                local_file_path = Path(root) / file
+                relative_path = local_file_path.relative_to(local_path)
+                gcs_file_path = f"{gcs_experiment_path}/{relative_path.as_posix()}"
+
+                # Compare file metadata before uploading
+                if not self.gcs_manager.file_needs_upload(local_file_path, gcs_file_path):
+                    logger.info(f"Skipping unchanged file: {local_file_path}")
+                    continue
+
+                # Upload new or modified file
+                self.gcs_manager.upload_file(str(local_file_path), gcs_file_path)
+
+        logger.info(f"Synced {local_experiment_path} to gs://{self.gcs_manager.bucket_name}/{gcs_experiment_path}")
+
+    def load_metadata(self, metadata_path: str) -> (dict, str):
+        """
+        Load metadata from GCS and return its content with a version hash.
+
+        Args:
+            metadata_path (str): Path to the metadata file in GCS.
+
+        Returns:
+            tuple: (metadata content as dict, version hash as str).
+        """
+        try:
+            data = self.gcs_manager.download_to_string(metadata_path)
+            version_hash = hashlib.md5(data.encode('utf-8')).hexdigest()
+            return json.loads(data), version_hash
+        except FileNotFoundError:
+            logger.warning(f"Metadata file {metadata_path} not found in GCS. Returning empty metadata.")
+            return {}, None
+
+    def save_metadata(self, metadata: dict, metadata_path: str, expected_version: str = None):
+        """
+        Save metadata to GCS, verifying version to prevent conflicts.
+
+        Args:
+            metadata (dict): Metadata content to save.
+            metadata_path (str): Path to the metadata file in GCS.
+            expected_version (str): Expected version hash of the metadata.
+
+        Raises:
+            RuntimeError: If the metadata version has changed during the save operation.
+        """
+        with tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".json") as temp_file:
+            json.dump(metadata, temp_file, indent=4)
+            temp_file_path = temp_file.name
+
+        if expected_version:
+            # Verify version before upload
+            current_metadata, current_version = self.load_metadata(metadata_path)
+            if current_version != expected_version:
+                raise RuntimeError("Metadata file has been updated by another instance. Retry required.")
+
+        self.gcs_manager.upload_file(temp_file_path, metadata_path)
+        os.remove(temp_file_path)
+        logger.info(f"Saved metadata to: gs://{self.gcs_manager.bucket_name}/{metadata_path}")
+
+    def save_metadata_with_retries(self, metadata: dict, metadata_path: str):
+        """
+        Save metadata with retries to handle version conflicts.
+
+        Args:
+            metadata (dict): Metadata content to save.
+            metadata_path (str): Path to the metadata file in GCS.
+        """
+        for attempt in range(self.MAX_RETRIES):
+            try:
+                current_metadata, current_version = self.load_metadata(metadata_path)
+                # Merge or update metadata as needed
+                current_metadata.update(metadata)
+                self.save_metadata(current_metadata, metadata_path, expected_version=current_version)
+                logger.info(f"Successfully saved metadata on attempt {attempt + 1}")
+                return
+            except RuntimeError as e:
+                logger.warning(f"Conflict detected while saving metadata. Retrying... ({attempt + 1}/{self.MAX_RETRIES})")
+                time.sleep(self.RETRY_DELAY)
+
+        raise RuntimeError(f"Failed to save metadata after {self.MAX_RETRIES} attempts due to version conflicts.")

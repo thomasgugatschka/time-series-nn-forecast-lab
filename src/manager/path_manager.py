@@ -30,28 +30,13 @@ class PathManager:
 
 
         # Initialize and load environment variables
-        env_manager = EnvManager()
-        env_manager.load_env()
-
-
-
-        # Determine whether to use GCS or local paths
-        self.use_gcs = env_manager.get_env_variable('USE_GCS', default='False', as_bool=True)
-        self.gcs_bucket_name = env_manager.get_env_variable('GCS_BUCKET', default=None)
-
-        if self.use_gcs:
-            logger.info("Using Google Cloud Storage for paths.")
-            self.gcs_client = storage.Client()
-            self.gcs_bucket = self.gcs_client.bucket(self.gcs_bucket_name)
-        else:
-            logger.info("Using local file system for paths.")
-
-
+        self.env_manager = EnvManager()
+        self.env_manager.load_env()
 
 
         # Retrieve PROJECT_BASE_DIR, ensuring the default value is a string
         default_base_dir = str(Path(__file__).resolve().parent.parent)
-        self.base_dir = Path(env_manager.get_env_variable('PROJECT_BASE_DIR', default_base_dir)).resolve()
+        self.base_dir = Path(self.env_manager.get_env_variable('PROJECT_BASE_DIR', default_base_dir)).resolve()
 
         logger.info(f"Project Base Directory: {self.base_dir}")
 
@@ -59,49 +44,18 @@ class PathManager:
         self.paths = {
             'base_dir': self.base_dir,
             'data_dir': self.base_dir / 'data',
+            'experiment_dir': self.base_dir / 'experiments',
             'log_dir': self.base_dir / 'logs',
- #           'experiment_dir': self.base_dir / 'experiments',
-            # TODO -> check if this works....
-            'experiment_dir': 'gs://{}'.format(self.gcs_bucket_name) if self.use_gcs else self.base_dir / 'experiments',
             'config_dir': self.base_dir / 'configs',
             'dataset_config_dir': self.base_dir / 'configs' / 'dataset_configs',
         }
 
 
-        if not self.use_gcs:
-            # Create directories only for local paths
-            self._ensure_directories(self.paths.values())
-
+        self._ensure_directories(self.paths.values())
 
         # Placeholder for dynamically added paths
         self.dynamic_paths: Dict[str, Path] = {}
         self.initialized = True
-
-
-
-
-
-
-    def is_experiment_path(self, path: str) -> bool:
-        """
-        Check if a given path relates to experiments.
-        """
-        experiment_base = self.paths["experiment_dir"]
-        return str(path).startswith(str(experiment_base))
-
-    def resolve_path(self, path: str) -> str:
-        """
-        Resolve a path to its local or GCS equivalent.
-        """
-        if self.use_gcs and self.is_experiment_path(path):
-            relative_path = str(Path(path).relative_to(self.paths["experiment_dir"]))
-            gcs_path = f"gs://{self.gcs_bucket_name}/experiments/{relative_path}"
-            return gcs_path
-        return path
-
-
-
-
 
 
     @staticmethod
@@ -187,6 +141,8 @@ class PathManager:
         Returns:
             Path: The full path to the experiment folder.
         """
+        # TODO - maybe adapt -> only experiment name
+        # TODO -> experiment_name might be adapted / increased with more data ????
         experiment_path = self.get_path("experiment_dir") / model_type / dataset_name / experiment_name
         experiment_path.mkdir(parents=True, exist_ok=True)
 

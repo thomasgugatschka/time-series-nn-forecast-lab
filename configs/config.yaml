@@ -1,7 +1,7 @@
-model_type: "RNN"            # Implemented Models
-dataset: "sinusoidal"
+model_type: "GRU"            # Implemented Models
+dataset: "weatherstation"
 #dataset: "illness"    # Available Datasets from data folder
-num_samples: 5               # Number of trials to run during hyperparameter tuning
+num_samples: 4               # Number of trials to run during hyperparameter tuning
 cpu_per_trial: 10  #10           # Number of CPU cores allocated per trial
 gpu_per_trial: 0.8   #0.8         # Fraction of GPU allocated per trial
 max_concurrent_trials: 1      # Maximum number of trials to run concurrently

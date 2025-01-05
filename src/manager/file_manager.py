@@ -28,46 +28,6 @@ class FileManager:
         env_manager = EnvManager()
         env_manager.load_env()
 
-        # Determine whether to use GCS or local paths
-        self.use_gcs = env_manager.get_env_variable('USE_GCS', default='False', as_bool=True)
-        self.gcs_bucket_name = env_manager.get_env_variable('GCS_BUCKET', default=None)
-
-
-        if self.use_gcs:
-            self.gcs_client = storage.Client()
-            self.gcs_bucket = self.gcs_client.bucket(self.gcs_bucket_name)
-
-
-
-
-
-    # --- Local and GCS Wrappers ---
-    def _read_from_gcs(self, gcs_path: str) -> bytes:
-        blob = self.gcs_bucket.blob(gcs_path)
-        data = blob.download_as_bytes()
-        logger.info(f"Read file from GCS: {gcs_path}")
-        return data
-
-    def _write_to_gcs(self, local_path: str, gcs_path: str):
-        blob = self.gcs_bucket.blob(gcs_path)
-        blob.upload_from_filename(local_path)
-        logger.info(f"Uploaded file to GCS: {gcs_path}")
-
-    def _download_from_gcs(self, gcs_path: str, local_path: str):
-        blob = self.gcs_bucket.blob(gcs_path)
-        blob.download_to_filename(local_path)
-        logger.info(f"Downloaded file from GCS: {gcs_path} to {local_path}")
-
-
-
-
-
-# TODO some function which "detects" if experiment is in the path then it uses GCS or local path
-
-
-
-
-
 
     def load_yaml(self, file_path: str):
         """

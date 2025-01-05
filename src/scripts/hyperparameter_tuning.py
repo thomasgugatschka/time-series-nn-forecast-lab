@@ -209,6 +209,8 @@ def main():
 
     # region ### SAVE BEST HYPERPARAMETERS ###
     experiment_manager.save_analysis_results(analysis)
+
+    experiment_manager.finalize_experiment()
     # endregion
 
     # Shutdown Ray
