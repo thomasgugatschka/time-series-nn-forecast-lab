@@ -1,0 +1,39 @@
+# Use the official NVIDIA CUDA runtime image as the base
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+
+# Set non-interactive mode for apt-get
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install necessary tools, Python 3.12, and pip
+RUN apt-get update && apt-get install -y \
+    software-properties-common wget curl && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && apt-get install -y \
+    python3.12 python3.12-venv python3-pip && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Manually upgrade pip and setuptools
+RUN python3.12 -m ensurepip --upgrade && \
+    python3.12 -m pip install --upgrade pip setuptools
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN python3.12 -m pip install -r requirements.txt
+
+# Copy the entire project to the container
+COPY . .
+
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH="/app"
+ENV PROJECT_BASE_DIR="/app"
+ENV USE_GCS=True
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
+
+# Default command to run the script
+CMD ["python", "-m", "src.scripts.hyperparameter_tuning"]

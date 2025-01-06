@@ -1,0 +1,25 @@
+name: hyperparameter-tuning-job-config1
+priority: 1
+
+taskGroups:
+  - taskSpec:
+      runnables:
+        - container:
+            imageUri: gcr.io/time-series-nn-forecast-lab/hyperparameter-tuner:latest
+            entrypoint: "python"
+            commands:
+              - "-m"
+              - "src.scripts.hyperparameter_tuning"
+#              - "--config_path"
+#              - "experiment_configs/config_gru_ETTh_0.7-0.15.yaml"
+      maxRetryCount: 1
+      computeResource:
+        cpuMilli: 10000  # 10 CPUs
+#        cpuMilli: 20000  # 20 CPUs
+        memoryMib: 16384  # 16 GB Memory
+#        memoryMib: 32768  # 32 GB Memory
+
+    taskCount: 1  # Single task
+
+logsPolicy:
+  destination: CLOUD_LOGGING
