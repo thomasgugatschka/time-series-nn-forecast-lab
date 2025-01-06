@@ -9,7 +9,7 @@
     "training_params": {
       "batch_size": [16, 32, 64, 128, 256, 512],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [10, 15],
+      "epochs": [20, 60],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }
@@ -23,7 +23,7 @@
     "training_params": {
       "batch_size": [16, 32, 64, 128, 256, 512],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [10, 20],
+      "epochs": [20, 60],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }
@@ -37,7 +37,7 @@
     "training_params": {
       "batch_size": [16, 32, 64, 128, 256, 512],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [20, 50],
+      "epochs": [20, 60],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }
@@ -51,7 +51,7 @@
     "training_params": {
       "batch_size": [16, 32, 64, 128, 256, 512],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [30, 50],
+      "epochs": [20, 60],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }
@@ -67,7 +67,7 @@
     "training_params": {
       "batch_size": [16, 32, 64, 128],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [30, 50],
+      "epochs": [20, 60],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }
@@ -83,7 +83,7 @@
     "training_params": {
       "batch_size": [16, 32, 64, 128],
       "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [20, 50],
+      "epochs": [20, 60],
       "optimizer": ["Adam"],
       "loss_function": ["MSELoss"]
     }
@@ -98,13 +98,11 @@
     "training_params": {
         "batch_size": [16, 32, 64, 128],
         "learning_rate": [1e-3, 1e-2, "log"],
-        "epochs": [10, 20],
+        "epochs": [20, 60],
         "optimizer": ["Adam"],
         "loss_function": ["MSELoss"]
     }
-}
-
-
+  }
 }
 
 

@@ -49,7 +49,7 @@ def parse_args():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(description="Train different models with different datasets.")
-    parser.add_argument("--config_path", type=str, default='config.yaml', help="Path to the configuration file.")
+    parser.add_argument("--config_path", type=str, default='config_rnn_sinusoidal_0.8-0.1.yaml', help="Path to the configuration file.")
     logger.info(f'Parse Args: {parser.parse_args()}')
     return parser.parse_args()
 # endregion
@@ -153,7 +153,7 @@ def main():
     experiment_name, experiment_path, resume = experiment_manager.manage_experiment()
     plot_manager = PlotManager(config_manager, data_manager, phase='tuning')
 
-    # Load main configuration (->config.yaml)
+    # Load main configuration (->config_rnn_sinusoidal_0.8-0.1.yaml)
     main_config = config_manager.get_main_config()
     dataset_config = config_manager.get_dataset_config()
     hyperparameter_config = file_manager.load_json(path_manager.get_path("config_dir") / "hyperparameter_search_space.json")

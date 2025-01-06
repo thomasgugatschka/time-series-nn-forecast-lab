@@ -31,4 +31,5 @@ ENV USE_GCS=True
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
 
 # Default command to run the hyperparameter tuning script
-CMD ["python", "-m", "src.scripts.hyperparameter_tuning", "--config_path", "config.yaml"]
+#CMD ["python", "-m", "src.scripts.hyperparameter_tuning", "--config_path", "config_rnn_sinusoidal_0.8-0.1.yaml"]
+CMD ["python", "-m", "src.scripts.hyperparameter_tuning"]

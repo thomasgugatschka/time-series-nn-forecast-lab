@@ -2,6 +2,15 @@
 # Build docker image
 docker build -t time-series-nn-forecast-lab-image .
 
+
+# for gcp
+#       Build the Docker image
+docker build -t gcr.io/time-series-nn-forecast-lab/hyperparameter-tuner:latest .
+#       Push the image to Google Container Registry
+docker push gcr.io/time-series-nn-forecast-lab/hyperparameter-tuner:latest
+
+
+
 # list available images
 docker images
 

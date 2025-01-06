@@ -21,7 +21,7 @@ logger = get_logger(__name__)
 # TODO -> USE the --num_models parameter in the .bat files !!!!
 def parse_args():
     parser = argparse.ArgumentParser(description="Train models based on provided hyperparameters.")
-    parser.add_argument("--config_path", type=str, default="config.yaml", help="Path to the configuration file.")
+    parser.add_argument("--config_path", type=str, default="config_rnn_sinusoidal_0.8-0.1.yaml", help="Path to the configuration file.")
     parser.add_argument(
         "--num_models",
         type=restricted_int,
