@@ -14,5 +14,5 @@ columns_to_drop:
   - 'date'
 crop_start: null
 crop_end: null
-ts_past: 120
-ts_future: 24
+ts_past: 52 # 52 weeks / 1 year
+ts_future: 13 # 13 weeks / 1 quarter

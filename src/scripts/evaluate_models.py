@@ -29,7 +29,7 @@ def parse_args():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(description="Train different models with different datasets.")
-    parser.add_argument("--config_path", type=str, default='config_rnn_sinusoidal_0.8-0.1.yaml', help="Path to the configuration file.")
+    parser.add_argument("--config_path", type=str, default='config.yaml', help="Path to the configuration file.")
     logger.info(f'Parse Args: {parser.parse_args()}')
     return parser.parse_args()
 # endregion

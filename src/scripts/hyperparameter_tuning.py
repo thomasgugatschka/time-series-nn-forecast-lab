@@ -49,7 +49,7 @@ def parse_args():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(description="Train different models with different datasets.")
-    parser.add_argument("--config_path", type=str, default='config_rnn_sinusoidal_0.8-0.1.yaml', help="Path to the configuration file.")
+    parser.add_argument("--config_path", type=str, default='config.yaml', help="Path to the configuration file.")
     logger.info(f'Parse Args: {parser.parse_args()}')
     return parser.parse_args()
 # endregion
@@ -153,7 +153,6 @@ def main():
     experiment_name, experiment_path, resume = experiment_manager.manage_experiment()
     plot_manager = PlotManager(config_manager, data_manager, phase='tuning')
 
-    # Load main configuration (->config_rnn_sinusoidal_0.8-0.1.yaml)
     main_config = config_manager.get_main_config()
     dataset_config = config_manager.get_dataset_config()
     hyperparameter_config = file_manager.load_json(path_manager.get_path("config_dir") / "hyperparameter_search_space.json")
@@ -186,35 +185,45 @@ def main():
     # Initialize Ray
     ray.init(include_dashboard=False, local_mode=local_mode)
 
-    # Run hyperparameter tuning with Ray Tune
-    analysis = tune.run(
-        tune.with_parameters(
-            objective,
-            model_type=model_type,
-            dataset_config=dataset_config,
-            data_manager=data_manager,
-            plot_manager=plot_manager
-            ),
-        config=search_space_config,
-        num_samples=num_samples,
-        resources_per_trial={"cpu": cpu_per_trial, "gpu": gpu_per_trial},
-        trial_dirname_creator=lambda trial: f"{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}_{trial.trial_id}",
-        scheduler=scheduler,
-        search_alg=search_algorithm,
-        resume=resume,
-        max_concurrent_trials=max_concurrent_trials,
-        name="ray_results",
-        storage_path=experiment_path
-    )
+    try:
+        # Run hyperparameter tuning with Ray Tune
+        analysis = tune.run(
+            tune.with_parameters(
+                objective,
+                model_type=model_type,
+                dataset_config=dataset_config,
+                data_manager=data_manager,
+                plot_manager=plot_manager
+                ),
+            config=search_space_config,
+            num_samples=num_samples,
+            resources_per_trial={"cpu": cpu_per_trial, "gpu": gpu_per_trial},
+            trial_dirname_creator=lambda trial: f"{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}_{trial.trial_id}",
+            scheduler=scheduler,
+            search_alg=search_algorithm,
+            resume=resume,
+            max_concurrent_trials=max_concurrent_trials,
+            name="ray_results",
+            storage_path=experiment_path
+        )
 
-    # region ### SAVE BEST HYPERPARAMETERS ###
-    experiment_manager.save_analysis_results(analysis)
+        experiment_manager.save_analysis_results(analysis)
 
-    experiment_manager.finalize_experiment()
-    # endregion
+    except Exception as e:
+        logger.error(f"Error during hyperparameter tuning or saving results: {e}")
+        raise e
+    finally:
+        try:
+            experiment_manager.finalize_experiment()
+        except Exception as finalize_error:
+            logger.error(f"Error during experiment finalization: {finalize_error}", exc_info=True)
 
-    # Shutdown Ray
-    ray.shutdown()
+        try:
+            ray.shutdown()
+        except Exception as shutdown_error:
+            logger.error(f"Error during Ray shutdown: {shutdown_error}", exc_info=True)
+
+
 # endregion
 
 if __name__ == "__main__":

@@ -256,12 +256,12 @@ class ExperimentManager:
         file_manager.save_json(all_trials_results_json, all_hyperparams_path)
         logger.info(f"All hyperparameter configurations saved to {all_hyperparams_path}")
 
-        # Save top 10 hyperparameters
+        # Save top 5 hyperparameters
         top_trials_results = all_trials_results.nsmallest(10, "val_loss")
         top_trials_results_json = top_trials_results.to_dict(orient="records")
         top_hyperparams_path = self.experiment_path / "top_hyperparameters.json"
         file_manager.save_json(top_trials_results_json, top_hyperparams_path)
-        logger.info(f"Top 10 hyperparameter configurations saved to {top_hyperparams_path}")
+        logger.info(f"Top 5 hyperparameter configurations saved to {top_hyperparams_path}")
 
         # Save best trial and best config
         best_trial = analysis.get_best_trial(metric="val_loss", mode="min").last_result
@@ -297,12 +297,13 @@ class ExperimentManager:
         Finalize the experiment by syncing data to GCS.
         """
         if self.gcs_use:
-            self.sync_manager.sync_experiment(self.experiment_path, f"experiments/{self.experiment_name}")
+            # IMPROVE: Should get the path including the dataset name from path_manager or complete handling
+            #          is done through ExperimentManager, to have Logic to create the name within path_manager is wrong.
+
+            dataset = self.config_manager.get_main_config().get("dataset")
+            self.sync_manager.sync_experiment(self.experiment_path, f"experiments/{dataset}/{self.experiment_name}")
 
         logger.info(f"Experiment {self.experiment_name} finalized.")
-
-
-
 
 class ExperimentSync:
     RETRY_DELAY = 1  # Seconds

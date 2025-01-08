@@ -8,7 +8,7 @@ Craete batch_job.yaml
 
 
 Submit the batch job
-    gcloud batch jobs submit --config=batch_job.yaml --region=us-central1
+    gcloud batch jobs submit --config=batch_job.yaml --location=us-central1
 
 
 

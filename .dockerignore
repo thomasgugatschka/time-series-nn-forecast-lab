@@ -1,0 +1,27 @@
+# Exclude virtual environments
+.venv
+
+# Exclude Terraform-related files
+.terraform
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+
+# Exclude Git-related files
+.git
+.gitignore
+
+# Exclude logs and caches
+*.log
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+
+docs/
+
+# Exclude other unnecessary files
+# TODO enable to exclude .env file -> need some other handling for environment variables
+#.env
+*.DS_Store

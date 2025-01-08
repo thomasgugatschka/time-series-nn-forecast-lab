@@ -12,7 +12,7 @@ def parse_args():
     """Parse arguments for the script."""
     import argparse
     parser = argparse.ArgumentParser(description="Visualize dataset for time series forecasting.")
-    parser.add_argument("--config_path", type=str, default="config_rnn_sinusoidal_0.8-0.1.yaml", help="Path to the configuration file.")
+    parser.add_argument("--config_path", type=str, default="config.yaml", help="Path to the configuration file.")
     return parser.parse_args()
 
 def main():

@@ -25,8 +25,8 @@ logger = get_logger(__name__)
 def parse_args():
     """Parse arguments for the script."""
     parser = argparse.ArgumentParser(description="Analyze hyperparameter tuning results.")
-    parser.add_argument("--config_path", type=str, default="config_rnn_sinusoidal_0.8-0.1.yaml", help="Path to the configuration file.")
-    parser.add_argument("--top_n", type=int, default=10, help="Number of top configurations to include in the parallel plot.")
+    parser.add_argument("--config_path", type=str, default="config.yaml", help="Path to the configuration file.")
+    parser.add_argument("--top_n", type=int, default=5, help="Number of top configurations to include in the parallel plot.")
     return parser.parse_args()
 
 def load_data(file_path):

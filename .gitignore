@@ -28,3 +28,9 @@ __pycache__/
 
 # Ignore Google Cloud credentials
 service-account-key.json
+
+# Exclude Terraform-related files
+.terraform
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup

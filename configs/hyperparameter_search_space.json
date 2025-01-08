@@ -1,58 +1,58 @@
 {
   "RNN": {
     "model_params": {
-      "hidden_size": [32, 64],
-      "num_layers": [2, 4],
-      "dropout": [0.0, 0.5],
+      "hidden_size": [32, 64, 128],
+      "num_layers": [2, 6],
+      "dropout": [0.1, 0.5],
       "nonlinearity": ["tanh", "relu"]
     },
     "training_params": {
-      "batch_size": [16, 32, 64, 128, 256, 512],
-      "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [20, 60],
-      "optimizer": ["Adam"],
+      "batch_size": [16, 32, 64, 128],
+      "learning_rate": [1e-4, 1e-2, "log"],
+      "epochs": [10, 100],
+      "optimizer": ["Adam", "RMSprop"],
       "loss_function": ["MSELoss"]
     }
   },
   "GRU": {
     "model_params": {
-      "hidden_size": [32, 64],
-      "num_layers": [2, 4],
-      "dropout": [0.0, 0.5]
+      "hidden_size": [32, 64, 128, 256],
+      "num_layers": [2, 6],
+      "dropout": [0.1, 0.5]
     },
     "training_params": {
-      "batch_size": [16, 32, 64, 128, 256, 512],
-      "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [20, 60],
-      "optimizer": ["Adam"],
+      "batch_size": [16, 32, 64, 128],
+      "learning_rate": [1e-4, 1e-2, "log"],
+      "epochs": [10, 100],
+      "optimizer": ["Adam", "RMSprop"],
       "loss_function": ["MSELoss"]
     }
   },
   "LSTM": {
     "model_params": {
-      "hidden_size": [32, 64, 128, 256],
+      "hidden_size": [32, 64, 128, 256, 512],
       "num_layers": [2, 8],
-      "dropout": [0.0, 0.5]
+      "dropout": [0.1, 0.5]
     },
     "training_params": {
-      "batch_size": [16, 32, 64, 128, 256, 512],
-      "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [20, 60],
-      "optimizer": ["Adam"],
+      "batch_size": [16, 32, 64, 128],
+      "learning_rate": [1e-4, 1e-2, "log"],
+      "epochs": [10, 100],
+      "optimizer": ["Adam", "RMSprop"],
       "loss_function": ["MSELoss"]
     }
   },
   "BiLSTM": {
     "model_params": {
-      "hidden_size": [32, 64],
+      "hidden_size": [32, 64, 128, 256, 512],
       "num_layers": [2, 4],
-      "dropout": [0.0, 0.5]
+      "dropout": [0.1, 0.5]
     },
     "training_params": {
-      "batch_size": [16, 32, 64, 128, 256, 512],
-      "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [20, 60],
-      "optimizer": ["Adam"],
+      "batch_size": [16, 32, 64, 128],
+      "learning_rate": [1e-4, 1e-2, "log"],
+      "epochs": [10, 100],
+      "optimizer": ["Adam", "RMSprop"],
       "loss_function": ["MSELoss"]
     }
   },
@@ -62,13 +62,13 @@
       "num_heads": [2, 4, 8],
       "num_layers": [2, 10],
       "forward_dim": [128, 256, 512],
-      "dropout": [0.1, 0.2, 0.3, 0.5]
+      "dropout": [0.1, 0.5]
     },
     "training_params": {
       "batch_size": [16, 32, 64, 128],
-      "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [20, 60],
-      "optimizer": ["Adam"],
+      "learning_rate": [1e-4, 1e-2, "log"],
+      "epochs": [10, 100],
+      "optimizer": ["Adam", "RMSprop", "AdamW"],
       "loss_function": ["MSELoss"]
     }
   },
@@ -76,15 +76,15 @@
     "model_params": {
       "num_channels": [[16, 32, 64], [32, 64, 128]],
       "kernel_size": [2, 3, 5],
-      "dropout": [0.1, 0.2, 0.5],
-      "dilation": [1, 2, 4],
-      "num_layers": [3, 4, 5]
+      "dropout": [0.1, 0.5],
+      "dilation": [1, 2, 4, 8],
+      "num_layers": [3, 6]
     },
     "training_params": {
       "batch_size": [16, 32, 64, 128],
-      "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [20, 60],
-      "optimizer": ["Adam"],
+      "learning_rate": [1e-4, 1e-2, "log"],
+      "epochs": [10, 100],
+      "optimizer": ["Adam", "RMSprop"],
       "loss_function": ["MSELoss"]
     }
   },
@@ -92,14 +92,14 @@
     "model_params": {
         "num_channels": [[16, 32, 64], [32, 64, 128]],
         "kernel_size": 3,
-        "dropout": [0.1, 0.2, 0.5],
+        "dropout": [0.1, 0.5],
         "num_layers": 3
     },
     "training_params": {
         "batch_size": [16, 32, 64, 128],
-        "learning_rate": [1e-3, 1e-2, "log"],
-        "epochs": [20, 60],
-        "optimizer": ["Adam"],
+        "learning_rate": [1e-4, 1e-2, "log"],
+        "epochs": [10, 100],
+        "optimizer": ["Adam", "RMSprop", "SGD"],
         "loss_function": ["MSELoss"]
     }
   }

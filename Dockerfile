@@ -5,10 +5,22 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # Install system dependencies (e.g., gcc, make, etc., for Python packages requiring compilation)
+# Install system dependencies (e.g., gcc, curl) and ensure Python3 is linked correctly
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    curl \
     libpq-dev \
+    && ln -sf /usr/local/bin/python3 /usr/bin/python3 \
+    && ln -sf /usr/local/bin/python3 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
+
+
+
+# Install Google Cloud SDK (for gsutil)
+RUN curl -sSL https://sdk.cloud.google.com | bash > /dev/null && \
+    /root/google-cloud-sdk/install.sh --quiet && \
+    /root/google-cloud-sdk/bin/gcloud components install gsutil --quiet
+ENV PATH="/root/google-cloud-sdk/bin:$PATH"
 
 # Copy requirements file and install dependencies
 COPY requirements.txt .
@@ -30,6 +42,15 @@ ENV PROJECT_BASE_DIR="/app"
 ENV USE_GCS=True
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
 
-# Default command to run the hyperparameter tuning script
-#CMD ["python", "-m", "src.scripts.hyperparameter_tuning", "--config_path", "config_rnn_sinusoidal_0.8-0.1.yaml"]
+# Environment variables for syncing and local mode
+ENV SYNC_CONFIG_FROM_GCS=True
+ENV LOCAL_MODE=False
+
+#ENV PLOTS_SHOW=False
+#ENV PLOTS_SAVE=False
+
+# Define the ENTRYPOINT to include the sync logic
+ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
+
+# CMD will be executed after ENTRYPOINT
 CMD ["python", "-m", "src.scripts.hyperparameter_tuning"]

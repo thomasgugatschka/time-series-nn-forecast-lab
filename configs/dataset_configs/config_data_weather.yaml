@@ -28,5 +28,5 @@ columns_to_drop:
   - 'date'
 crop_start: null
 crop_end: null
-ts_past: 120
-ts_future: 24
+ts_past: 1008 # 1 week
+ts_future: 144 # 1 day

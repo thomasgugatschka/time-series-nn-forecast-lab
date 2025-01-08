@@ -16,5 +16,5 @@ columns_to_drop:
   - 'date'
 crop_start: null
 crop_end: null
-ts_past: 120
-ts_future: 24
+ts_past: 168  # 1 week (24 - 168 day to week)
+ts_future: 24 # 1 day (short-term 24 / medium-term 48-168)

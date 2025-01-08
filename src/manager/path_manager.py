@@ -143,7 +143,7 @@ class PathManager:
         """
         # TODO - maybe adapt -> only experiment name
         # TODO -> experiment_name might be adapted / increased with more data ????
-        experiment_path = self.get_path("experiment_dir") / model_type / dataset_name / experiment_name
+        experiment_path = self.get_path("experiment_dir") / dataset_name / experiment_name
         experiment_path.mkdir(parents=True, exist_ok=True)
 
         # Add experiment path dynamically for later use

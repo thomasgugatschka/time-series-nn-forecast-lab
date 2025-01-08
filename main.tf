@@ -9,3 +9,4 @@ resource "google_storage_bucket" "experiment_results" {
   name     = "forecast-lab-experiments"
   location = "US"
 }
+

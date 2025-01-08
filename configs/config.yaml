@@ -1,5 +1,5 @@
 model_type: "GRU"            # Implemented Models
-dataset: "sinusoidal"
+dataset: "ETTh"
 #dataset: "illness"    # Available Datasets from data folder
 num_samples: 4               # Number of trials to run during hyperparameter tuning
 cpu_per_trial: 10  #10           # Number of CPU cores allocated per trial

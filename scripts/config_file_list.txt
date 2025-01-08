@@ -1,0 +1,2 @@
+experiment_configs\ETTh\config_cnn_ETTh_0.1-0.1-0.1.yaml
+experiment_configs\ETTh\config_cnn_ETTh_0.2-0.1-0.1.yaml

@@ -1,5 +1,5 @@
-name: hyperparameter-tuning-job-config1
-priority: 1
+name: hyperparameter-tuning-job-config
+priority: 50
 
 taskGroups:
   - taskSpec:
@@ -10,13 +10,15 @@ taskGroups:
             commands:
               - "-m"
               - "src.scripts.hyperparameter_tuning"
-#              - "--config_path"
-#              - "experiment_configs/config_gru_ETTh_0.7-0.15.yaml"
+              - "--config_path"
+              - "experiment_configs/config_gru_sinusoidal_0.8-0.1.yaml"
       maxRetryCount: 1
       computeResource:
-        cpuMilli: 10000  # 10 CPUs
+        cpuMilli: 8000  # 10 CPUs
 #        cpuMilli: 20000  # 20 CPUs
-        memoryMib: 16384  # 16 GB Memory
+#        memoryMib: 4096  # 4 GB Memory
+        memoryMib: 8192  # 8 GB Memory
+#        memoryMib: 16384  # 16 GB Memory
 #        memoryMib: 32768  # 32 GB Memory
 
     taskCount: 1  # Single task

@@ -16,8 +16,8 @@ formatters:
 handlers:
   console:
     class: logging.StreamHandler
-    formatter: colored
-#    formatter: standard
+#    formatter: colored
+    formatter: standard
     level: INFO
   file:
     class: logging.FileHandler

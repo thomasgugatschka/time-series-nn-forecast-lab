@@ -13,7 +13,7 @@ feature_forecasted: 0
 columns_to_drop:
   - Date/Time (LST)
   - Index
-crop_start: 10_000
-crop_end: 50_000
-ts_past: 120
-ts_future: 24
+crop_start: null
+crop_end: null
+ts_past: 168 # 1 week
+ts_future: 24 # 1 day

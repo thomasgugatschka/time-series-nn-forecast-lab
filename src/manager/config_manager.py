@@ -8,7 +8,7 @@ from src.utilities.logging_utils import get_logger
 logger = get_logger(__name__)
 
 class ConfigManager:
-    def __init__(self, main_config_file='config_rnn_sinusoidal_0.8-0.1.yaml'):
+    def __init__(self, main_config_file='config.yaml'):
         # Load main configuration
 
         logger.info(f"Loading main configuration from {main_config_file}")
@@ -123,4 +123,4 @@ class ConfigManager:
         return self.main_config[key]
 
 
-#config_manager = ConfigManager('config_rnn_sinusoidal_0.8-0.1.yaml')
+
