@@ -1,0 +1,8 @@
+config_transformer_ETTh_0.8-0.1-0.1_fixed-window.yaml
+config_transformer_ETTh_0.7-0.1-0.1_fixed-window.yaml
+config_transformer_ETTh_0.6-0.1-0.1_fixed-window.yaml
+config_transformer_ETTh_0.5-0.1-0.1_fixed-window.yaml
+config_transformer_ETTh_0.4-0.1-0.1_fixed-window.yaml
+config_transformer_ETTh_0.3-0.1-0.1_fixed-window.yaml
+config_transformer_ETTh_0.2-0.1-0.1_fixed-window.yaml
+config_transformer_ETTh_0.1-0.1-0.1_fixed-window.yaml
