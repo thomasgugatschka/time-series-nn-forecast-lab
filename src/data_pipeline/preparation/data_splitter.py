@@ -79,6 +79,9 @@ class FixedDataSplitter:
         x_arr_val = x[num_train:num_train + num_val]
         x_arr_test = x[num_train + num_val:num_train + num_val + num_test]
 
+        if num_train <= 0 or num_val <= 0 or num_test <= 0:
+            raise ValueError("One or more splits are empty due to insufficient data. Adjust your fractions.")
+
         logger.info(f"Features split: Train({num_train}), Val({num_val}), Test({num_test})")
 
         split_data = {
