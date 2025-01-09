@@ -62,7 +62,6 @@ class FixedDataSplitter:
                 if y is not None:
                     y = y[unused_samples:]
             elif self.unused_split == "end":
-                effective_samples = int(total_frac * num_samples)
                 x = x[:effective_samples]  # Trim from the end
                 if y is not None:
                     y = y[:effective_samples]
