@@ -108,12 +108,8 @@ class TCN(BaseModel):
             logger.debug(f"Unused keyword arguments: {kwargs}")
 
     def forward(self, x):
-
-        # TODO - BUGIX
         # Transpose input to match the expected shape for Conv1d: [batch_size, input_channels, seq_len]
         x = x.transpose(1, 2)  # Change from [batch_size, seq_len, input_channels] to [batch_size, input_channels, seq_len]
-        # TODO - BUGFIX - test - end
-
         y = self.tcn(x)
         # Use the last time step for prediction
         return self.linear(y[:, :, -1])

@@ -6,13 +6,6 @@ from dotenv import load_dotenv
 import os
 from pathlib import Path
 
-# TODO - CLEANUP
-
-# TODO -> GOAL is that logger does not need any class or function from the project
-# so no path_manager or file_manager
-
-# TODO -> add method to disable coloured logging
-
 def setup_logging():
 
     # Load environment variables from .env file

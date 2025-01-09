@@ -3,9 +3,6 @@ import pandas as pd
 from src.manager.path_manager import path_manager
 from src.manager.file_manager import file_manager
 
-# TODO -> add this to some other folder... since just supporting but not "daily" operation !!!!
-
-
 def generate_multivariate_sinusoidal_data(num_samples=1000, num_features=5, stop=20):
     t = np.linspace(0, stop, num_samples)
     data = np.zeros((num_samples, num_features))

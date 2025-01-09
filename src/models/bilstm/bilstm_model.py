@@ -45,7 +45,7 @@ class BiLSTM(BaseModel):
 
         # Propagate input through Bi-LSTM with one dropout layer
         output, (hn, cn) = self.lstm(x, (h_0, c_0))  # (input, hidden, and internal state)
-        output = self.dropout_lstm(output) # TODO is the output used somewhere??????
+        output = self.dropout_lstm(output)
         hn = hn.view(self.num_layers, -1,
                      self.hidden_size * 2)  # reshape hidden states for Dense layer, multiply by 2 for bidirectional
         out = self.relu(hn[-1])  # take the output from the last layer

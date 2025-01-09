@@ -64,16 +64,6 @@ def save_model(model, model_name, save_path, hyperparameter_config):
     logger.info(f"Model saved at {model_save_path}")
     logger.info(f"Hyperparameters saved at {hyperparams_save_path}")
 
-
-# TODO #### TODO ##### TODO ####
-
-# TODO -> SOMETHING IS NOT CORRECT with EPOCHS -> TRAINING vs. HYPERPARAMETER TUNING ?????
-# TODO -> TRAINING MUCH MORE EPOCHS for SOME REASON ??????
-
-# TODO -> probably need to USE   "training_iteration": xx isntead of "epoch"
-
-# TODO -> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 def train_model(hyperparameter_config, model_type, dataset_config, data_manager, plot_manager):
     """
     Train a single model based on the provided hyperparameter configuration.
@@ -88,7 +78,7 @@ def train_model(hyperparameter_config, model_type, dataset_config, data_manager,
         torch.nn.Module: Trained model.
     """
 
-    #TODO -> maybe train with different SEEDS ??? -> is it worth the check???
+    # IMPROVEMENT: Train each model with different seeds -> possible that there is a difference in performance
     set_seed(hyperparameter_config.get("config/trial_seed"))
 
     trial_name = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
@@ -112,7 +102,14 @@ def train_model(hyperparameter_config, model_type, dataset_config, data_manager,
     training_params = {
         k.split("/")[-1]: v for k, v in hyperparameter_config.items() if k.startswith("config/training_params")
     }
-    epochs = training_params["epochs"]
+
+    # ###### NOTE ######
+    # USE "training_iteration" instead of "epochs"
+    # "training_iteration" is the ACTUAL number of iterations which where used for hyperparameter tuning
+    # "epochs" is the number of iterations which was defined during the hyperparameter tuning
+    # it was cut short because of an early stopping mechanism
+    #epochs = training_params["epochs"]
+    epochs = hyperparameter_config.get("training_iteration")
     batch_size = training_params["batch_size"]
 
     # Create data loaders

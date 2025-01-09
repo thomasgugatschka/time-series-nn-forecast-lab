@@ -69,9 +69,8 @@ def generate_configurations(base_template, dataset_name, target_root):
 
 def main():
 
-    # TODO move out and make TEMPLATE
-    # TODO -> template can be for local and one for gcp cloud and one for aws ...
-    # TODO -> since slighly different setup etc. is needed
+    # TODO -> Move to TEMPLATE file, could also make sense to have a template for gcp and aws
+
     # Base YAML template
     base_template = {
         "model_type": "",  # Placeholder, will be set dynamically

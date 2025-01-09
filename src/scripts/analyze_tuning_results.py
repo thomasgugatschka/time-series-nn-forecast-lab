@@ -19,8 +19,7 @@ from src.utilities.logging_utils import setup_logging, get_logger
 setup_logging()
 logger = get_logger(__name__)
 
-# TODO - Refactor to plot_manager....
-
+# TODO -> Refactor so PlotManager is used
 
 def parse_args():
     """Parse arguments for the script."""

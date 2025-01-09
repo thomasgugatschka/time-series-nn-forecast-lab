@@ -52,7 +52,7 @@ class LSTM(BaseModel):
         c_0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
 
         # Propagate input through Unidirectional LSTM with dropout
-        output, (hn, cn) = self.lstm(x, (h_0, c_0)) # TODO is the output used somewhere??????
+        output, (hn, cn) = self.lstm(x, (h_0, c_0))
 
         # Reshape hidden states for Dense layer
         hn = hn.view(self.num_layers, -1, self.hidden_size)

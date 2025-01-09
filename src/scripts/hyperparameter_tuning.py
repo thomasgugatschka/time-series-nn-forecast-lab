@@ -80,8 +80,7 @@ def objective(hyperparameter_config, model_type, dataset_config, data_manager, p
     # endregion
 
     # region ### SET VARIABLES from CONFIG ###
-    # TODO -> CHANGE NAMING of MODEL PARAMETER....
-    # TODO -> Tooo Confusing if input_size is num_features and output_size is ts_future
+    # TODO -> Change naming of model_params -> confusing if input_size is num_features and output_size is ts_future
     ts_future = dataset_config["ts_future"]
     ts_past = dataset_config["ts_past"]
 
@@ -99,7 +98,7 @@ def objective(hyperparameter_config, model_type, dataset_config, data_manager, p
 
     # region ### DATALOADER ###
     split_loader = data_manager.create_data_loaders(
-        batch_size=batch_size, loaders_to_create=['train', 'val'], shuffle_train=True) # TODO - Check if shuffle=True is correct and works for TS data
+        batch_size=batch_size, loaders_to_create=['train', 'val'], shuffle_train=False) # IMPROVEMENT: / OPTION: shuffle_train=True -> Check if it makes sense for time series
     train_loader, val_loader = split_loader['train_loader'], split_loader['val_loader']
     # endregion
 

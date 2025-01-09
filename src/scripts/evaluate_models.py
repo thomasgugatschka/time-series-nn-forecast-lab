@@ -81,16 +81,17 @@ def evaluate_model(wrapper, hyperparameters, test_data, ts_past, ts_future, data
                             # TODO is the , 0] the index of the feature ??? -> need to use the selected_feature
     selected_feature_idx = 0  # TODO - Replace with the actual index of the selected feature
 
+    selected_feature_idx = data_manager.get_data("metadata")["selected_feature_idx"]
+
+    print(f"Selected Feature Index: {selected_feature_idx}")
+
+    # IMPROVEMENT: Option to use DataLoader (test data loader) for evaluation or manual iteration
+
     for i in range(0, x_test.size(0), ts_future):  # Shift by ts_future instead of 1
 
 
         # Extract the context for all features
         x_context_all_features = x_test[i, -ts_past:, :].cpu().numpy()  # Shape: [ts_past, num_features]
-
-        # Extract the selected feature from the context # TODO - not sure if needed, since original calcualtion works
-        x_context = x_context_all_features[:, selected_feature_idx]  # Shape: [ts_past]
-
-
 
         x_context = x_test[i, -ts_past:, selected_feature_idx].cpu().numpy()
         y_actual = y_test[i].cpu().numpy()
@@ -115,8 +116,6 @@ def evaluate_model(wrapper, hyperparameters, test_data, ts_past, ts_future, data
         raw_metrics_norm.append(metrics_norm)
         raw_metrics_denorm.append(metrics_denorm)
 
-
-
         # Generate a generic info text for plot
         model_params = {
             k.split("/")[-1]: v for k, v in hyperparameters.items() if k.startswith("config/model_params")
@@ -131,16 +130,33 @@ def evaluate_model(wrapper, hyperparameters, test_data, ts_past, ts_future, data
             f"{model_param_str}\n{training_param_str}"
         )
 
-        # TODO - make all calls the same like -> plot_evaluation_full_context
 
         # Generate plot(s)
         plot_title = f"Model: {hyperparameters['config/model_type']}, Val Loss: {val_loss:.4f} (Normalized)"
         plot_manager.plot_evaluation(
-            ts_past, ts_future, x_context, y_actual, y_pred, model_name, i + 1, plot_title, denormalized=False, plot_info=info_text)
+            ts_past=ts_past,
+            ts_future=ts_future,
+            x_context=x_context,
+            y_actual=y_actual,
+            y_predicted=y_pred,
+            model_name=model_name,
+            plot_index=i + 1,
+            plot_title=plot_title,
+            denormalized=False,
+            plot_info=info_text)
 
         plot_title = f"Model: {hyperparameters['config/model_type']}, Val Loss: {val_loss:.4f} (Denormalized)"
         plot_manager.plot_evaluation(
-            ts_past, ts_future, x_context_denorm, y_actual_denorm, y_pred_denorm, model_name, i + 1, plot_title, denormalized=True, plot_info=info_text)
+            ts_past=ts_past,
+            ts_future=ts_future,
+            x_context=x_context_denorm,
+            y_actual=y_actual_denorm,
+            y_predicted=y_pred_denorm,
+            model_name=model_name,
+            plot_index=i + 1,
+            plot_title=plot_title,
+            denormalized=True,
+            plot_info=info_text)
 
         plot_title = f"Model Evaluation (Denormalized) | Sample {i + 1}"
         plot_manager.plot_evaluation_full_context(
@@ -237,13 +253,6 @@ def aggregate_overall_metrics(all_metrics, model_metadata):
         "raw_metrics_norm": [model_metrics.get("raw_metrics_norm", []) for model_metrics in all_metrics],
         "raw_metrics_denorm": [model_metrics.get("raw_metrics_denorm", []) for model_metrics in all_metrics],
     }
-
-
-
-
-
-# TODO - CHECK if possible to make metric configurable... currently mix between mse and mae....
-# TODO -> both or all are needed ?
 
 
 def plot_overall_metrics(plot_manager, overall_metrics):
@@ -355,9 +364,8 @@ def main():
 
     logger.info(f"Test Data Shape: x_test: {test_data['x_test'].shape}, y_test: {test_data['y_test'].shape}")
 
-    # TODO -> Print test_data to see what it looks like
-
-    # TODO -> add val_loss and stuff to the final metrics ?!?!?!?
+    # IMPROVEMENT: Print test data to see what it looks like
+    # IMPROVEMENT: Add val_loss and more to the final metrics
 
     # Load models and evaluate
     trained_models_path = path_manager.get_path("experiment_trained_models")
