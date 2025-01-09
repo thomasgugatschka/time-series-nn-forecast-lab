@@ -40,8 +40,12 @@ def run_script(script, config, optional_params=None):
 
 def main():
     # Define the operation manually (tuning, training, or evaluation)
-    operation = "tuning"  # tuning, training, evaluation
+
+
+    # --- SETTINGS ---
+    operation = "tuning"  # tuning, training, evaluation, visualizeDS
     location = "file" # file, script
+    # ----------------
 
 
 
@@ -62,6 +66,7 @@ def main():
         "tuning": "src.scripts.hyperparameter_tuning",
         "training": "src.scripts.train_models",
         "evaluation": "src.scripts.evaluate_models",
+        "visualizeDS": "src.scripts.visualize_dataset"
     }
 
     if operation not in operation_scripts:
