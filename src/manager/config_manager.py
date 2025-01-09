@@ -73,6 +73,7 @@ class ConfigManager:
                 ('data_params.data_split.frac_train', True),
                 ('data_params.data_split.frac_val', True),
                 ('data_params.data_split.frac_test', False), # Optional
+                ('data_params.data_split.unused_split', False), # Optional
                 ('data_params.time_series_window', False), # Optional
                 ('search_algorithm', True),
                 ('scheduler', True)

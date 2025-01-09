@@ -28,6 +28,7 @@ def generate_configurations(base_template, dataset_name, target_root):
             "frac_val": 0.1,
             "frac_test": 0.1,
 #           "frac_test": round(1.0 - frac_train - 0.1, 1),
+            "unused_split": "beginning"
         }
 
         # Generate filename
@@ -67,16 +68,20 @@ def generate_configurations(base_template, dataset_name, target_root):
     print(f"Generated file index: {index_file}")
 
 def main():
+
+    # TODO move out and make TEMPLATE
+    # TODO -> template can be for local and one for gcp cloud and one for aws ...
+    # TODO -> since slighly different setup etc. is needed
     # Base YAML template
     base_template = {
         "model_type": "",  # Placeholder, will be set dynamically
         "dataset": "",  # Placeholder, will be set dynamically
-        "num_samples": 100,
-        "cpu_per_trial": 8,
+        "num_samples": 30, # --- MODIFY ---
+        "cpu_per_trial": 12, # --- MODIFY ---
         "gpu_per_trial": 0,
-        "max_concurrent_trials": 2,
+        "max_concurrent_trials": 1, # --- MODIFY ---
         "trial_params": {
-            "max_epochs": 100,
+            "max_epochs": 100, # --- MODIFY ---
             "grace_period": 5,
             "reduction_factor": 2,
         },
@@ -85,6 +90,7 @@ def main():
                 "frac_train": "",
                 "frac_val": "",
                 "frac_test": "",
+                "unused_split": "beginning"     # "beginning" / "end" | if split does not add to 1 -> decide if unused data is at beginning or end of DS
             },
             "time_series_window": "fixed-window",  # Placeholder for Transformer
         },

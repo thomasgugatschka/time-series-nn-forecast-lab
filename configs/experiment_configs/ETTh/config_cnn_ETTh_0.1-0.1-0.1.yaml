@@ -1,15 +1,16 @@
-cpu_per_trial: 8
+cpu_per_trial: 12
 data_params:
   data_split:
     frac_test: 0.1
     frac_train: 0.1
     frac_val: 0.1
+    unused_split: beginning
   time_series_window: full-sequence
 dataset: ETTh
 gpu_per_trial: 0
-max_concurrent_trials: 2
+max_concurrent_trials: 1
 model_type: CNN
-num_samples: 100
+num_samples: 30
 scheduler: asha
 search_algorithm: optuna
 trial_params:

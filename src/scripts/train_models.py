@@ -18,7 +18,6 @@ from src.utilities.logging_utils import setup_logging, get_logger
 setup_logging()
 logger = get_logger(__name__)
 
-# TODO -> USE the --num_models parameter in the .bat files !!!!
 def parse_args():
     parser = argparse.ArgumentParser(description="Train models based on provided hyperparameters.")
     parser.add_argument("--config_path", type=str, default="config.yaml", help="Path to the configuration file.")

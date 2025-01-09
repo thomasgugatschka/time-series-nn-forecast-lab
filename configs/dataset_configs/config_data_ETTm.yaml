@@ -4,14 +4,14 @@ sources:
   - ETTm2
 source_forecasted: 0
 feature_list:
-  - 'HUFL'
-  - 'HULL'
-  - 'MUFL'
-  - 'MULL'
-  - 'LUFL'
-  - 'LULL'
-  - '0T'
-feature_forecasted: 0
+  - 'HUFL'    # High UseFul Load
+  - 'HULL'    # High UseLess Load
+  - 'MUFL'    # Middle UseFul Load
+  - 'MULL'    # Middle UseLess Load
+  - 'LUFL'    # Low UseFul Load
+  - 'LULL'    # Low UseLess Load
+  - '0T'      # Oil Temperature
+feature_forecasted: 6 # 0T - Oil Temperature
 columns_to_drop:
   - 'date'
 crop_start: null

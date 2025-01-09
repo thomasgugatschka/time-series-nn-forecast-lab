@@ -7,15 +7,17 @@ gpu_per_trial: 0.8   #0.8         # Fraction of GPU allocated per trial
 max_concurrent_trials: 1      # Maximum number of trials to run concurrently
 
 trial_params:
-  max_epochs: 6             # Maximum number of epochs for training each trial
+  max_epochs: 30             # Maximum number of epochs for training each trial
   grace_period: 5             # Minimum number of epochs before stopping underperforming trials
   reduction_factor: 2         # Factor by which the learning rate is reduced (used by some schedulers)
 
 data_params:
   data_split:
-    frac_train: 0.8
+    frac_train: 0.3
     frac_val: 0.1
     frac_test: 0.1
+    unused_split: "beginning"  # "beginning" / "end" | if split does not add to 1 -> decide if unused data is at beginning or end of DS
+
   time_series_window: "fixed-window" # Transformer only - "full-sequence" / "fixed-window"
 
 search_algorithm: "optuna"    # Algorithm used for hyperparameter tuning; "optuna", "bayesopt", "random", "hyperopt"
