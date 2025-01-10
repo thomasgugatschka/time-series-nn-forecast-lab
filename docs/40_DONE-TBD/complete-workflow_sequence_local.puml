@@ -1,0 +1,51 @@
+@startuml
+title Sequence Diagram for Complete Workflow
+
+actor User
+
+participant "Local Machine" as Local
+participant "Data Manager" as DataMngr
+participant "Hyperparameter Tuning" as HyperTuning
+participant "Model Training" as Train
+participant "Model Evaluation" as Eval
+participant "Summary Report" as Report
+participant "Experiment Storage" as Storage
+
+User -> Local : Start Workflow
+User -> Local : Import Datasets
+User -> Local : Define & Adjust Configurations
+
+User -> HyperTuning : Hyperparameter Tuning
+HyperTuning -> DataMngr : Request Preprocessing
+DataMngr -> DataMngr : Preprocess Data
+DataMngr -> HyperTuning : Return Preprocessed Data
+
+HyperTuning -> HyperTuning : Define Hyperparameter Search Space
+HyperTuning -> HyperTuning : Run Tuning Trials
+HyperTuning -> Storage : Store Best Hyperparameters
+
+User -> Train : Train Best Model(s)
+Train -> Storage : Get Best Hyperparameters
+Train -> DataMngr : Request Preprocessing
+DataMngr -> DataMngr : Preprocess Data
+DataMngr -> Train : Return Preprocessed Data
+Train -> Train : Train Best Model(s) (Top n)
+Train -> Storage : Store Trained Models
+
+User -> Eval : Evaluate Best Model(s)
+Eval -> Storage : Get Trained Models
+Eval -> DataMngr : Request Preprocessing
+DataMngr -> DataMngr : Preprocess Data
+DataMngr -> Eval : Return Preprocessed Data
+Eval -> Eval : Load Models
+Eval -> Eval : Evaluate on Test Batches
+Eval -> Eval : Calculate & Aggregate Metrics
+Eval -> Storage : Store Evaluation Results
+
+User -> Report : Generate Report
+Report -> Storage : Get Evaluation Results
+Report -> Report : Compare Metrics Across Models
+User <- Report : Final Results
+
+@enduml
+

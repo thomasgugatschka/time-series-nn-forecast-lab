@@ -1,0 +1,33 @@
+@startuml
+
+title Sequence Diagram for Training
+
+actor User
+participant "Main" as Main
+participant "ConfigManager" as ConfigManager
+participant "DataManager" as DataManager
+participant "ExperimentManager" as ExperimentManager
+participant "ModelFactory" as ModelFactory
+participant "WrapperFactory" as WrapperFactory
+participant "TrainingPipeline" as TrainingPipeline
+participant "FileManager" as FileManager
+
+User -> Main: Run Script
+Main -> Main: parse_args()
+Main -> ConfigManager: Load Configurations
+Main -> DataManager: Initialize DataManager
+Main -> ExperimentManager: Manage Experiment
+Main -> FileManager: Load top_hyperparameters
+loop For each configuration
+    Main -> DataManager: Load Raw Data
+    DataManager -> DataManager: Preprocess Data
+    Main -> ModelFactory: Create Model
+    Main -> WrapperFactory: Create Wrapper
+    Main -> TrainingPipeline: Build TrainingPipeline
+    TrainingPipeline -> TrainingPipeline: Train Model (Epochs)
+    TrainingPipeline -> TrainingPipeline: Validate Model
+    Main -> FileManager: Save Model and Hyperparameters
+end
+Main -> User: Completion Message
+
+@enduml

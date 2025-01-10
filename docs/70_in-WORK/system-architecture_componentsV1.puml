@@ -1,0 +1,99 @@
+
+# TODO Confirm if all components are included and lines are correct
+
+@startuml
+
+title Architecture
+
+package "User Scripts" {
+  component "train_model.py" as TrainScript
+  component "evaluate_models.py" as EvalScript
+  component "hyperparameter_tuning.py" as TuningScript
+}
+
+package "Managers" {
+  component "ConfigManager"
+  component "DataManager"
+  component "ExperimentManager"
+  component "FileManager"
+  component "PathManager"
+  component "EnvManager"
+  component "HyperparameterManager"
+}
+
+package "Data Pipeline" {
+  component "RawDataLoader"
+  component "DataTransformation"
+  component "DataPipelineFactory"
+  component "RNNDataPipeline"
+  component "TransformerDataPipeline"
+  component "DataSplitter"
+  component "DataLoaderCreator"
+}
+
+package "Model and Training" {
+  component "ModelFactory"
+  component "WrapperFactory"
+  component "TrainingPipelineBuilder"
+  component "TrainingPipeline"
+}
+
+package "Callbacks" {
+  component "CallbackManager"
+  component "LoggingCallback"
+  component "EarlyStoppingCallback"
+  component "PlottingCallback"
+  component "TensorBoardCallback"
+}
+
+package "RayTune" {
+  component "tune.run"
+}
+
+TrainScript --> ConfigManager
+TrainScript --> DataManager
+TrainScript --> ExperimentManager
+TrainScript --> ModelFactory
+TrainScript --> TrainingPipelineBuilder
+TrainScript --> TrainingPipeline
+TrainScript --> FileManager
+
+EvalScript --> ConfigManager
+EvalScript --> DataManager
+EvalScript --> ExperimentManager
+EvalScript --> ModelFactory
+EvalScript --> WrapperFactory
+EvalScript --> FileManager
+EvalScript --> PathManager
+
+TuningScript --> ConfigManager
+TuningScript --> DataManager
+TuningScript --> ExperimentManager
+TuningScript --> EnvManager
+TuningScript --> HyperparameterManager
+TuningScript --> RayTune
+TuningScript --> CallbackManager
+TuningScript --> TrainingPipelineBuilder
+TuningScript --> TrainingPipeline
+
+DataManager --> RawDataLoader
+DataManager --> DataPipelineFactory
+DataPipelineFactory --> RNNDataPipeline
+DataPipelineFactory --> TransformerDataPipeline
+DataManager --> DataTransformation
+DataManager --> DataSplitter
+DataManager --> DataLoaderCreator
+
+TrainingPipeline --> CallbackManager
+TrainingPipeline --> ModelFactory
+TrainingPipeline --> WrapperFactory
+TrainingPipeline --> DataLoaderCreator
+
+CallbackManager --> LoggingCallback
+CallbackManager --> EarlyStoppingCallback
+CallbackManager --> PlottingCallback
+CallbackManager --> TensorBoardCallback
+
+RayTune --> TuningScript
+
+@enduml

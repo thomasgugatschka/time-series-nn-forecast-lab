@@ -1,0 +1,45 @@
+@startuml
+
+title Deployment Diagram
+
+actor "User" as user
+
+node "Local Machine" {
+  artifact "User Scripts" as scripts
+  folder "Local File System" {
+    file "Dataset"
+    file "Configuration Files"
+  }
+  component "Python Runtime" as runtime
+}
+
+cloud "Google Cloud Platform (GCP)" {
+  cloud "Artifact Registry" as registry
+  cloud "Google Cloud Storage (GCS)" as gcs {
+    folder "configs/"
+    folder "experiments/"
+  }
+  node "Compute Engine" as vm {
+    component "Docker Runtime" as docker
+    component "Training Scripts" as training
+  }
+  node "Batch Service" as batch {
+    component "Job Scheduler"
+    component "Job Queue"
+  }
+}
+
+user --> scripts : Run Scripts
+scripts --> runtime : Execute Python Code
+runtime --> "Dataset" : Load Data
+runtime --> "Configuration Files" : Load Configurations
+
+scripts --> registry : Pull Docker Images
+scripts --> gcs : Upload Results
+
+registry --> docker : Provide Docker Image
+batch --> docker : Deploy Training Jobs
+batch --> gcs : Fetch Configurations
+vm --> gcs : Save Experiment Results
+
+@enduml

@@ -1,0 +1,158 @@
+@startuml
+
+' Base Classes
+class BaseModel {
+  +model_name: str
+  +forward(x): Tensor
+  +validate_parameters(...)
+}
+
+class BaseWrapper {
+  +train_epoch(...)
+  +validate(...)
+  +callbacks: list
+}
+
+' Managers
+class ConfigManager {
+  +get_main_config(): dict
+  +get_dataset_config(): dict
+}
+
+class DataManager {
+  +load_raw_data(): None
+  +preprocess_data(): dict
+  +create_data_loaders(...): dict
+}
+
+class ExperimentManager {
+  +manage_experiment(): tuple
+  +finalize_experiment(): None
+}
+
+class FileManager {
+  +save_json(...)
+  +load_json(...): dict
+}
+
+class PathManager {
+  +get_path(...): Path
+}
+
+class EnvManager {
+  +get_env_variable(...): str
+}
+
+class HyperparameterManager {
+  +get_search_space(...): dict
+}
+
+' Models
+class Transformer {
+  +forward(x): Tensor
+}
+
+class RNN {
+  +forward(x): Tensor
+}
+
+class LSTM {}
+class BiLSTM {}
+class GRU {}
+class TCN {}
+class CNN {}
+
+' Wrappers
+class TransformerWrapper {}
+class RNNWrapper {}
+class LSTMWrapper {}
+class BiLSTMWrapper {}
+class GRUWrapper {}
+class TCNWrapper {}
+class CNNWrapper {}
+
+' Data Pipeline
+class RawDataLoader {
+  +load_data(...): Any
+}
+
+class DataPipelineFactory {
+  +create_pipeline(...): BaseDataPipeline
+}
+
+class RNNDataPipeline {
+  +preprocess(...): dict
+}
+
+class TransformerDataPipeline {
+  +preprocess(...): dict
+}
+
+class DataSplitter {
+  +split(...): dict
+}
+
+class DataLoaderCreator {
+  +create_loaders(...): dict
+}
+
+class DataTransformation {
+  +normalize(...): dict
+  +denormalize(...): dict
+}
+
+' Callbacks
+class CallbackManager {
+  +on_train_begin(...)
+  +on_epoch_end(...)
+  +on_train_end(...)
+}
+
+class LoggingCallback {}
+class EarlyStoppingCallback {}
+class PlottingCallback {}
+class TensorBoardCallback {}
+
+' Factories
+class ModelFactory {
+  +create_model(...): BaseModel
+}
+
+class WrapperFactory {
+  +create_wrapper(...): BaseWrapper
+}
+
+' Relationships
+BaseWrapper <|-- TransformerWrapper
+BaseWrapper <|-- RNNWrapper
+BaseWrapper <|-- LSTMWrapper
+BaseWrapper <|-- BiLSTMWrapper
+BaseWrapper <|-- GRUWrapper
+BaseWrapper <|-- TCNWrapper
+BaseWrapper <|-- CNNWrapper
+
+BaseModel <|-- Transformer
+BaseModel <|-- RNN
+BaseModel <|-- LSTM
+BaseModel <|-- BiLSTM
+BaseModel <|-- GRU
+BaseModel <|-- TCN
+BaseModel <|-- CNN
+
+DataManager --> RawDataLoader
+DataManager --> DataPipelineFactory
+DataPipelineFactory --> RNNDataPipeline
+DataPipelineFactory --> TransformerDataPipeline
+DataManager --> DataTransformation
+DataManager --> DataSplitter
+DataManager --> DataLoaderCreator
+
+CallbackManager --> LoggingCallback
+CallbackManager --> EarlyStoppingCallback
+CallbackManager --> PlottingCallback
+CallbackManager --> TensorBoardCallback
+
+ModelFactory --> BaseModel
+WrapperFactory --> BaseWrapper
+
+@enduml

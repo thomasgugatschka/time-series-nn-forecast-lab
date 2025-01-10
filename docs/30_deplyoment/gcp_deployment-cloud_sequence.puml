@@ -1,0 +1,34 @@
+@startuml
+title Sequence Diagram for Cloud Execution on GCP
+
+actor User
+
+participant "Local Machine" as Local
+participant "Google Cloud Storage (GCS)" as GCS
+participant "Batch Service" as Batch
+participant "Artifact Registry" as Registry
+participant "Compute Engine (VM)" as VM
+
+User -> Local : Generate Experiment Configurations (generate_experiment_configs.py)
+User -> Local : Update Configurations (gcs_update_configs.bat)
+Local -> GCS : Upload Configurations
+User -> Local : Submit Job List (gcp_batch_jobs.py)
+Local -> Batch : Submit Batch Jobs
+Batch -> VM : Schedule Job
+
+VM -> Registry : Pull Docker Image
+VM -> GCS : Read Configurations
+
+loop Execute Task
+  VM -> VM : Execute Task
+  User -> VM : Monitor Task Progress (GCP - VM & Jobs)
+  VM -> User : Provide Execution Updates
+end
+
+VM -> GCS : Store Experiment Results
+VM -> User : Report Completion
+
+User -> Local : Pull Experiment Data (gcs_sync_experiments.bat)
+Local -> GCS : Download Experiment Results
+
+@enduml

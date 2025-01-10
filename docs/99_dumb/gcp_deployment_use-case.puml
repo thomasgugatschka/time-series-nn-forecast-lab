@@ -1,0 +1,24 @@
+@startuml
+
+actor User
+
+package "Google Cloud Platform (GCP)" {
+  usecase "Submit Job List" as SubmitJob
+  usecase "Read Configurations" as ReadConfigs
+  usecase "Schedule Job" as ScheduleJob
+  usecase "Pull Docker Image" as PullImage
+  usecase "Execute Benchmark" as ExecuteBenchmark
+  usecase "Store Results" as StoreResults
+  usecase "Return Job Status" as ReturnStatus
+}
+
+User --> SubmitJob
+SubmitJob --> ReadConfigs
+SubmitJob --> ScheduleJob
+ScheduleJob --> PullImage
+ScheduleJob --> ExecuteBenchmark
+ExecuteBenchmark --> StoreResults
+StoreResults --> ReturnStatus
+ReturnStatus --> User
+
+@enduml

@@ -1,0 +1,44 @@
+@startuml
+
+start
+
+:Parse arguments (parse_args);
+:Load configuration (ConfigManager);
+:Initialize DataManager, ExperimentManager, PlotManager;
+:Load dataset configuration (e.g., ts_past, ts_future);
+
+:Load test data using DataManager;
+if (Test data available?) then (Yes)
+  :Prepare test data (x_test, y_test);
+else (No)
+  :Raise error ("No test data available");
+  stop
+endif
+
+:Retrieve model paths (PathManager);
+while (For each model path) is (True)
+  :Load model hyperparameters (FileManager);
+  if (Hyperparameters available?) then (Yes)
+    :Parse model type and parameters;
+  else (No)
+    :Raise error ("Missing hyperparameters");
+    stop
+  endif
+
+  :Load model using ModelFactory;
+  :Initialize wrapper (WrapperFactory);
+
+  :Evaluate model on test data (evaluate_model);
+  :Calculate metrics (e.g., MSE, MAE);
+  :Plot evaluation results (PlotManager);
+
+  :Store metrics summary (FileManager);
+endwhile (All models processed)
+
+:Aggregate all metrics (aggregate_overall_metrics);
+:Save aggregated metrics (FileManager);
+:Generate visualizations (PlotManager);
+
+stop
+
+@enduml

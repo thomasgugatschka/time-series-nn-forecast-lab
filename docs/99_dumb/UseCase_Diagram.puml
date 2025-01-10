@@ -1,0 +1,26 @@
+@startuml
+
+actor User
+
+package "System" {
+  usecase "Prepare Data" as PrepareData
+  usecase "Train Model" as TrainModel
+  usecase "Evaluate Model" as EvaluateModel
+  usecase "Tune Hyperparameters" as TuneHyperparameters
+  usecase "Generate Reports" as GenerateReports
+}
+
+User --> PrepareData : Initiates
+User --> TrainModel : Initiates
+User --> EvaluateModel : Initiates
+User --> TuneHyperparameters : Initiates
+User --> GenerateReports : Requests
+
+PrepareData --> TrainModel : Provides Data
+PrepareData --> EvaluateModel : Provides Data
+TrainModel --> GenerateReports : Generates Training Metrics
+EvaluateModel --> GenerateReports : Generates Evaluation Metrics
+TuneHyperparameters --> GenerateReports : Generates Tuning Metrics
+
+@enduml
+

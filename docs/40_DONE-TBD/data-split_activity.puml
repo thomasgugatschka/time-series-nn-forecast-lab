@@ -1,0 +1,52 @@
+@startuml
+
+start
+
+:Initialize FixedDataSplitter;
+:Validate `frac_train`, `frac_val`, `frac_test`;
+if (Do fractions add up to 1?) then (Yes)
+  :Use provided fractions;
+else (No)
+  if (Is `frac_test` provided?) then (Yes)
+    :Calculate total fractions (train + val + test);
+    if (Total > 1?) then (Yes)
+      :Raise Error ("Fractions exceed 100%");
+      stop
+    else (No)
+      :Use provided fractions;
+    endif
+  else (No)
+    :Set `frac_test` = 1 - (frac_train + frac_val);
+    if (Total > 1?) then (Yes)
+      :Raise Error ("Fractions exceed 100%");
+      stop
+    else (No)
+      :Use calculated fractions;
+    endif
+  endif
+endif
+
+if (Do fractions sum to < 1?) then (Yes)
+  :Handle unused data;
+  if (`unused_split` == "beginning") then (Yes)
+    :Trim unused data from the beginning;
+  else (No)
+    :Trim unused data from the end;
+  endif
+else (No)
+  :No trimming needed;
+endif
+
+:Calculate number of samples for each split;
+:Split data into train, validation, and test sets;
+
+if (Any split size <= 0?) then (Yes)
+  :Raise Error ("Insufficient data for one or more splits");
+  stop
+else (No)
+  :Return split data (x_arr_train, x_arr_val, x_arr_test);
+endif
+
+stop
+
+@enduml

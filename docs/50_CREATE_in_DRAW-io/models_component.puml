@@ -1,0 +1,65 @@
+@startuml
+
+package "Model and Training" {
+  component "ModelFactory" as ModelFactory
+  component "WrapperFactory" as WrapperFactory
+
+  package "Base Classes" {
+    component "BaseModel" as BaseModel
+    component "BaseWrapper" as BaseWrapper
+  }
+
+  package "Models" {
+    component "Transformer" as Transformer
+    component "RNN" as RNN
+    component "LSTM" as LSTM
+    component "BiLSTM" as BiLSTM
+    component "GRU" as GRU
+    component "TCN" as TCN
+    component "CNN" as CNN
+  }
+
+  package "Wrappers" {
+    component "TransformerWrapper" as TransformerWrapper
+    component "RNNWrapper" as RNNWrapper
+    component "LSTMWrapper" as LSTMWrapper
+    component "BiLSTMWrapper" as BiLSTMWrapper
+    component "GRUWrapper" as GRUWrapper
+    component "TCNWrapper" as TCNWrapper
+    component "CNNWrapper" as CNNWrapper
+  }
+
+  ModelFactory --> Transformer
+  ModelFactory --> RNN
+  ModelFactory --> LSTM
+  ModelFactory --> BiLSTM
+  ModelFactory --> GRU
+  ModelFactory --> TCN
+  ModelFactory --> CNN
+
+  WrapperFactory --> TransformerWrapper
+  WrapperFactory --> RNNWrapper
+  WrapperFactory --> LSTMWrapper
+  WrapperFactory --> BiLSTMWrapper
+  WrapperFactory --> GRUWrapper
+  WrapperFactory --> TCNWrapper
+  WrapperFactory --> CNNWrapper
+
+  Transformer --> BaseModel
+  RNN --> BaseModel
+  LSTM --> BaseModel
+  BiLSTM --> BaseModel
+  GRU --> BaseModel
+  TCN --> BaseModel
+  CNN --> BaseModel
+
+  TransformerWrapper --> BaseWrapper
+  RNNWrapper --> BaseWrapper
+  LSTMWrapper --> BaseWrapper
+  BiLSTMWrapper --> BaseWrapper
+  GRUWrapper --> BaseWrapper
+  TCNWrapper --> BaseWrapper
+  CNNWrapper --> BaseWrapper
+}
+
+@enduml

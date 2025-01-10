@@ -1,0 +1,56 @@
+@startuml
+
+title Model Evaluation Sequence Diagram
+
+actor "User" as user
+
+participant "Main Script" as Main
+participant "ConfigManager" as ConfigManager
+participant "DataManager" as DataManager
+participant "PathManager" as PathManager
+participant "FileManager" as FileManager
+participant "ModelFactory" as ModelFactory
+participant "WrapperFactory" as WrapperFactory
+participant "MetricsUtility" as Metrics
+participant "PlotManager" as PlotManager
+
+user -> Main: Start Model Evaluation
+Main -> Main: parse_args()
+Main -> ConfigManager: Load Configurations
+Main -> DataManager: Preprocess Test Data
+DataManager -> Main: Return Test Data
+
+loop For Each Model
+  Main -> FileManager: Load Model Hyperparameters
+  Main -> ModelFactory: Initialize Model
+  Main -> WrapperFactory: Wrap Model
+
+  loop For Each Test Slice | step: ts_future
+    Main -> Main: Extract Test Slice (x_test, y_test)
+    Main -> WrapperFactory: Predict Outputs
+    WrapperFactory -> Main: Return Predictions
+
+    Main -> DataManager: Postprocess Inputs and Outputs
+    DataManager -> DataManager: Denormalize Data
+    DataManager -> Main: Return Denormalized Data
+    Main -> Metrics: Calculate Slice Metrics
+    Metrics -> Main: Return Metrics (MAE, MSE, etc.)
+
+    Main -> PlotManager: Generate Evaluation Plots for Slice
+    alt Plot-Show
+        PlotManager -> PlotManager: Save Plot
+    end
+    alt Plot-Save
+        PlotManager -> FileManager: Save Plot
+    end
+  end
+
+  Main -> Metrics: Aggregate Metrics Across Slices
+  Metrics -> Main: Return Aggregated Metrics
+  Main -> FileManager: Save Model Metrics Summary
+  Main -> PlotManager: Generate Overall Evaluation Plots
+end
+
+Main -> user: Notify Completion
+
+@enduml

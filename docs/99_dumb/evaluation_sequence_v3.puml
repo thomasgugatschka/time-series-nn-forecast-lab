@@ -1,0 +1,46 @@
+@startuml
+
+actor User
+participant "Main" as Main
+participant "ConfigManager" as ConfigManager
+participant "DataManager" as DataManager
+participant "ExperimentManager" as ExperimentManager
+participant "WrapperFactory" as WrapperFactory
+participant "MetricsUtility" as MetricsUtility
+participant "PlotManager" as PlotManager
+participant "FileManager" as FileManager
+participant "PathManager" as pathManager
+participant "Wrapper" as Wrapper
+
+User -> Main: Run Script
+Main -> Main: parse_args()
+Main -> ConfigManager: Load Configurations
+Main -> DataManager: Load & Preprocess Test Data
+Main -> pathManager: Retrieve Model Paths
+Main -> ExperimentManager: Manage Experiment
+
+Main -> FileManager: Load Models and Hyperparameters
+loop For each model
+  Main -> WrapperFactory: Create Wrapper
+  Main -> DataManager: Postprocess Test Data
+
+  loop For each slice in test data
+    Main -> DataManager: Extract Test Slice (x_test, y_test)
+    Main -> Wrapper: Predict Outputs
+    Wrapper -> Main: Return Predictions
+
+    Main -> DataManager: Denormalize Inputs & Outputs
+    Main -> MetricsUtility: Calculate Metrics
+    MetricsUtility -> Main: Return Metrics (e.g., MAE, MSE)
+
+    Main -> PlotManager: Generate Evaluation Plots
+  end
+
+  Main -> MetricsUtility: Aggregate Metrics Across Slices
+  MetricsUtility -> Main: Aggregated Metrics Summary
+  Main -> FileManager: Save Metrics Summary
+end
+
+Main -> User: Completion Message
+
+@enduml

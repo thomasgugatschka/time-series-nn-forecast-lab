@@ -20,26 +20,37 @@ class GRU(BaseModel):
             dropout=dropout
         )
 
-        self.output_size = output_size
-        self.num_layers = num_layers
-        self.input_size = input_size
-        self.hidden_size = hidden_size
+#        self.output_size = output_size
+#        self.num_layers = num_layers
+#        self.input_size = input_size
+#        self.hidden_size = hidden_size
+#        self.dropout = dropout
+#        self.batch_first = True
+
+    # TODO -> fix somewhere else.... casting here should not be necessary???? better fix it while reading the CONFIG
+        # TODO -> should not be necessary to cast to int here... fix it while reading the CONFIG
+        self.output_size = int(output_size)
+        self.num_layers = int(num_layers)
+        self.input_size = int(input_size)
+        self.hidden_size = int(hidden_size)
         self.dropout = dropout
         self.batch_first = True
 
+# TODO -> CHECK ALL MODELS if one initialized that I use *.self
+
         # Unidirectional GRU model with dropout
         self.gru = nn.GRU(
-            input_size=input_size,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
+            input_size=self.input_size,
+            hidden_size=self.hidden_size,
+            num_layers=self.num_layers,
             batch_first=self.batch_first,
-            dropout=dropout,
+            dropout=self.dropout,
         )
 
         # Fully connected layers
-        self.fc_1 = nn.Linear(hidden_size, 128)
+        self.fc_1 = nn.Linear(self.hidden_size, 128)
         self.relu = nn.ReLU()
-        self.fc_2 = nn.Linear(128, output_size)
+        self.fc_2 = nn.Linear(128, self.output_size)
 
         if kwargs:
             logger.debug(f"Unused keyword arguments: {kwargs}")

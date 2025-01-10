@@ -1,0 +1,44 @@
+
+
+- Use Case Diagram
+    -> 1 Diagram with multiple Use-Cases
+        - Tune, Train, Evaluate, Visualize Data, Visualize Hyperparameter, Visualize Metrics, Tensorboard
+        - sync data from cloud to local
+        - generate configuration files
+        - push local configuration files to cloud
+        - BATCH Execution (local) -> batch_wrapper script
+- Class Diagram
+- Component Diagram
+- Deployment Diagram
+- Sequence Diagram
+- Activity Diagram
+- State Diagram ??
+
+
+EVALUATION LOGIC  -> multiple models -> and how the evaluation is done in regards of the test data (multiple evaluations)
+Data Logic -> in regards of splitting TRAIN/VAL/TEST splits
+
+COMPLETE WORKFLOW DIAGRAM
+    - Including information like store 10 best hyperparameter
+    - Train e.g. 5 best models
+    - evaluate on test data and move always ts_futere so multiple results are genered out of the test data (cross validation??????)
+
+
+- all additional scripts -> config generation, also the batch execution script
+
+
+
+- how cloud deployment works (GCP)
+- how local deployment works IDE & Docker
+
+- sequence diagram for
+    - training
+    - hyperparameter tuning
+    - evaluation
+
+Class Diagram for complete project
+    -> add info about patterns used (singelton, observer, factory, strategy, builder, ...)
+
+- observation / monitoring methods -> logs, tensorboard
+
+- logic with experiment management

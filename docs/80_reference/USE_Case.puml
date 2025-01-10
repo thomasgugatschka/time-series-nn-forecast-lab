@@ -1,0 +1,43 @@
+@startuml
+
+title Use Case Diagram for the Whole Project
+
+actor "User" as user
+
+package "Core Use Cases" {
+  usecase "Configure Experiment" as configureExperiment
+  usecase "Preprocess Data" as preprocessData
+  usecase "Train Model" as trainModel
+  usecase "Tune Hyperparameters" as tuneHyperparameters
+  usecase "Evaluate Model" as evaluateModel
+}
+
+package "Auxiliary Use Cases" {
+  usecase "Generate Plots" as generatePlots
+  usecase "Save/Load Data" as saveLoadData
+  usecase "Log Activity" as logActivity
+  usecase "Resolve Paths" as resolvePaths
+}
+
+user --> configureExperiment : Initiate Experiment
+user --> preprocessData : Provide Dataset
+user --> trainModel : Start Training
+user --> tuneHyperparameters : Initiate Tuning
+user --> evaluateModel : Start Evaluation
+
+configureExperiment --> saveLoadData : Save Configurations
+preprocessData --> saveLoadData : Manage Dataset
+trainModel --> logActivity : Log Training Progress
+trainModel --> generatePlots : Visualize Training Metrics
+trainModel --> saveLoadData : Save Trained Model
+
+preprocessData --> resolvePaths : Locate Dataset
+trainModel --> resolvePaths : Locate Model Paths
+
+tuneHyperparameters --> logActivity : Log Tuning Progress
+
+evaluateModel --> generatePlots : Visualize Evaluation Results
+evaluateModel --> saveLoadData : Save Evaluation Metrics
+evaluateModel --> resolvePaths : Locate Trained Models
+
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+
+package "Data Pipeline" {
+  class DataManager {
+    - _raw_df
+    - _cropped_df
+    - _tensor_data
+    - _array_data
+    - _scaler
+    - _metadata
+    - data_transformation
+    - data_loader
+    + postprocess_data(data, selected: bool)
+    + get_data(key: str)
+    + create_data_loaders(tensor_data: dict, batch_size: int, loaders_to_create: list, shuffle_train: bool)
+    + clear_memory()
+  }
+}
+
+package "Managers" {
+  class HyperparameterManager {
+    - config_hyperparameter
+    + get_search_space(model_type: str)
+  }
+}
+
+DataManager --> DataTransformation
+DataManager --> DataLoaderCreator
+
+@enduml

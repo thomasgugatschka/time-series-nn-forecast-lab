@@ -1,0 +1,34 @@
+@startuml
+
+actor User
+
+cloud "Google Cloud Platform (GCP)" {
+
+  cloud "Google Cloud Storage (GCS)" as GCS {
+    folder "configs/"
+    folder "experiments/"
+  }
+
+  artifact "Artifact Registry" as Registry {
+    file "docker-image"
+  }
+
+  node "Batch Service" as Batch {
+    component "Job Queue"
+    component "Job Scheduler"
+  }
+
+  node "Compute Engine (VM)" as VM {
+    component "Docker Runtime"
+    component "Benchmark Executor"
+  }
+
+  User --> Batch: "Submit Job List"
+  Batch --> GCS: "Read Configurations"
+  Batch --> VM: "Schedule Job"
+  VM --> Registry: "Pull Docker Image"
+  VM --> GCS: "Read Configs"
+  VM --> GCS: "Store Results"
+}
+
+@enduml

@@ -1,0 +1,55 @@
+@startuml
+
+title Hyperparameter Tuning Workflow Diagram
+
+actor "User" as user
+
+participant "Main Script" as main
+participant "ConfigManager" as config
+participant "DataManager" as dataManager
+participant "HyperparameterManager" as hyperManager
+participant "StrategyFactory" as strategyFactory
+participant "Ray Tune" as rayTune
+participant "Objective Function" as objective
+participant "ModelFactory" as modelFactory
+participant "WrapperFactory" as wrapperFactory
+participant "TrainingPipelineBuilder" as pipelineBuilder
+participant "TrainingPipeline" as trainingPipeline
+participant "MetricsUtility" as metrics
+participant "FileManager" as fileManager
+participant "PlotManager" as plot
+
+user -> main: Start Hyperparameter Tuning
+main -> config: Load Configurations
+main -> dataManager: Load & Preprocess Data
+main -> hyperManager: Load Search Space
+main -> strategyFactory: Create Search and Scheduler Strategies
+strategyFactory -> rayTune: Configure Ray Tune
+
+main -> rayTune: Start Trials
+loop For Each Trial
+  rayTune -> objective: Run Objective Function
+  objective -> dataManager: Load Trial Data
+  objective -> modelFactory: Initialize Model
+  objective -> wrapperFactory: Wrap Model
+
+  objective -> pipelineBuilder: Build Training Pipeline
+  pipelineBuilder -> trainingPipeline: Create TrainingPipeline Instance
+
+  loop For Each Epoch
+    trainingPipeline -> trainingPipeline: Train for One Epoch
+    trainingPipeline -> metrics: Calculate Metrics
+    metrics -> trainingPipeline: Return Metrics
+  end
+
+  trainingPipeline -> metrics: Aggregate Final Metrics
+  trainingPipeline -> fileManager: Save Trial Results
+  trainingPipeline -> plot: Generate Trial Plots
+  objective -> rayTune: Return Trial Results
+end
+
+rayTune -> fileManager: Save Aggregated Results
+rayTune -> plot: Generate Tuning Summary Plots
+main -> user: Notify Completion
+
+@enduml

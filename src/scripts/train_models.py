@@ -109,7 +109,7 @@ def train_model(hyperparameter_config, model_type, dataset_config, data_manager,
     # "epochs" is the number of iterations which was defined during the hyperparameter tuning
     # it was cut short because of an early stopping mechanism
     #epochs = training_params["epochs"]
-    epochs = hyperparameter_config.get("training_iteration")
+    epochs = int(hyperparameter_config.get("training_iteration"))
     batch_size = training_params["batch_size"]
 
     # Create data loaders

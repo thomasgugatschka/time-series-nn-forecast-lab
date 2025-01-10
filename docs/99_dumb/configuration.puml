@@ -1,0 +1,54 @@
+@startuml
+
+package "Configurations" #LightBlue {
+  class ConfigManager {
+    +get_main_config(): dict
+    +get_dataset_config(): dict
+  }
+
+  class DataManager #LightGreen {
+    +load_raw_data(): None
+    +preprocess_data(): dict
+    +create_data_loaders(batch_size: int, loaders_to_create: list, shuffle_train: bool): dict
+    +dataset_config: dict
+  }
+
+  class HyperparameterManager {
+    +get_search_space(model_type: str): dict
+    +validate_hyperparameters(hyperparameters: dict): bool
+  }
+
+  class EnvManager {
+    +get_env_variable(key: str, default: Any, as_bool: bool = False): Any
+  }
+
+  class ExperimentManager {
+    +manage_experiment(): tuple
+    +finalize_experiment(): None
+    +experiment_name: str
+    +experiment_path: Path
+  }
+
+  class FileManager {
+    +load_json(file_path: Path): dict
+    +save_json(data: dict, file_path: Path): None
+  }
+
+  class PathManager {
+    +get_path(key: str): Path
+    +get_config_dir(): Path
+    +experiment_path: Path
+  }
+}
+
+' Relationships
+ConfigManager --> DataManager : Provides Configurations
+ConfigManager --> HyperparameterManager : Provides Configurations
+ConfigManager --> ExperimentManager : Provides Configurations
+EnvManager --> ConfigManager : Provides Environment Variables
+ExperimentManager --> PathManager : Manages Paths
+FileManager --> ConfigManager : Loads/Saves Configurations
+DataManager --> FileManager : Reads/Writes Dataset Configs
+HyperparameterManager --> ConfigManager : Reads Search Space Config
+
+@enduml

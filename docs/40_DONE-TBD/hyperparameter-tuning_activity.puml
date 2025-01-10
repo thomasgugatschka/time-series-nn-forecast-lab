@@ -1,0 +1,27 @@
+@startuml
+
+start
+:User starts hyperparameter tuning;
+:Load configurations (ConfigManager);
+:Initialize DataManager and ExperimentManager;
+:Load search space (HyperparameterManager);
+:Initialize Ray for parallel trials;
+
+fork
+  :For each trial;
+  :Load and preprocess data (DataManager);
+  :Create model (ModelFactory);
+  :Initialize callbacks (CallbackManager);
+  :Build training pipeline (TrainingPipelineBuilder);
+  :Run training pipeline;
+  :Return trial results;
+endfork
+
+:Aggregate trial results;
+:Save results to experiment folder;
+:Finalize experiment (ExperimentManager);
+:Shutdown Ray;
+
+stop
+
+@enduml

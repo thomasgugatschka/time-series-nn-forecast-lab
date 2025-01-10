@@ -1,0 +1,60 @@
+@startuml
+
+actor User
+
+package "Local Execution" {
+  node "Local System" {
+    component "Benchmark Script"
+    component "Filesystem"
+    User -- "Benchmark Script": "Starts Execution"
+    "Benchmark Script" --> "Filesystem": "Read/Write Configs"
+  }
+}
+
+package "Local with GCS" {
+  node "Local System" {
+    component "Benchmark Script"
+  }
+  User -- "Benchmark Script": "Starts Execution"
+  "Benchmark Script" --> GCS: "Read/Write Data"
+}
+
+package "Local Docker" {
+  node "Docker Container" {
+    component "Config Fetcher"
+    component "Script Executor"
+    component "Results Uploader"
+  }
+  User -- "Docker Container": "Starts Container"
+  "Config Fetcher" --> GCS: "Pull Configs"
+  "Script Executor" --> "Config Fetcher": "Use Configs"
+  "Script Executor" --> "Results Uploader": "Generate Results"
+  "Results Uploader" --> GCS: "Upload Results"
+}
+
+package "Cloud Batch Execution" {
+  node "GCP/AWS Batch" {
+    component "Batch Job Processor"
+  }
+  artifact "Artifact Registry" {
+    file "Docker Image"
+  }
+  User -- "Batch Job Processor": "Queue Jobs"
+  "Batch Job Processor" --> "Artifact Registry": "Pull Docker Image"
+  "Batch Job Processor" --> GCS: "Pull Configs"
+  "Batch Job Processor" --> GCS: "Store Results"
+}
+
+cloud "Google Cloud Storage (GCS)" as GCS {
+  folder "experiment" {
+    folder "raw_data/"
+    folder "results/"
+  }
+  file "experiment_metadata.json"
+  folder "configs/" {
+    file "config1.json"
+    file "config2.json"
+  }
+}
+
+@enduml

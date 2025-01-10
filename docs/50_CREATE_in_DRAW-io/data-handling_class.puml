@@ -1,0 +1,60 @@
+@startuml
+
+title Data Handling Class Diagram
+
+package "Data Handling" {
+
+  ' Base class for data pipelines
+  abstract class BaseDataPipeline {
+    +process_data(data: dict): dict
+    +split_data(data: dict): dict
+  }
+
+  ' RNN-specific pipeline
+  class RNNDataPipeline {
+    +process_data(data: dict): dict
+    +split_data(data: dict): dict
+  }
+
+  ' Transformer-specific pipeline
+  class TransformerDataPipeline {
+    +process_data(data: dict): dict
+    +split_data(data: dict): dict
+  }
+
+  ' Factory for creating pipelines
+  class DataPipelineFactory {
+    +create_pipeline(type: str): BaseDataPipeline
+  }
+
+  ' Data manager for handling data operations
+  class DataManager {
+    +load_raw_data(): dict
+    +preprocess_data(): dict
+    +create_data_loaders(batch_size: int, loaders_to_create: list, shuffle_train: bool): dict
+    +split_data_with_pipeline(pipeline: BaseDataPipeline): dict
+  }
+
+  ' Data transformation utilities
+  class DataTransformation {
+    +normalize(data: dict): dict
+    +denormalize(data: dict): dict
+    +windowize(data: dict, window_size: int): dict
+  }
+
+  ' Data splitting utilities
+  class DataSplitter {
+    +split(data: dict, train_frac: float, val_frac: float, test_frac: float): dict
+    +handle_unused_data(unused_split: str): dict
+  }
+}
+
+' Relationships
+BaseDataPipeline <|-- RNNDataPipeline
+BaseDataPipeline <|-- TransformerDataPipeline
+DataPipelineFactory --> BaseDataPipeline : creates
+DataManager --> DataPipelineFactory : uses
+DataManager --> DataTransformation : uses
+DataManager --> DataSplitter : uses
+
+@enduml

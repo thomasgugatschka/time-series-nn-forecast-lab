@@ -1,0 +1,139 @@
+@startuml
+
+title Complete Class Diagram of the Project
+
+' Package: Data Handling
+package "Data Handling" {
+  class DataManager {
+    +load_raw_data(): None
+    +preprocess_data(): dict
+    +create_data_loaders(batch_size: int, loaders_to_create: list, shuffle_train: bool): dict
+  }
+
+  class DataPipelineFactory {
+    +create_pipeline(type: str): BaseDataPipeline
+  }
+
+  abstract class BaseDataPipeline {
+    +process_data(data: dict): dict
+  }
+
+  class RNNDataPipeline {
+    +process_data(data: dict): dict
+  }
+
+  class TransformerDataPipeline {
+    +process_data(data: dict): dict
+  }
+
+  DataPipelineFactory --> BaseDataPipeline : creates
+  RNNDataPipeline --|> BaseDataPipeline
+  TransformerDataPipeline --|> BaseDataPipeline
+}
+
+' Package: Model Management
+package "Model Management" {
+  class ModelFactory {
+    +create_model(type: str, **kwargs): torch.nn.Module
+  }
+
+  class WrapperFactory {
+    +create_wrapper(type: str, model, optimizer, loss_fn, device): BaseWrapper
+  }
+
+  abstract class BaseWrapper {
+    +train_epoch(x_batch, y_batch): float
+    +validate(x_batch, y_batch): float
+    +predict(x_batch): np.ndarray
+  }
+
+  class RNNWrapper {
+    +train_epoch(x_batch, y_batch): float
+  }
+
+  class TransformerWrapper {
+    +train_epoch(x_batch, y_batch): float
+  }
+
+  WrapperFactory --> BaseWrapper : creates
+  RNNWrapper --|> BaseWrapper
+  TransformerWrapper --|> BaseWrapper
+}
+
+' Package: Training and Callbacks
+package "Training" {
+  class TrainingPipelineBuilder {
+    +set_model(model: torch.nn.Module): self
+    +set_wrapper(wrapper: BaseWrapper): self
+    +set_data_loaders(train, val): self
+    +set_epochs(epochs: int): self
+    +set_callback_manager(manager): self
+    +build(): TrainingPipeline
+  }
+
+  class TrainingPipeline {
+    +run(): None
+  }
+
+  class CallbackManager {
+    +on_epoch_begin(epoch: int, wrapper: BaseWrapper): None
+    +on_epoch_end(epoch: int, wrapper: BaseWrapper): None
+  }
+}
+
+TrainingPipelineBuilder --> TrainingPipeline : builds
+TrainingPipeline --> CallbackManager : uses
+
+' Package: Hyperparameter Tuning
+package "Hyperparameter Tuning" {
+  class StrategyFactory {
+    +create_search_algorithm(name: str, metric: str, mode: str): object
+    +create_scheduler(name: str, metric: str, mode: str, params: dict): object
+  }
+
+  class RayTune {
+    +run(config, num_samples, resources, scheduler, search_alg): None
+  }
+
+  StrategyFactory --> RayTune : configures
+}
+
+' Package: Configuration & Utilities
+package "Utilities" {
+  class ConfigManager {
+    +get_main_config(): dict
+    +get_dataset_config(): dict
+  }
+
+  class ExperimentManager {
+    +manage_experiment(): tuple
+    +finalize_experiment(): None
+  }
+
+  class PlotManager {
+    +plot_evaluation(ts_past, ts_future, x_context, y_actual, y_predicted): None
+    +plot_metric_histogram(metrics: list, metric_name: str): None
+  }
+
+  class MetricsUtility {
+    +calculate_metrics(predictions, targets): dict
+  }
+
+  class FileManager {
+    +save_json(data: dict, file_path: Path): None
+    +load_json(file_path: Path): dict
+  }
+
+  class Logging {
+    +setup_logging(): None
+  }
+
+}
+
+ConfigManager --> DataManager : provides configs
+ConfigManager --> ExperimentManager : manages experiments
+ExperimentManager --> FileManager : uses
+PlotManager --> MetricsUtility : visualizes
+TrainingPipeline --> MetricsUtility : calculates metrics
+
+@enduml

@@ -1,0 +1,83 @@
+@startuml
+
+title System Architecture Diagram
+
+package "User Interaction" {
+  actor User as user
+}
+
+package "Configuration & Management" {
+  component "ConfigManager" as config
+  component "ExperimentManager" as experiment
+  component "PlotManager" as plot
+  component "FileManager" as file
+  component "PathManager" as path
+}
+
+package "Data Processing" {
+  component "DataManager" as data
+  component "DataPipelineFactory" as pipelineFactory
+  component "RNNDataPipeline" as rnnPipeline
+  component "TransformerDataPipeline" as transformerPipeline
+}
+
+package "Model Components" {
+  component "ModelFactory" as modelFactory
+  component "WrapperFactory" as wrapperFactory
+  component "TrainingPipeline" as trainingPipeline
+  component "TrainingPipelineBuilder" as pipelineBuilder
+  component "MetricsUtility" as metrics
+}
+
+package "Hyperparameter Tuning" {
+  component "StrategyFactory" as strategyFactory
+  component "Ray Tune" as rayTune
+  component "SchedulerStrategy" as scheduler
+  component "SearchAlgorithmStrategy" as searchAlgorithm
+}
+
+package "Utilities" {
+  component "Logging" as logging
+  component "LossFunctions & Optimizers" as lossOptim
+  component "SeedManager" as seed
+}
+
+user --> config : Provide Configurations
+config --> data : Manage Dataset Configs
+config --> experiment : Manage Experiments
+config --> rayTune : Pass Trial Configurations
+
+experiment --> plot : Manage Experiment Plots
+experiment --> file : Save Experiment Data
+experiment --> path : Resolve Paths
+
+user --> data : Upload/Provide Data
+
+pipelineFactory --> data : Create Data Pipelines
+pipelineFactory --> rnnPipeline : Use for RNN
+pipelineFactory --> transformerPipeline : Use for Transformer
+
+data --> trainingPipeline : Provide Processed Data
+
+user --> modelFactory : Choose Model Type
+user --> wrapperFactory : Use Wrapper for Models
+
+modelFactory --> trainingPipeline : Model Initialization
+wrapperFactory --> trainingPipeline : Wrapping Model for Training
+pipelineBuilder --> trainingPipeline : Build Training Configuration
+
+trainingPipeline --> metrics : Generate Training Metrics
+trainingPipeline --> plot : Provide Training Metrics for Visualization
+metrics --> plot : Visualize Evaluation Metrics
+metrics --> experiment : Save Metrics to Experiment Data
+
+user --> rayTune : Initiate Hyperparameter Tuning
+rayTune --> strategyFactory : Configure Search & Scheduler
+strategyFactory --> searchAlgorithm : Set Search Algorithm
+strategyFactory --> scheduler : Set Scheduler Strategy
+rayTune --> trainingPipeline : Execute Training Trials
+
+logging --> trainingPipeline : Log Training Activity
+logging --> rayTune : Log Tuning Activity
+
+@enduml

@@ -1,0 +1,55 @@
+@startuml
+
+title Training-Loop Sequence
+
+actor "TrainingPipeline" as TP
+participant "CallbackManager" as CBM
+participant "Wrapper" as WRAP
+participant "Train DataLoader" as TrainLoader
+participant "Validation DataLoader" as ValLoader
+participant "Ray Tune" as RayTune
+
+TP -> CBM: on_train_begin(wrapper)
+
+group Training Process (Over Epochs)
+    loop Over Epochs
+        TP -> CBM: on_epoch_begin(epoch)
+
+        group Training Loop (per Batch)
+            TP -> TrainLoader: Get Next Batch
+            TrainLoader -> TP: x_train_batch, y_train_batch
+            TP -> WRAP: train_epoch(x_train_batch, y_train_batch)
+            WRAP -> WRAP: Perform Forward Pass
+            WRAP -> WRAP: Compute Loss
+            WRAP -> WRAP: Perform Backward Pass
+            WRAP -> WRAP: Update Parameters
+            TP -> CBM: on_batch_end(batch)
+        end
+
+        TP -> TP: Calculate Average Train Loss
+
+        group Validation Loop (per Batch)
+            TP -> ValLoader: Get Next Batch
+            ValLoader -> TP: x_val_batch, y_val_batch
+            TP -> WRAP: validate(x_val_batch, y_val_batch)
+            WRAP -> WRAP: Perform Forward Pass
+            WRAP -> WRAP: Compute Validation Loss
+            TP -> TP: Collect Validation Data
+        end
+
+        TP -> TP: Calculate Average Validation Loss
+        TP -> CBM: on_epoch_end(epoch, val_loss, train_loss)
+
+        TP -> CBM: Check Early Stopping (should_stop)
+        CBM -> TP: Stop Training? (True/False)
+        alt If Should Stop
+            TP -> CBM: on_train_end(wrapper)
+            break Training Loop
+        end
+
+        TP -> RayTune: Report Epoch Metrics (val_loss, train_loss)
+    end
+end
+
+TP -> CBM: on_train_end(wrapper)
+@enduml

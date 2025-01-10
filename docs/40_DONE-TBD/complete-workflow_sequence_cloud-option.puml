@@ -1,0 +1,91 @@
+@startuml
+title Sequence Diagram for Complete Workflow Cloud-Option
+
+actor User
+
+participant "Local Machine" as Local
+participant "Data Manager" as DataMngr
+participant "Hyperparameter Tuning" as HyperTuning
+participant "Model Training" as Train
+participant "Model Evaluation" as Eval
+participant "Summary Report" as Report
+participant "Experiment Storage GCP" as Storage
+participant "Google Cloud Platform (GCP)" as GCP
+
+User -> Local : Start Workflow
+User -> Local : Import Datasets
+User -> Local : Define & Adjust Configurations
+
+alt Cloud-Option
+    User -> GCP : Update Configurations
+end
+
+alt Local
+    User -> HyperTuning : Hyperparameter Tuning
+    HyperTuning -> DataMngr : Request Preprocessing
+    DataMngr -> DataMngr : Preprocess Data
+    DataMngr -> HyperTuning : Return Preprocessed Data
+    HyperTuning -> HyperTuning : Define Hyperparameter Search Space
+    HyperTuning -> HyperTuning : Run Tuning Trials
+    HyperTuning -> Storage : Store Best Hyperparameters
+else Cloud-Option
+    User -> GCP : Submit Hyperparameter Tuning Batch Jobs
+    GCP -> Storage : Get Configurations
+    GCP -> GCP : Run Hyperparameter Tuning Trials
+    GCP -> Storage : Store Best Hyperparameters
+end
+
+alt Local
+    User -> Train : Train Best Model(s)
+    Train -> Storage : Get Best Hyperparameters
+    Train -> DataMngr : Request Preprocessing
+    DataMngr -> DataMngr : Preprocess Data
+    DataMngr -> Train : Return Preprocessed Data
+    Train -> Train : Train Best Model(s) (Top n)
+    Train -> Storage : Store Trained Models
+else Cloud-Option
+    User -> GCP : Submit Training Batch Jobs
+    GCP -> Storage : Get Best Hyperparameters
+    GCP -> GCP : Train Best Model(s)
+    GCP -> Storage : Store Trained Models
+end
+
+alt Local
+    User -> Eval : Evaluate Best Model(s)
+    Eval -> Storage : Get Trained Models
+    Eval -> DataMngr : Request Preprocessing
+    DataMngr -> DataMngr : Preprocess Data
+    DataMngr -> Eval : Return Preprocessed Data
+    Eval -> Eval : Load Models
+    Eval -> Eval : Evaluate on Test Batches
+    Eval -> Eval : Calculate & Aggregate Metrics
+    Eval -> Storage : Store Evaluation Results
+else Cloud-Option
+    User -> GCP : Submit Evaluation Batch Jobs
+    GCP -> Storage : Get Trained Models
+    GCP -> GCP : Evaluate Best Model(s)
+    GCP -> Storage : Store Evaluation Results
+end
+
+User -> Report : Generate Report
+Report -> Storage : Get Evaluation Results
+Report -> Report : Compare Metrics Across Models
+User <- Report : Final Results
+
+@enduml
+
+
+
+# TODO -> ADD GCP as an OPTION instead of LOCAL
+alt Gcp Setup
+    User -> Gcp : Deploy Docker Containers
+    Gcp -> HyperTuning : Parallel Training on Gcp
+end
+
+alt RNN Model
+DPF -> RNNPipeline: Create RNN Data Pipeline
+RNNPipeline -> DM: Pipeline Instance
+else Transformer Model
+DPF -> TFMPipeline: Create Transformer Data Pipeline
+TFMPipeline -> DM: Pipeline Instance
+end

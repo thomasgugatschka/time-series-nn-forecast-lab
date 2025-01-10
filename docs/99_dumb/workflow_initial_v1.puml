@@ -1,0 +1,51 @@
+@startuml
+
+!define RECTANGLE_COLOR #DDDDDD
+!define DIAMOND_COLOR #FFDD00
+
+actor User
+
+rectangle "Data Preparation" as DP {
+    rectangle "Initial Dataset Split" as InitSplit
+    DP -> InitSplit : Split into Training & Test Sets
+}
+
+rectangle "Hyperparameter Tuning" as HT {
+    rectangle "Data Splitting for Tuning" as DataSplit
+    rectangle "Define Search Space" as SearchSpace
+    rectangle "Run Hyperparameter Tuning" as RunTuning
+    rectangle "Validate Model" as ValidateModel
+
+    HT -> DataSplit : Further split Training Set
+    DataSplit -> SearchSpace : Define hyperparameter ranges
+    SearchSpace -> RunTuning : Run Trials
+    RunTuning -> ValidateModel : Evaluate on Validation Set
+}
+
+rectangle "Model Retraining & Evaluation" as ME {
+    rectangle "Retrain Best Model" as Retrain
+    rectangle "Evaluate on Test Set" as EvalTest
+
+    HT -> ME : Pass Best Hyperparameters
+    Retrain -> EvalTest : Use best hyperparameters
+}
+
+rectangle "Cloud Setup" as Cloud {
+    rectangle "Multiple Docker Containers for Different Datasets/Models" as DockerContainers
+    DockerContainers -> HT : Train in Parallel on Cloud
+}
+
+User -> DP : Prepare the Dataset
+DP -> HT : Perform Hyperparameter Tuning
+HT -> ME : Select Best Hyperparameters
+ME -> User : Best Model and Evaluation Metrics
+
+rectangle "Summary & Comparison" as Summary {
+    rectangle "Store Best Models" as StoreModels
+    rectangle "Compare Metrics across Model Types" as CompareMetrics
+}
+
+ME -> Summary : Store Best Model of Each Type
+Summary -> User : Comparison Report
+
+@enduml

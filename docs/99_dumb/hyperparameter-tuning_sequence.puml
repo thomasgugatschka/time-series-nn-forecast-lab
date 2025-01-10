@@ -1,0 +1,40 @@
+@startuml
+
+actor User
+participant "Main" as Main
+participant "ConfigManager" as ConfigManager
+participant "DataManager" as DataManager
+participant "ExperimentManager" as ExperimentManager
+participant "EnvManager" as EnvManager
+participant "HyperparameterManager" as HyperparameterManager
+participant "Ray Tune" as RayTune
+participant "Objective Function" as Objective
+participant "CallbackManager" as CallbackManager
+participant "TrainingPipeline" as TrainingPipeline
+
+User -> Main: Run Script
+Main -> Main: parse_args()
+Main -> ConfigManager: Load Configurations
+Main -> DataManager: Initialize DataManager
+Main -> ExperimentManager: Manage Experiment
+Main -> EnvManager: Get Environment Variables
+Main -> HyperparameterManager: Load Search Space
+Main -> RayTune: Initialize Ray
+Main -> RayTune: Perform Hyperparameter Tuning (tune.run)
+
+loop For each trial
+RayTune -> Objective: Call Objective Function
+Objective -> DataManager: Load & Preprocess Data
+Objective -> CallbackManager: Initialize Callbacks
+Objective -> TrainingPipeline: Build Training Pipeline
+TrainingPipeline -> TrainingPipeline: Run Training
+Objective -> RayTune: Return Trial Results
+end
+
+Main -> ExperimentManager: Save Tuning Results
+Main -> ExperimentManager: Finalize Experiment
+Main -> RayTune: Shutdown Ray
+Main -> User: Completion Message
+
+
+@enduml

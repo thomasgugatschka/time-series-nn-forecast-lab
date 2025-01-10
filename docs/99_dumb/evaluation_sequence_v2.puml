@@ -1,0 +1,31 @@
+@startuml
+
+actor "Evaluation Loop"
+
+participant "x_test" as XTest
+participant "y_test" as YTest
+participant "Wrapper" as Wrapper
+participant "DataManager" as DataManager
+participant "PlotManager" as PlotManager
+participant "MetricsUtility" as MetricsUtility
+
+"Evaluation Loop" -> XTest: Extract input slice for iteration
+"Evaluation Loop" -> YTest: Extract target slice for iteration
+"Evaluation Loop" -> Wrapper: Predict outputs
+Wrapper --> "Evaluation Loop": Return predictions
+
+"Evaluation Loop" -> DataManager: Denormalize inputs and outputs
+DataManager --> "Evaluation Loop": Return denormalized data
+
+"Evaluation Loop" -> MetricsUtility: Calculate Metrics
+MetricsUtility --> "Evaluation Loop": Return metrics (MAE, MSE, etc.)
+
+"Evaluation Loop" -> PlotManager: Generate evaluation plots
+PlotManager --> "Evaluation Loop": Plot saved
+
+alt Last iteration
+"Evaluation Loop" -> MetricsUtility: Aggregate Metrics
+MetricsUtility --> "Evaluation Loop": Return aggregated results
+end
+
+@enduml

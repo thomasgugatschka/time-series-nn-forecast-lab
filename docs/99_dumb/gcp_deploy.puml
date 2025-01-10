@@ -1,0 +1,40 @@
+@startuml
+
+' Deployment Workflow for Configuration Generation and GCP Integration
+
+title Deployment Workflow for GCP Integration
+
+actor "User" as user
+
+package "Local Machine" {
+  component "generate_experiment_configs.py" as configGen
+  component "gcs_upload_configs.bat" as uploadConfigs
+  component "gcs_sync_experiments_to_local.bat" as syncResults
+  component "batch_wrapper_scripts.py" as batchWrapper
+}
+
+cloud "Google Cloud Platform (GCP)" {
+  cloud "Google Cloud Storage (GCS)" as gcs {
+    folder "configs/"
+    folder "experiments/"
+  }
+  node "Batch Service" as batch {
+    component "gcp_batch_jobs_hyperparameter_tuning.py" as batchJob
+    file "batch_job_template.yaml" as batchTemplate
+  }
+}
+
+user --> configGen : Generate Experiment Configurations
+configGen --> gcs : Upload Configurations
+uploadConfigs --> gcs : Trigger Upload Script
+
+user --> batchJob : Submit Batch Jobs
+batchJob --> batchTemplate : Use Batch Job Template
+batchJob --> gcs : Fetch Configurations
+batchJob --> batch : Submit Job
+
+batch --> gcs : Save Results
+syncResults --> gcs : Download Results
+
+@enduml
+

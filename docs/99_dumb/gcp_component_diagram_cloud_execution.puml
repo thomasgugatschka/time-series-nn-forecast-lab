@@ -1,0 +1,50 @@
+@startuml
+title Component Diagram for Cloud Execution on GCP
+
+actor "User" as user
+
+package "Local Machine" {
+  [generate_experiment_configs.py] as ConfigGen
+  [gcs_upload_configs.bat] as UploadConfigs
+  [gcs_sync_experiments_to_local.bat] as SyncResults
+  [batch_wrapper_scripts.py] as BatchWrapper
+}
+
+cloud "Google Cloud Platform (GCP)" {
+  package "Google Cloud Storage (GCS)" as GCS {
+    folder "configs/"
+    folder "experiments/"
+  }
+
+  package "Batch Service" as Batch {
+    component "Job Scheduler" as Scheduler
+    component "Job Queue" as JobQueue
+    file "batch_job_template.yaml" as BatchTemplate
+  }
+
+  package "Compute Engine" as Compute {
+    component "VM Instance(s)" as VM
+  }
+
+  package "Artifact Registry" as Registry {
+    file "docker-image: time-series benchmark" as DockerImage
+  }
+}
+
+user --> ConfigGen : Generate Experiment Configurations
+ConfigGen --> GCS : Upload Configurations
+UploadConfigs --> GCS : Trigger Upload Script
+
+user --> BatchWrapper : Submit Batch Jobs
+BatchWrapper --> Batch : Queue Job List
+Batch --> GCS : Fetch Configurations
+Batch --> Compute : Schedule Job Execution
+
+Compute --> Registry : Pull Docker Image
+Compute --> GCS : Read Configurations
+Compute --> GCS : Save Experiment Results
+
+user --> SyncResults : Download Experiment Results
+SyncResults --> GCS : Fetch Results
+
+@enduml
