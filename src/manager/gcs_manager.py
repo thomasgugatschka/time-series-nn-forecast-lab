@@ -5,7 +5,6 @@ from src.utilities.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
-# TODO merge with ExperimentSync???
 # TODO -> write method to sync all GCS back to local drive (for all experiments)
 
 class GCSManager:

@@ -78,15 +78,9 @@ def evaluate_model(wrapper, hyperparameters, test_data, ts_past, ts_future, data
     raw_metrics_norm = []
     raw_metrics_denorm = []
 
-                            # TODO is the , 0] the index of the feature ??? -> need to use the selected_feature
-    selected_feature_idx = 0  # TODO - Replace with the actual index of the selected feature
-
-    selected_feature_idx = data_manager.get_data("metadata")["selected_feature_idx"]
-
-    print(f"Selected Feature Index: {selected_feature_idx}")
+    selected_feature_idx = data_manager.get_data("metadata")["selected_feature"]
 
     # IMPROVEMENT: Option to use DataLoader (test data loader) for evaluation or manual iteration
-
     for i in range(0, x_test.size(0), ts_future):  # Shift by ts_future instead of 1
 
 

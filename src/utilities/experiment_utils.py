@@ -26,6 +26,8 @@ def set_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+
+# TODO -> move OPTIMIZER & LOSS function to separeate file in MODELS -> model_utils.py
 def get_optimizer(optimizer_name, params, lr):
     """
     Retrieve the specified optimizer.

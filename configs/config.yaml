@@ -1,7 +1,7 @@
 model_type: "GRU"            # Implemented Models
-dataset: "ETTh"
+dataset: "weatherstation"
 #dataset: "illness"    # Available Datasets from data folder
-num_samples: 4               # Number of trials to run during hyperparameter tuning
+num_samples: 20               # Number of trials to run during hyperparameter tuning
 cpu_per_trial: 10  #10           # Number of CPU cores allocated per trial
 gpu_per_trial: 0.8   #0.8         # Fraction of GPU allocated per trial
 max_concurrent_trials: 1      # Maximum number of trials to run concurrently
@@ -13,7 +13,7 @@ trial_params:
 
 data_params:
   data_split:
-    frac_train: 0.3
+    frac_train: 0.8
     frac_val: 0.1
     frac_test: 0.1
     unused_split: "beginning"  # "beginning" / "end" | if split does not add to 1 -> decide if unused data is at beginning or end of DS

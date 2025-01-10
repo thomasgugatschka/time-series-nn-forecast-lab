@@ -70,7 +70,7 @@ https://trello.com/b/6q793jEO/time-series-nn-forecast-lab
 ## Usage
 
 ## NEW MODELS
-- [How to Add a Model](docs/adding-models.md)
+- [How to Add a Model](docs/add-new-models)
 
 ### Configuration
 
