@@ -75,10 +75,10 @@ def main():
     base_template = {
         "model_type": "",  # Placeholder, will be set dynamically
         "dataset": "",  # Placeholder, will be set dynamically
-        "num_samples": 30, # --- MODIFY ---
-        "cpu_per_trial": 12, # --- MODIFY ---
+        "num_samples": 50, # --- MODIFY ---
+        "cpu_per_trial": 8, # --- MODIFY ---
         "gpu_per_trial": 0,
-        "max_concurrent_trials": 1, # --- MODIFY ---
+        "max_concurrent_trials": 2, # --- MODIFY ---
         "trial_params": {
             "max_epochs": 100, # --- MODIFY ---
             "grace_period": 5,
@@ -99,7 +99,7 @@ def main():
 
     # Datasets to process
 #    datasets = ["weatherstation", "traffic", "weather"]  # Add your datasets here
-    datasets = ["ETTh"]  # Add your datasets here
+    datasets = ["exchangerate"]  # Add your datasets here
     target_root = "../configs/experiment_configs"
 
     for dataset_name in datasets:

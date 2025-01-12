@@ -37,3 +37,5 @@ service-account-key.json
 
 /scripts/aws/batch_jobs/
 /scripts/gcp/batch_jobs/
+
+_merged_scripts/
