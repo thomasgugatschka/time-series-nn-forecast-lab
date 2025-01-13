@@ -33,6 +33,8 @@
 - Averaging/Aggregation Every nth Point
 - Down sampling with Interpolation
 
+## UI for Experiment Management and Configuration setup
+
 
 
 
