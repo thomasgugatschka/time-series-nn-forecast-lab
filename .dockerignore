@@ -19,9 +19,20 @@ __pycache__/
 *.pyd
 *.swp
 
-docs/
 
 # Exclude other unnecessary files
-# TODO enable to exclude .env file -> need some other handling for environment variables
+.cadence/
+docs/
+_merged_scripts/
+
+# Exclude all contents
+experiments/**
+# Allow the .gitkeep file
+!experiments/.gitkeep
+
+/scripts/
+
+# IMPROVEMENT
+# .ENV must be excluded from .dockerignore since not all settings are overwritten by Dockerfile
 #.env
 *.DS_Store

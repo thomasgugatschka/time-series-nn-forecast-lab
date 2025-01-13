@@ -11,7 +11,7 @@ Follow these steps to set up the `time-series-nn-forecast-lab` project.
 Ensure you have the following installed:
 
 - **Python 3.12**: The project is compatible with Python 3.12. Install it from [python.org](https://www.python.org/).
-- **Git LFS**: Required for handling large files such as datasets, if project is maintained on GitHub. [Install Git LFS](https://git-lfs.com/).
+- **Git LFS** *(optional)*: Required for handling large files such as datasets, if project is maintained on GitHub. [Install Git LFS](https://git-lfs.com/).
 - **Docker** *(optional)*: For running the project in a containerized environment. [Get Docker](https://www.docker.com/).
 - **Google Cloud SDK** *(optional)*: Required for deploying experiments and syncing configurations to Google Cloud. [Install the SDK](https://cloud.google.com/sdk/docs/install).
 - **AWS CLI** *(optional)*: Required for deploying experiments and syncing configurations to Amazon Web Services. [Install AWS CLI](https://aws.amazon.com/cli/).
