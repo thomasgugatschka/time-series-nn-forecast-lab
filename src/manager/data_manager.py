@@ -114,7 +114,7 @@ class DataManager:
             'metadata': self._metadata
         }
 
-    # TODO -> check if okay to directly use the Transformation Class or rather we go through pipeline
+    # TODO -> TBC -> Check if it is okay to directly use the Transformation Class or rather we go through pipeline
     def postprocess_data(self, data, selected: bool):
         """
         Postprocess (denormalize) data using the DataTransformation class.

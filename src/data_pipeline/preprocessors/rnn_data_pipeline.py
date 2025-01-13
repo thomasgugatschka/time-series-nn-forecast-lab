@@ -18,7 +18,7 @@ class RNNDataPipeline(BaseDataPipeline):
             df (pd.DataFrame): Input dataframe to preprocess.
 
         Returns:
-            # TODO !!!!!!!!!!!!!!!!!!
+
         """
 
         metadata = {}
@@ -95,8 +95,8 @@ class RNNDataPipeline(BaseDataPipeline):
         Returns:
             pd.DataFrame: Postprocessed predictions.
         """
-        # TODO !!!!!!
-        df = self.denormalize(predictions, metadata, method="z_score")
+
+        df = self.denormalize(predictions, metadata)
         return df
 
 

@@ -36,7 +36,9 @@ class GRU(BaseModel):
         self.dropout = dropout
         self.batch_first = True
 
+# TODO #################################################################
 # TODO -> CHECK ALL MODELS if one initialized that I use *.self
+        # TODO #################################################################
 
         # Unidirectional GRU model with dropout
         self.gru = nn.GRU(

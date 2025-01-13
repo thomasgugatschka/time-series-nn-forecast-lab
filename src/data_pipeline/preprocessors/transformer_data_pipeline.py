@@ -8,7 +8,7 @@ from src.utilities.logging_utils import get_logger
 logger = get_logger(__name__)
 
 
-# TODO -> move out to it's own file
+# TODO -> REFACTOR -> Move to a separate file
 class TimeSeriesWindowGenerator:
     @staticmethod
     def generate_fixed_time_series_windows(input_data, target_data, ts_past, ts_future=None):
@@ -42,6 +42,7 @@ class TimeSeriesWindowGenerator:
         return np.array(x), None
 
 
+# TODO -> REFACTOR -> Merge with RNNDataPipeline to have one generic DataPipeline with configuration options
 class TransformerDataPipeline(BaseDataPipeline):
     def __init__(self, dataset_config, data_transformer, data_splitter, window_size=None, **kwargs):
         super().__init__(dataset_config=dataset_config, data_transformer=data_transformer, data_splitter=data_splitter)
@@ -245,16 +246,11 @@ class TransformerDataPipeline(BaseDataPipeline):
         """
         # Denormalize predictions
         logger.info("Postprocessing Step: Denormalizing predictions")
-        df = self.denormalize(predictions, metadata, method="z_score")
+        df = self.denormalize(predictions, metadata)
         return df
 
 
-# TODO -> FIX OR MERGE TRANSFORMER AND RNN (or GENERIC) DATA PIPELINES....
-# TODO -> MAYBE ADD more RESTRICTIVE CONFIG FILES
-# TODO -> MAYBE ALL STEPS IN THERE... and then just TRUE / FALSE or the options -> z_score
-# TODO -> Positional Encoding -> TRUE / FALSE -> and only true for Transformer...
 
-# TODO -> z_scor or rather min_max for Transformer ??????????
 
 
 

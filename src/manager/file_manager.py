@@ -4,16 +4,10 @@ import pickle
 import os
 import pandas as pd
 from pathlib import Path
-from google.cloud import storage
 from src.manager.env_manager import EnvManager
 
 from src.utilities.logging_utils import get_logger
 logger = get_logger(__name__)
-
-# SINGELTON CLASS
-
-#TODO add DEBUG level messages for each action
-
 
 class FileManager:
     _instance = None
@@ -39,6 +33,7 @@ class FileManager:
         Returns:
             dict: Parsed content of the YAML file.
         """
+        logger.debug(f"Loading YAML file from {file_path}")
         file_path = Path(file_path)
         if not file_path.exists():
             raise FileNotFoundError(f"YAML file not found at {file_path}")
@@ -54,6 +49,7 @@ class FileManager:
             data (dict): Data to be saved.
             file_path (str): Path to save the YAML file.
         """
+        logger.debug(f"Saving YAML file to {file_path}")
         with open(file_path, 'w') as f:
             yaml.safe_dump(data, f)
 
@@ -67,6 +63,7 @@ class FileManager:
         Returns:
             dict: Parsed content of the JSON file.
         """
+        logger.debug(f"Loading JSON file from {file_path}")
         file_path = Path(file_path)
         if not file_path.exists():
             raise FileNotFoundError(f"JSON file not found at {file_path}")
@@ -82,6 +79,7 @@ class FileManager:
             data (dict): Data to be saved.
             file_path (str): Path to save the JSON file.
         """
+        logger.debug(f"Saving JSON file to {file_path}")
         with open(file_path, 'w') as f:
             json.dump(data, f, indent=4)
 
@@ -95,6 +93,7 @@ class FileManager:
         Returns:
             pd.DataFrame: Loaded pandas DataFrame.
         """
+        logger.debug(f"Loading CSV file from {file_path}")
         file_path = Path(file_path)
         if not file_path.exists():
             raise FileNotFoundError(f"CSV file not found at {file_path}")
@@ -109,6 +108,7 @@ class FileManager:
             df (pd.DataFrame): DataFrame to save.
             file_path (str): Path to save the CSV file.
         """
+        logger.debug(f"Saving CSV file to {file_path}")
         df.to_csv(file_path, index=False, encoding='utf-8')
 
     def load_pickle(self, file_path: str):
@@ -121,6 +121,7 @@ class FileManager:
         Returns:
             object: Parsed content of the pickle file.
         """
+        logger.debug(f"Loading pickle file from {file_path}")
         file_path = Path(file_path)
         if not file_path.exists():
             raise FileNotFoundError(f"Pickle file not found at {file_path}")
@@ -136,6 +137,7 @@ class FileManager:
             data (object): Data to be saved.
             file_path (str): Path to save the pickle file.
         """
+        logger.debug(f"Saving pickle file to {file_path}")
         with open(file_path, 'wb') as f:
             pickle.dump(data, f)
 
@@ -147,6 +149,7 @@ class FileManager:
             plt_obj: Matplotlib plot object.
             file_path (str): Path to save the plot.
         """
+        logger.debug(f"Saving plot to {file_path}")
         Path(file_path).parent.mkdir(parents=True, exist_ok=True)
         plt_obj.savefig(file_path)
 
@@ -157,6 +160,7 @@ class FileManager:
         Args:
             dir_path (str): Path of the directory to create.
         """
+        logger.debug(f"Creating directory at {dir_path}")
         Path(dir_path).mkdir(parents=True, exist_ok=True)
 
     def file_exists(self, file_path: str) -> bool:
@@ -169,6 +173,7 @@ class FileManager:
         Returns:
             bool: True if the file exists, False otherwise.
         """
+        logger.debug(f"Checking if file exists at {file_path}")
         return Path(file_path).is_file()
 
     def delete_file(self, file_path: str):
@@ -178,6 +183,7 @@ class FileManager:
         Args:
             file_path (str): Path to the file to delete.
         """
+        logger.debug(f"Deleting file at {file_path}")
         try:
             os.remove(file_path)
         except FileNotFoundError:

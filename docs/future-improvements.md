@@ -35,6 +35,6 @@
 
 ## UI for Experiment Management and Configuration setup
 
-
+## Complete Refactoring and Design of the Experiment Manager and adjacent classes
 
 

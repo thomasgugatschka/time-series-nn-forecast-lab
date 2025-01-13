@@ -15,7 +15,9 @@ class PlotManager:
 
         self.config_manager = config_manger
 
-        # TODO -> remove the DataManager??? not needed of the prediciton is done outside of the plot_manager
+        # IMPROVEMENT -> Prediction should not be done in the plot_manager, not the responsibility of the plot_manager.
+        #               -> Then the data_manager is not needed here anymore and can be removed.
+
         self.data_manager = data_manager
         self.phase = phase
 
@@ -73,7 +75,7 @@ class PlotManager:
         plt.rcParams['legend.fontsize'] = 12
         plt.rcParams['lines.linewidth'] = 2.5
 
-    # TODO -> todo detailed control over legend and stuff -> apply everywhere!!!
+    # TODO -> REFACTOR -> Use 'apply_legend' everywhere for consistency and style
     @staticmethod
     def apply_legend(ax, loc='upper right', ncol=1, title=None):
         """
@@ -87,7 +89,7 @@ class PlotManager:
         """
         ax.legend(loc=loc, ncol=ncol, title=title, frameon=True, shadow=False, fancybox=True)
 
-    # TODO -> use this whenever a TEXT is needed in a plot
+    # TODO -> REFACTOR -> Use 'apply_text' if text is needed in the plot
     @staticmethod
     def apply_text(ax, text, x=0.05, y=0.95, verticalalignment='top', fontsize=10):
         """
@@ -128,7 +130,6 @@ class PlotManager:
 
 
     # region TRAINING & TUNING PLOTS
-    # TODO -> move prediction OUT of plot manager -> should be somewhere else???
     def plot_performance_during_training(self, wrapper, x_val, y_val, epochs, trial_name):
         """
         Plot the performance during training.
@@ -200,8 +201,7 @@ class PlotManager:
 
     # region EVALUATION PLOTS
 
-    # TODO -> check if BOTH PLOTs can be merged together!!!! since it is very similar code
-
+    # TODO -> REFACTOR -> Check if the plot_evaluation and plot_evaluation_full_context can be merged together
     def plot_evaluation(self, ts_past, ts_future, x_context, y_actual, y_predicted, model_name, plot_index, plot_title, denormalized: bool, plot_info=None):
         """
         Plot and save the actual vs. predicted values with context.

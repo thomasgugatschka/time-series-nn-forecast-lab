@@ -20,7 +20,7 @@ class TensorBoardCallback(BaseCallback):
         """
         super().__init__()
 
-        # TODO -> REFACTOR - should be integrated solution with the CallbackManager and the BaseCallback
+        # TODO -> REFACTOR -> Should be integrated solution with the CallbackManager and the BaseCallback
         disable_flag = os.getenv(f"DISABLE_TENSORBOARDCALLBACK", "False").lower() in ("true", "1", "yes")
 
         if disable_flag:

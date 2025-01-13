@@ -26,7 +26,7 @@ class CallbackManager:
             list: Filtered list of callbacks.
         """
 
-        # TODO -> REFACTOR - should be integrated solution with the CallbackManager and the BaseCallback
+        # TODO -> REFACTOR -> Should be integrated solution with the CallbackManager and the BaseCallback
         enabled_callbacks = []
         for callback in callbacks:
             callback_name = type(callback).__name__.upper()

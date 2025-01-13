@@ -8,12 +8,6 @@ class DataLoaderCreator:
     Handles the creation of PyTorch DataLoaders from preprocessed data.
     """
 
-    def __init__(self):
-        # TODO should this be kept if id not really have anything to initialize???
-
-        # TODO -> maybe move / convert to a general utility class
-        pass
-
     def create_data_loader(self, x, y, batch_size, shuffle=False):
         """
         Create a single data loader.
@@ -55,6 +49,6 @@ class DataLoaderCreator:
         }
 
 
-# TODO -> should this be a singelton????
+# TODO - TBC -> Should this be a Singleton?
 # Singleton instance
 data_loader = DataLoaderCreator()

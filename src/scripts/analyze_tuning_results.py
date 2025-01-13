@@ -19,8 +19,7 @@ from src.utilities.logging_utils import setup_logging, get_logger
 setup_logging()
 logger = get_logger(__name__)
 
-# TODO -> Refactor so PlotManager is used
-
+# TODO -> REFACTOR -> PlotManager should be used. Script could also be removed completely TensorBoard analysis is more convenient.
 def parse_args():
     """Parse arguments for the script."""
     parser = argparse.ArgumentParser(description="Analyze hyperparameter tuning results.")

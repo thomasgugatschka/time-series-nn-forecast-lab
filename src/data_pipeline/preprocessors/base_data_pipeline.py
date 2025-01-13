@@ -12,7 +12,8 @@ class BaseDataPipeline(ABC):
     Abstract base class for all data pipelines. Provides common preprocessing and
     postprocessing methods while enforcing the implementation of architecture-specific methods.
     """
-# TODO -> rename data_transformer to data_transformation -> so it has the same class as filename
+
+    # TODO -> REFACTOR -> data_transformer should be data_transformation to stay aligned with the filename
     def __init__(self, dataset_config, data_transformer, data_splitter):
         self.dataset_config = dataset_config
         self.data_transformer = data_transformer
@@ -97,9 +98,6 @@ class BaseDataPipeline(ABC):
         """
         Split sequences from input DataFrame into features and labels for model training.
 
-        #TODO -> add docstring with new inputs
-        # TODO -> explain the output sequence!!!!
-
         Args:
             df (pd.DataFrame): The dataframe to split.
             ts_past (int): Number of input time steps.
@@ -107,6 +105,8 @@ class BaseDataPipeline(ABC):
 
         Returns:
             tuple: Arrays of input sequences (x) and output sequences (y).
+            :param output_sequence:
+            :param input_sequences:
         """
         logger.info(f"Splitting sequences with n_steps_in: {ts_past}, n_steps_out: {ts_future}")
 
@@ -128,7 +128,7 @@ class BaseDataPipeline(ABC):
         logger.info(f"Sequence splitting complete. Generated {len(x)} training pairs.")
 
         # Convert the lists of sequences to DataFrames and return them as a tuple (x, y)
-        # TODO np oder eher mit pd.DataFrame? !!!!!
+        # TODO -> TBC -> np.array or rather pd.DataFrame ?
         return np.array(x), np.array(y)
 
     def calculate_features(self):
@@ -213,27 +213,3 @@ class BaseDataPipeline(ABC):
         """
         logger.info("Reversing normalization using sklearn scaler.")
         return self.data_transformer.reverse_scaler(df, scaler)
-
-    # def normalize(self, df, method):
-    #     # TODO: change over to SCALER -> first confirm if no dependencies to metadata for z-scor / min-max
-    #     """Apply normalization."""
-    #     if method == "z_score":
-    #         logger.info("Applying z-score normalization")
-    #         return self.data_transformer.apply_z_score(df)
-    #     elif method == "min_max":
-    #         logger.info("Applying min-max normalization")
-    #         return self.data_transformer.apply_min_max(df)
-    #     else:
-    #         raise ValueError(f"Unsupported normalization method: {method}")
-    #
-    # def denormalize(self, df, metadata, method):
-    #     """Apply denormalization."""
-    #     if method == "z_score":
-    #         logger.info("Reversing z-score normalization")
-    #         return self.data_transformer.reverse_z_score(df, metadata)
-    #     elif method == "min_max":
-    #         logger.info("Reversing min-max normalization")
-    #         return self.data_transformer.reverse_min_max(df, metadata)
-    #     else:
-    #         raise ValueError(f"Unsupported denormalization method: {method}")
-

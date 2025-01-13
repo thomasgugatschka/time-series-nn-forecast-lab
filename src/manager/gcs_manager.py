@@ -5,8 +5,6 @@ from src.utilities.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
-# TODO -> write method to sync all GCS back to local drive (for all experiments)
-
 class GCSManager:
     def __init__(self, bucket_name: str):
         """
@@ -19,7 +17,7 @@ class GCSManager:
         self.client = storage.Client()
         self.bucket = self.client.bucket(bucket_name)
 
-# Optional - parallel uploads with asyncio and gsutil...
+    # IMPROVEMENT -> parallel uploads with asyncio and gsutil...
 
     def upload_file(self, local_path: str, gcs_path: str):
         """

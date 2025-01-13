@@ -82,7 +82,8 @@ def objective(hyperparameter_config, model_type, dataset_config, data_manager, p
     # endregion
 
     # region ### SET VARIABLES from CONFIG ###
-    # TODO -> Change naming of model_params -> confusing if input_size is num_features and output_size is ts_future
+
+    # TODO -> REFACTOR -> model_params are slightly confusing -> input_size is num_features, output_size is ts_future
     ts_future = dataset_config["ts_future"]
     ts_past = dataset_config["ts_past"]
 

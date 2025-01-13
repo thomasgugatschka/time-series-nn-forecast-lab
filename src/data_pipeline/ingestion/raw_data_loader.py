@@ -12,10 +12,6 @@ class RawDataLoader:
     Handles loading raw data from files and performing basic operations like column drops.
     """
 
-    def __init__(self):
-        # TODO should this be kept if id not really have anything to initialize???
-        pass
-
     # REFACTOR: Currently only works with CSV files. Add support for other file types.
     def load_data(self, data_dir, sources, columns_to_drop=None):
         """
