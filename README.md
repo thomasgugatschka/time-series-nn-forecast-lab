@@ -430,12 +430,14 @@ python scripts/batch_wrapper_scripts.py
 ### Google Cloud Platform (GCP)
 
 Batch processing on GCP enables parallel execution of experiments using **Google Cloud Batch** and storage of outputs and configurations on **Google Cloud Storage (GCS)**. While GCP provides a scalable platform for experimentation, there are some caveats and setup requirements to consider.
-
+Batch was used because no additional infrastructure setup is required, only the Compute Engine VM instances are charged if a container is running.
 
 
 #### Setup Instructions
 
 Instructions for Cloud Setup to be found in [Cloud GCP](docs/cloud-gcp.md).
+
+Build the Docker Image and push it to the Google Container Registry (GCR) for deployment on GCP can be found in [Docker Images](docs/docker.md).
 
 Known Issues and Limitations are documented in [GCP Batch Limitations](docs/known-limitations.md#gcp-batch-limitations).
 
@@ -474,10 +476,10 @@ docker logs -f <container-id>  # -f for streaming logs
 ---
 
 #### Components Diagram
-![Component Diagram](docs/png/gcp_deployment-cloud_component.drawio.png)
+![Component Diagram](docs/graphics_for_markdown/gcp_deployment-cloud_component.drawio.png)
 
 #### Sequence Diagram
-![Sequence Diagram](docs/png/gcp_deployment-cloud_sequence.png)
+![Sequence Diagram](docs/graphics_for_markdown/gcp_deployment-cloud_sequence.png)
 
 ### Amazon Web Services (AWS)
 

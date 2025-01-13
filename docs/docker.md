@@ -1,27 +1,48 @@
+# Docker Images
 
-**TODO**
+1. Start docker (e.g. Docker Desktop)
 
+2. Build Container Image from Dockerfile
+- **GCP**
+```bash
+docker build -t gcr.io/time-series-nn-forecast-lab/forecast-lab-container:latest .
+```
+This name must also be the same which is used in the `batch_job_template.yaml` file, otherwise the job will not be able to find the image.
 
-# Build docker image
-docker build -t time-series-nn-forecast-lab-image .
+- **Local**
+```bash
+docker build -t forecast-lab-container:latest .
+```
+GCP image can of course also be used locally.
 
+- **AWS**
+  - **TODO**
 
-# for gcp
-#       Build the Docker image
-docker build -t gcr.io/time-series-nn-forecast-lab/hyperparameter-tuner:latest .
-#       Push the image to Google Container Registry
-docker push gcr.io/time-series-nn-forecast-lab/hyperparameter-tuner:latest
-
-
-
-# list available images
+3. List available images
+```bash
 docker images
+```
 
+4. Run Container Image
+- **Local with default `CMD` (script) defined in Dockerfile and default config.yaml**
+```bash
+docker run -it --rm forecast-lab-container:latest
+```
+- **Local with defined script and default config.yaml**
+```bash
+docker run -it --rm forecast-lab-container:latest python -m src.scripts.hyperparameter_tuning
+```
+- **Local with defined script and default config.yaml**
+```bash
+docker run -it --rm forecast-lab-container:latest python -m src.scripts.hyperparameter_tuning --config_path "experiment_configs/config_gru_ETTh_0.7-0.15.yaml"
+```
 
-# run docker container wiht default config
-docker run -it --rm time-series-forecast-lab-image:latest python -m src.scripts.hyperparameter_tuning
-#### or like that only if CMD in Dockerfile is properly defined
-docker run -it --rm time-series-forecast-lab-image:latest
+5. Push Container Image to Container Registry (Cloud)
+- **GCP**
+```bash
+docker push gcr.io/time-series-nn-forecast-lab/forecast-lab-container:latest
+```
+- **AWS**
+  - **TODO**
 
-# run docker container with new config
-docker run -it --rm time-series-nn-forecast-lab-image:latest python -m src.scripts.hyperparameter_tuning --config_path "experiment_configs/config_gru_ETTh_0.7-0.15.yaml"
+6. Confirm functionality with simple Batch Job

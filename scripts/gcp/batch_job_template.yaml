@@ -5,7 +5,7 @@ taskGroups:
   - taskSpec:
       runnables:
         - container:
-            imageUri: gcr.io/time-series-nn-forecast-lab/hyperparameter-tuner:latest
+            imageUri: gcr.io/time-series-nn-forecast-lab/forecast-lab-container:latest
             commands:
               - "python"
               - "-m"

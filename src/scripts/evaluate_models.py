@@ -273,7 +273,7 @@ def plot_overall_metrics(plot_manager, overall_metrics):
         mae_values,
         metric_name="MAE",
         title="MAE Distribution (Denormalized)",
-        filename="mae_histogram.png",
+        filename="mae_histogram.graphics_for_markdown",
     )
 
     # 2. Plot histogram for MSE (denormalized raw metrics)
@@ -287,7 +287,7 @@ def plot_overall_metrics(plot_manager, overall_metrics):
         mse_values,
         metric_name="MSE",
         title="MSE Distribution (Denormalized)",
-        filename="mse_histogram.png",
+        filename="mse_histogram.graphics_for_markdown",
     )
 
     # 3. Plot trend for MAE (denormalized average metrics)
@@ -298,7 +298,7 @@ def plot_overall_metrics(plot_manager, overall_metrics):
             [average_mae],  # Pass as a list to maintain compatibility
             metric_name="MAE",
             title=f"Mean Absolute Error Trend (Denormalized)\nStddev: {stddev_mae:.4f}",
-            filename="mae_trend.png",
+            filename="mae_trend.graphics_for_markdown",
         )
 
     # 4. Plot trend for MSE (denormalized average metrics)
@@ -309,7 +309,7 @@ def plot_overall_metrics(plot_manager, overall_metrics):
             [average_mse],  # Pass as a list to maintain compatibility
             metric_name="MSE",
             title=f"Mean Squared Error Trend (Denormalized)\nStddev: {stddev_mse:.4f}",
-            filename="mse_trend.png",
+            filename="mse_trend.graphics_for_markdown",
         )
 
 

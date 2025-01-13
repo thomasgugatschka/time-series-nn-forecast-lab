@@ -158,7 +158,7 @@ class PlotManager:
         plt.legend()
 
         # Save or show the plot
-        filename = f"{trial_name}/epoch_{epochs:04d}.png"
+        filename = f"{trial_name}/epoch_{epochs:04d}.graphics_for_markdown"
         self._save_or_show_plot(filename)
 
     def create_gif_from_plots(self, trial_name, gif_name='_training_progress.gif', duration=0.3):
@@ -180,7 +180,7 @@ class PlotManager:
         try:
             images = []
             for file_name in sorted(plots_path.iterdir()):
-                if file_name.suffix == '.png':
+                if file_name.suffix == '.graphics_for_markdown':
                     images.append(imageio.imread(file_name))
 
             if not images:
@@ -238,9 +238,9 @@ class PlotManager:
             )
 
         if denormalized:
-            filename = f"{model_name}_denormalized_plot_{plot_index}.png"
+            filename = f"{model_name}_denormalized_plot_{plot_index}.graphics_for_markdown"
         else:
-            filename = f"{model_name}_normalized_plot_{plot_index}.png"
+            filename = f"{model_name}_normalized_plot_{plot_index}.graphics_for_markdown"
 
         self._save_or_show_plot(filename)
 
@@ -314,7 +314,7 @@ class PlotManager:
             )
 
         # Generate filename
-        filename = f"{model_name}_{'denormalized' if denormalized else 'normalized'}_plot_{plot_index}_ALL.png"
+        filename = f"{model_name}_{'denormalized' if denormalized else 'normalized'}_plot_{plot_index}_ALL.graphics_for_markdown"
 
         # Save or show the plot
         self._save_or_show_plot(filename)
@@ -378,7 +378,7 @@ class PlotManager:
         plt.ylabel("Value")
         plt.legend()
         plt.annotate(f"Data Source: {sources}\nDatapoints: {len(df)}", xy=(0.02, 0.95), xycoords="axes fraction")
-        self._save_or_show_plot(f"{dataset_name}_full_dataset_selected_feature.png")
+        self._save_or_show_plot(f"{dataset_name}_full_dataset_selected_feature.graphics_for_markdown")
 
         # Plot all features
         for i, col in enumerate(df.columns):
@@ -389,7 +389,7 @@ class PlotManager:
         plt.xlabel("Time Steps")
         plt.ylabel("Value")
         plt.legend()
-        self._save_or_show_plot(f"{dataset_name}_full_dataset_all_features.png")
+        self._save_or_show_plot(f"{dataset_name}_full_dataset_all_features.graphics_for_markdown")
 
     def plot_cropped_data(self, df, metadata):
         """Plot cropped data with ts_past and ts_future markers."""
@@ -413,7 +413,7 @@ class PlotManager:
         plt.xlabel("Time Steps")
         plt.ylabel("Value")
         plt.legend()
-        self._save_or_show_plot(f"{dataset_name}_cropped_data.png")
+        self._save_or_show_plot(f"{dataset_name}_cropped_data.graphics_for_markdown")
 
     def plot_data_chunk(self, df, metadata):
         """Plot a chunk of the data with ts_past and ts_future markers."""
@@ -440,6 +440,6 @@ class PlotManager:
         plt.xlabel("Time Steps")
         plt.ylabel("Value")
         plt.legend()
-        self._save_or_show_plot(f"{dataset_name}_data_chunk.png")
+        self._save_or_show_plot(f"{dataset_name}_data_chunk.graphics_for_markdown")
 
     # endregion
