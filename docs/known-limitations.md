@@ -1,5 +1,26 @@
 # Known Limitations 
 
+
+## Choosing the Best Epoch in Hyperparameter Tuning
+
+When tuning with early stopping, you might see better validation performance at an earlier epoch than the stopping point. Should you use:
+
+1. **The Early Stopping Epoch**:
+   - Reflects operational settings where early stopping balances training and overfitting.
+   - Aligns with the tuning process but may not capture the best validation performance.
+
+2. **The Epoch with Lowest Validation Error**:
+   - Maximizes generalization by using the best validation performance.
+   - Requires tracking and saving the model at the best epoch during training.
+
+### Recommendation
+- **For Best Generalization**: Use the epoch with the lowest validation error.
+- **For Real-World Usage**: Use the early stopping epoch.
+- Save checkpoints for both and evaluate them to decide what works best for your goals.
+
+### Current Implementation
+- Training till the early stopping epoch.
+
 ## Logging Transformer Models with TensorBoard
 
 ### Overview

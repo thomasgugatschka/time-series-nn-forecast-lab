@@ -8,8 +8,7 @@ participant "Main Script" as Main
 participant "ConfigManager" as ConfigManager
 participant "DataManager" as DataManager
 participant "ExperimentManager" as ExperimentManager
-participant "ModelFactory" as ModelFactory
-participant "WrapperFactory" as WrapperFactory
+participant "Model" as Model
 participant "TrainingPipelineBuilder" as PipelineBuilder
 participant "TrainingPipeline" as TrainingPipeline
 participant "CallbackManager" as CallbackManager
@@ -24,10 +23,10 @@ Main -> ExperimentManager: Load Hyperparameters
 
 loop For each configuration
     Main -> DataManager: Preprocess Data
-    Main -> ModelFactory: Initialize Model
-    Main -> Main: Get Optimizer
-    Main -> Main: Get Loss Function
-    Main -> WrapperFactory: Wrap Model
+    Main -> Model: Initialize Model
+    Main -> Model: Get Optimizer
+    Main -> Model: Get Loss Function
+    Main -> Model: Wrap Model
 
     Main -> CallbackManager: Initialize Callbacks
 
@@ -36,11 +35,7 @@ loop For each configuration
     PipelineBuilder -> TrainingPipeline: Create TrainingPipeline Instance
 
     loop For Each Epoch
-      TrainingPipeline -> TrainingPipeline: Train
-      TrainingPipeline -> TrainingPipeline: Calculate train_loss
-      TrainingPipeline -> TrainingPipeline: Validate
-      TrainingPipeline -> TrainingPipeline: Calculate val_loss
-      TrainingPipeline -> CallbackManager: Execute Callbacks
+      TrainingPipeline -> TrainingPipeline: Run Training Loop
     end
 
     TrainingPipeline -> FileManager: Save Trained Model
