@@ -20,6 +20,8 @@ else:
     logger.warning(f"Skipping graph logging for {model_name} due to known tracing issues.")
 ```
 
+---
+
 ## Logging Final Metrics to TensorBoard
 
 ### Issue
@@ -30,4 +32,26 @@ This issue likely results from a bug or compatibility problem in the current ver
 
 ### Workaround
 Log hyperparameters manually as scalars to ensure visibility in Scalars and Time Series.
+
+---
+
+## GCP Batch Limitations
+**Limited Parallelization**:
+- GCP Batch currently starts only 1–3 jobs in parallel, regardless of the number of submitted jobs.
+- No clear pattern or reason for this limitation has been identified. According to the documentation, this behavior depends on **resource availability** in the region.
+
+**Non-Resumable Experiments**:
+- Experiments are **not resumable** when using GCP Batch or similar Docker-based deployments.
+- This is because experiment files (e.g., logs, metadata) are not pulled from GCS to the container during execution.
+
+**TensorBoard Logging**:
+- **Live monitoring via TensorBoard** is not supported, as logs are not streamed to GCS during training.
+
+**Costs**:
+- Using GCP Batch incurs costs for **Compute Engine**, **Cloud Storage**, and the **Artifact Repository**.
+
+---
+
+
+
 

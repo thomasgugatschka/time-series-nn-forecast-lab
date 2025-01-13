@@ -43,10 +43,10 @@ def main():
 
     # us-east1, europe-west4
 
-    locations = ["europe-west4", "us-central1", "us-east1", "us-east5", "us-west1", "me-west1",
-                 "europe-west1", "europe-west3", "us-east4", "us-west4", "asia-east1",
+    locations = ["europe-west4", "us-central1", "us-east1", "australia-southeast2", "us-east5", "us-west1", "me-west1",
+                 "europe-west3", "us-east4", "us-west4", "asia-east1",
                  "europe-west9", "europe-southwest1", "us-south1", "asia-south1",
-                 "asia-south2", "us-west2", "us-west3", "australia-southeast2", "me-central1"]
+                 "asia-south2", "us-west2", "us-west3", "me-central1"]
 
     # Location iterator to loop through the list cyclically
     location_count = len(locations)

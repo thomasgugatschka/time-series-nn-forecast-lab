@@ -1,3 +1,30 @@
+
+# GCP Cloud
+
+**TODO**
+
+
+
+## Overview
+
+## Setup
+
+
+To set up GCP for batch processing:
+1. **Terraform Configuration**: Automate resource provisioning using Terraform scripts.
+2. **Service Account Key**: Provide a `service-account-key.json` file with appropriate permissions for accessing GCS and managing batch jobs.
+3. **Permissions**:
+   - Grant necessary IAM roles to the service account, such as:
+     - `roles/storage.admin` (for GCS access)
+     - `roles/batch.admin` (for managing Batch jobs)
+   - Ensure the Compute Engine API and Batch API are enabled in your GCP project.
+4. **GCS Bucket**: Create and configure a GCS bucket for storing experiment results and configurations.
+
+
+---
+
+---
+
 create Google Cloud Account
 
 in IAM & Admin create service account and set role as "Storage Admin" and "Storage Object Admin"
@@ -45,3 +72,7 @@ stream logs -> opne ssh to container through google cloud
 -> docker logs <container_id>
 -> docker logs -f <container_id> # to stream logs
 
+
+
+
+---
