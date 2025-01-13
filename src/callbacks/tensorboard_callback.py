@@ -1,3 +1,5 @@
+import os
+
 import torch
 from torch.utils.tensorboard import SummaryWriter
 from src.callbacks.base_callback import BaseCallback
@@ -17,10 +19,17 @@ class TensorBoardCallback(BaseCallback):
             example_input_tensor (torch.Tensor, optional): Example input for the model.
         """
         super().__init__()
-        self.writer = SummaryWriter(log_dir)
-        self.hparams = self._format_hyperparameters(hparams)
-        self.model = model
-        self.example_input = example_input_tensor
+
+        # TODO -> REFACTOR - should be integrated solution with the CallbackManager and the BaseCallback
+        disable_flag = os.getenv(f"DISABLE_TENSORBOARDCALLBACK", "False").lower() in ("true", "1", "yes")
+
+        if disable_flag:
+            logger.warning(f"Callback TENSORBOARD is disabled via environment variable.")
+        else:
+            self.writer = SummaryWriter(log_dir)
+            self.hparams = self._format_hyperparameters(hparams)
+            self.model = model
+            self.example_input = example_input_tensor
 
 
     def _format_hyperparameters(self, chosen_config):

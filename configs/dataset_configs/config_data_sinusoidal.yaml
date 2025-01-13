@@ -20,7 +20,7 @@ feature_forecasted: 0
 columns_to_drop:
 #  - feature_2
 # Indices for cropping the DataFrame for lower calc time // disable set to null
-crop_start: 10_000
+crop_start: 14_000
 crop_end: 15_000
 ts_past: 200
 ts_future: 50

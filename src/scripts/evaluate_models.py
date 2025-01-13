@@ -12,7 +12,7 @@ from src.models.model_factory import ModelFactory
 from src.models.wrapper_factory import WrapperFactory
 from src.manager.file_manager import file_manager
 from src.manager.path_manager import path_manager
-from src.utilities.experiment_utils import get_device
+from src.models.model_utils import get_device
 from src.utilities.metrics_utils import MetricsUtility
 
 # Initialize logging
@@ -273,7 +273,7 @@ def plot_overall_metrics(plot_manager, overall_metrics):
         mae_values,
         metric_name="MAE",
         title="MAE Distribution (Denormalized)",
-        filename="mae_histogram.graphics_for_markdown",
+        filename="mae_histogram.png",
     )
 
     # 2. Plot histogram for MSE (denormalized raw metrics)
@@ -287,7 +287,7 @@ def plot_overall_metrics(plot_manager, overall_metrics):
         mse_values,
         metric_name="MSE",
         title="MSE Distribution (Denormalized)",
-        filename="mse_histogram.graphics_for_markdown",
+        filename="mse_histogram.png",
     )
 
     # 3. Plot trend for MAE (denormalized average metrics)
@@ -298,7 +298,7 @@ def plot_overall_metrics(plot_manager, overall_metrics):
             [average_mae],  # Pass as a list to maintain compatibility
             metric_name="MAE",
             title=f"Mean Absolute Error Trend (Denormalized)\nStddev: {stddev_mae:.4f}",
-            filename="mae_trend.graphics_for_markdown",
+            filename="mae_trend.png",
         )
 
     # 4. Plot trend for MSE (denormalized average metrics)
@@ -309,7 +309,7 @@ def plot_overall_metrics(plot_manager, overall_metrics):
             [average_mse],  # Pass as a list to maintain compatibility
             metric_name="MSE",
             title=f"Mean Squared Error Trend (Denormalized)\nStddev: {stddev_mse:.4f}",
-            filename="mse_trend.graphics_for_markdown",
+            filename="mse_trend.png",
         )
 
 
@@ -341,7 +341,7 @@ def main():
     config_manager = ConfigManager(args.config_path)
     data_manager = DataManager(config_manager)
     experiment_manager = ExperimentManager(config_manager)
-    experiment_name, experiment_path, _ = experiment_manager.manage_experiment()
+    experiment_name, experiment_path, _ = experiment_manager.manage_experiment(phase="evaluation")
     plot_manager = PlotManager(config_manager, data_manager, phase="evaluation")
 
     dataset_config = config_manager.get_dataset_config()

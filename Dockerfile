@@ -46,6 +46,14 @@ ENV GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
 ENV SYNC_CONFIG_FROM_GCS=True
 ENV LOCAL_MODE=False
 
+# Environment variables for disabling certain callbacks
+# Reduce verbosity and storage requirements
+ENV DISABLE_LOGGINGCALLBACK=False
+ENV DISABLE_EARLYSTOPPINGCALLBACK=False
+ENV DISABLE_PLOTTINGCALLBACK=True
+ENV DISABLE_TENSORBOARDCALLBACK=True
+
+
 #ENV PLOTS_SHOW=False
 #ENV PLOTS_SAVE=False
 

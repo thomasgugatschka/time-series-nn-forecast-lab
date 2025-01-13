@@ -40,6 +40,8 @@ class ExperimentManager:
                     "ExperimentManager must be initialized with a config_manager during the first instantiation."
                 )
 
+            # Ignore certain keys when hashing the configuration file, since they might vary
+            self.ignored_keys_hash = ["cpu_per_trial", "gpu_per_trial", "max_concurrent_trials"]
 
             # Initialize and load environment variables
             self.env_manager = EnvManager()
@@ -61,14 +63,7 @@ class ExperimentManager:
             self._experiment_name = None
             self._experiment_path = None
 
-
-
-
-
-
             self._initialized = True
-
-
 
     @property
     def experiment_name(self):
@@ -98,6 +93,13 @@ class ExperimentManager:
             # Load YAML content as a Python dictionary
             yaml_content = yaml.safe_load(f)
 
+#TODO ############## ADD THIS WAY OF HASHING ################## TODO #
+        # Remove ignored keys
+#        filtered_content = self._remove_ignored_keys(yaml_content)
+        # Normalize the dictionary by sorting keys
+#        normalized_content = self._sort_dict(filtered_content)
+
+
         # Normalize the dictionary by sorting keys
         normalized_content = self._sort_dict(yaml_content)
 
@@ -115,6 +117,16 @@ class ExperimentManager:
         if isinstance(d, list):
             return [self._sort_dict(v) for v in d]
         return d
+
+    def _remove_ignored_keys(self, d):
+        """Recursively remove ignored keys from the dictionary."""
+        if not isinstance(d, dict):
+            return d
+        return {
+            k: self._remove_ignored_keys(v)
+            for k, v in d.items()
+            if k not in self.ignored_keys_hash
+        }
 
 
 
@@ -143,7 +155,7 @@ class ExperimentManager:
 
 
 
-    def manage_experiment(self):
+    def manage_experiment(self, phase='undefined'):
         """
         Manage an experiment by generating a name, creating the folder, and deciding whether to resume.
 
@@ -159,6 +171,7 @@ class ExperimentManager:
 
         # Compute hash for the configuration file
         config_hash = self._hash_config(config_path)
+        logger.info(f"Configuration hash: {config_hash}")
 
         # Load existing metadata
         metadata = self._load_experiment_metadata()
@@ -168,13 +181,18 @@ class ExperimentManager:
             # Resume existing experiment
             experiment_info = metadata[config_hash]
             self.experiment_name = experiment_info["experiment_name"]
-            #self.experiment_path = Path(experiment_info["experiment_path"])
             resume = True
+
+            # Update phase and counter
+            phase_info = experiment_info.setdefault("phases", {})
+            phase_info[phase] = phase_info.get(phase, 0) + 1
+            experiment_info["phases"] = phase_info
         else:
             # New experiment - Generate experiment name
             self.experiment_name = self.generate_experiment_name(main_config, dataset_config, timestamp)
 
-        # Create experiment folder and store path
+        # Create experiment folder and store path (MUST be done to have correct path for the experiment)
+        # Since hyperparameter tuning could have been done in cloud and training and evaluation is done locally.
         self.experiment_path = path_manager.create_experiment_folder(
             model_type=main_config["model_type"],
             dataset_name=main_config["dataset"],
@@ -189,6 +207,7 @@ class ExperimentManager:
                 "experiment_name": self.experiment_name,
                 "experiment_path": str(self.experiment_path),
                 "timestamp": timestamp,
+                "phases": {phase: 1},
             }
             self._save_experiment_metadata(metadata)
 
@@ -304,6 +323,75 @@ class ExperimentManager:
             self.sync_manager.sync_experiment(self.experiment_path, f"experiments/{dataset}/{self.experiment_name}")
 
         logger.info(f"Experiment {self.experiment_name} finalized.")
+
+
+    def validate_experiment(self, metadata_entry, config_path, required_files):
+        """
+        Validate an experiment by checking metadata, hash, and required files.
+
+        Args:
+            metadata_entry (dict): Metadata entry for the experiment.
+            config_path (str): Path to the local configuration file.
+            required_files (list): List of required files.
+
+        Returns:
+            dict: Validation results including missing files, hash match, and updated path.
+        """
+        missing_files = []
+
+        # Compute hash
+        expected_hash = metadata_entry.get("hash")
+        computed_hash = self._hash_config(config_path)
+        hash_match = expected_hash == computed_hash
+
+        # Rebuild local path
+        experiment_name = metadata_entry.get("experiment_name")
+        local_experiment_dir = path_manager.get_path("experiment_dir") / experiment_name
+
+        # Check for required files
+        for required_file in required_files:
+            if not (local_experiment_dir / required_file).exists():
+                missing_files.append(required_file)
+
+        return {
+            "experiment_dir": str(local_experiment_dir),
+            "hash_match": hash_match,
+            "missing_files": missing_files,
+        }
+
+    def validate_all_experiments(self, config_path):
+        """
+        Validate all experiments using the metadata file.
+
+        Args:
+            config_path (str): Path to the local configuration file.
+
+        Returns:
+            list: Validation results for all experiments.
+        """
+        metadata = self._load_experiment_metadata()
+        results = []
+
+        required_files = [
+            "all_hyperparameters.json",
+            "best_config.json",
+            "best_trial.json",
+            "dataset_config.yaml",
+            "main_config.yaml",
+            "top_hyperparameters.json",
+            "trial_data.json",
+        ]
+
+        for hash_key, entry in metadata.items():
+            result = self.validate_experiment(entry, config_path, required_files)
+            result["hash"] = hash_key
+            results.append(result)
+
+        return results
+
+
+
+
 
 class ExperimentSync:
     RETRY_DELAY = 1  # Seconds

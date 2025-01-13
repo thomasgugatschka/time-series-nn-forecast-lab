@@ -11,7 +11,8 @@ from src.manager.plot_manager import PlotManager
 from src.models.model_factory import ModelFactory
 from src.models.wrapper_factory import WrapperFactory
 from src.training_pipeline.training_pipeline_builder import TrainingPipelineBuilder
-from src.utilities.experiment_utils import get_device, set_seed, get_optimizer, get_loss_function
+from src.utilities.experiment_utils import set_seed
+from src.models.model_utils import get_device, get_optimizer, get_loss_function
 from src.manager.file_manager import file_manager
 
 from src.utilities.logging_utils import setup_logging, get_logger
@@ -156,7 +157,7 @@ def main():
     config_manager = ConfigManager(args.config_path)
     data_manager = DataManager(config_manager)
     experiment_manager = ExperimentManager(config_manager)
-    experiment_name, experiment_path, _ = experiment_manager.manage_experiment()
+    experiment_name, experiment_path, _ = experiment_manager.manage_experiment(phase="training")
     plot_manager = PlotManager(config_manager, data_manager, phase="training")
 
     dataset_config = config_manager.get_dataset_config()

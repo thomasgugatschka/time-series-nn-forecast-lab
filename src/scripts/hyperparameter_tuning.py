@@ -26,7 +26,9 @@ from src.manager.file_manager import file_manager
 from src.manager.path_manager import path_manager
 
 # Utilities
-from src.utilities.experiment_utils import get_device, set_seed, get_optimizer, get_loss_function
+from src.utilities.experiment_utils import set_seed
+from src.models.model_utils import get_device, get_optimizer, get_loss_function
+
 
 # Models and Pipeline
 from src.models.model_factory import ModelFactory
@@ -149,7 +151,7 @@ def main():
     data_manager = DataManager(config_manager)
     env_manager = EnvManager()
     experiment_manager = ExperimentManager(config_manager)
-    experiment_name, experiment_path, resume = experiment_manager.manage_experiment()
+    experiment_name, experiment_path, resume = experiment_manager.manage_experiment(phase='tuning')
     plot_manager = PlotManager(config_manager, data_manager, phase='tuning')
 
     main_config = config_manager.get_main_config()

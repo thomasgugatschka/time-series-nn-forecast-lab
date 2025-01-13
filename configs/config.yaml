@@ -1,13 +1,13 @@
 model_type: "GRU"            # Implemented Models
-dataset: "exchangerate"
+dataset: "sinusoidal"
 #dataset: "illness"    # Available Datasets from data folder
-num_samples: 20               # Number of trials to run during hyperparameter tuning
+num_samples: 5               # Number of trials to run during hyperparameter tuning
 cpu_per_trial: 10  #10           # Number of CPU cores allocated per trial
 gpu_per_trial: 0.8   #0.8         # Fraction of GPU allocated per trial
 max_concurrent_trials: 1      # Maximum number of trials to run concurrently
 
 trial_params:
-  max_epochs: 30             # Maximum number of epochs for training each trial
+  max_epochs: 6             # Maximum number of epochs for training each trial
   grace_period: 5             # Minimum number of epochs before stopping underperforming trials
   reduction_factor: 2         # Factor by which the learning rate is reduced (used by some schedulers)
 

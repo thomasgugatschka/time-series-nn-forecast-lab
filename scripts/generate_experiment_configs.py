@@ -34,14 +34,12 @@ def generate_configurations(base_template, dataset_name, target_root):
         config["dataset"] = dataset_name
 
         # Apply model-specific overrides
-        if model_type in model_configs:
-            config.update(model_configs[model_type])  # Update the template with specific overrides
-            if "time_series_window" in model_configs[model_type]:
-                time_series_windows = model_configs[model_type]["time_series_window"]
-            else:
-                time_series_windows = [config["data_params"]["time_series_window"]]
-        else:
-            time_series_windows = [config["data_params"]["time_series_window"]]  # Default value
+        model_specific_config = model_configs.get(model_type, {})
+        for key, value in model_specific_config.items():
+            if key == "time_series_window":
+                # Skip setting time_series_window here; it will be handled below
+                continue
+            config[key] = value
 
         # Update data split
         config["data_params"]["data_split"] = {
@@ -50,6 +48,9 @@ def generate_configurations(base_template, dataset_name, target_root):
             "frac_test": 0.1,
             "unused_split": "beginning"
         }
+
+        # Handle time_series_window specifically for Transformer
+        time_series_windows = model_specific_config.get("time_series_window", [config["data_params"]["time_series_window"]])
 
         # Generate filenames for each window type if applicable
         for window_type in time_series_windows:
@@ -82,12 +83,12 @@ def main():
     base_template = {
         "model_type": "",  # Placeholder, will be set dynamically
         "dataset": "",  # Placeholder, will be set dynamically
-        "num_samples": 50,
+        "num_samples": 100,
         "cpu_per_trial": 8,  # Default value
         "gpu_per_trial": 0,
         "max_concurrent_trials": 2,  # Default value
         "trial_params": {
-            "max_epochs": 100,
+            "max_epochs": 75,
             "grace_period": 5,
             "reduction_factor": 2,
         },
