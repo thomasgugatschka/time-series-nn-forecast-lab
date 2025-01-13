@@ -1,6 +1,43 @@
+import os
+from src.manager.env_manager import EnvManager
+from src.utilities.logging_utils import get_logger
+logger = get_logger(__name__)
+
 class CallbackManager:
     def __init__(self, callbacks=None):
-        self.callbacks = callbacks if callbacks else []
+        """
+        Initialize the CallbackManager.
+
+        Args:
+            callbacks (list): List of callback instances to manage. Callbacks can be selectively disabled
+                             using environment variables with the pattern DISABLE_<CALLBACK_NAME>.
+        """
+ #       self.callbacks = callbacks if callbacks else []
+        self.callbacks = self._filter_callbacks(callbacks if callbacks else [])
+
+    def _filter_callbacks(self, callbacks):
+        """
+        Filter out disabled callbacks based on environment variables.
+
+        Args:
+            callbacks (list): List of callback instances to filter.
+
+        Returns:
+            list: Filtered list of callbacks.
+        """
+
+        # IMPROVEMENT: Maybe there is a nicer way to implement this.
+        enabled_callbacks = []
+        for callback in callbacks:
+            callback_name = type(callback).__name__.upper()
+            disable_flag = os.getenv(f"DISABLE_{callback_name}", "False").lower() in ("true", "1", "yes")
+
+            if disable_flag:
+                logger.warning(f"Callback {callback_name} is disabled via environment variable.")
+            else:
+                enabled_callbacks.append(callback)
+
+        return enabled_callbacks
 
     def on_train_begin(self, wrapper, **kwargs):
         for callback in self.callbacks:
