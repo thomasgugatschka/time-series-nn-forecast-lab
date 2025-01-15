@@ -58,23 +58,23 @@ class Transformer(BaseModel):
         self.seq_len = seq_len               # The length of the input sequence (number of time steps considered in the model)
 
         # Embedding layer to project input features into embedding space
-        self.embedding = nn.Linear(input_size, embed_dim)
+        self.embedding = nn.Linear(self.input_size, self.embed_dim)
 
         # Positional encoding module
-        self.positional_encoding = PositionalEncoding(embed_dim=embed_dim, max_len=seq_len)
+        self.positional_encoding = PositionalEncoding(embed_dim=self.embed_dim, max_len=self.seq_len)
 
         # Transformer Encoder Layers
         encoder_layer = nn.TransformerEncoderLayer(
-            d_model=embed_dim,
-            nhead=num_heads,
-            dim_feedforward=forward_dim,
-            dropout=dropout,
+            d_model=self.embed_dim,
+            nhead=self.num_heads,
+            dim_feedforward=self.forward_dim,
+            dropout=self.dropout,
             batch_first=True
         )
-        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=self.num_layers)
 
         # Output layer
-        self.fc_out = nn.Linear(embed_dim, 1)  # Always predict a single feature
+        self.fc_out = nn.Linear(self.embed_dim, 1)  # Always predict a single feature
 
 
         if kwargs:

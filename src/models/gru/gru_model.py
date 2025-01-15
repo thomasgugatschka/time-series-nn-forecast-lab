@@ -20,25 +20,12 @@ class GRU(BaseModel):
             dropout=dropout
         )
 
-#        self.output_size = output_size
-#        self.num_layers = num_layers
-#        self.input_size = input_size
-#        self.hidden_size = hidden_size
-#        self.dropout = dropout
-#        self.batch_first = True
-
-    # TODO -> fix somewhere else.... casting here should not be necessary???? better fix it while reading the CONFIG
-        # TODO -> should not be necessary to cast to int here... fix it while reading the CONFIG
         self.output_size = int(output_size)
         self.num_layers = int(num_layers)
         self.input_size = int(input_size)
         self.hidden_size = int(hidden_size)
         self.dropout = dropout
         self.batch_first = True
-
-# TODO #################################################################
-# TODO -> CHECK ALL MODELS if one initialized that I use *.self
-        # TODO #################################################################
 
         # Unidirectional GRU model with dropout
         self.gru = nn.GRU(

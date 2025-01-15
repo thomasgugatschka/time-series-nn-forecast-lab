@@ -101,8 +101,8 @@ class TCN(BaseModel):
         self.num_layers = num_layers
 
 
-        self.tcn = TemporalConvolutionNetwork(input_size, num_channels, kernel_size=kernel_size, dropout=dropout, dilation=dilation, num_layers=num_layers)
-        self.linear = nn.Linear(num_channels[-1], output_size)
+        self.tcn = TemporalConvolutionNetwork(self.input_size, self.num_channels, kernel_size=self.kernel_size, dropout=self.dropout, dilation=self.dilation, num_layers=self.num_layers)
+        self.linear = nn.Linear(self.num_channels[-1], self.output_size)
 
         if kwargs:
             logger.debug(f"Unused keyword arguments: {kwargs}")

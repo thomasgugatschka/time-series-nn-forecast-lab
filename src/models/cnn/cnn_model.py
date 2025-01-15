@@ -44,24 +44,24 @@ class CNN(BaseModel):
 
         # Build CNN layers
         layers = []
-        for i in range(num_layers):
-            in_channels = input_size if i == 0 else num_channels[i - 1]
-            out_channels = num_channels[i]
+        for i in range(self.num_layers):
+            in_channels = self.input_size if i == 0 else self.num_channels[i - 1]
+            out_channels = self.num_channels[i]
             layers.append(
                 nn.Conv1d(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    kernel_size=kernel_size,
+                    kernel_size=self.kernel_size,
                     stride=1,
-                    padding=(kernel_size // 2)  # Keep the sequence length constant
+                    padding=(self.kernel_size // 2)  # Keep the sequence length constant
                 )
             )
             layers.append(nn.ReLU())
-            if dropout > 0:
-                layers.append(nn.Dropout(dropout))
+            if self.dropout > 0:
+                layers.append(nn.Dropout(self.dropout))
 
         self.cnn = nn.Sequential(*layers)
-        self.fc = nn.Linear(num_channels[-1], output_size)  # Fully connected layer for prediction
+        self.fc = nn.Linear(self.num_channels[-1], self.output_size)  # Fully connected layer for prediction
 
         if kwargs:
             logger.debug(f"Unused keyword arguments: {kwargs}")

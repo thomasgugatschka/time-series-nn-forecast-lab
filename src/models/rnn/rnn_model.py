@@ -32,17 +32,17 @@ class RNN(BaseModel):
 
         # Create RNN model
         self.rnn = nn.RNN(
-            input_size=input_size,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
+            input_size=self.input_size,
+            hidden_size=self.hidden_size,
+            num_layers=self.num_layers,
             batch_first=self.batch_first,
-            dropout=dropout,
-            nonlinearity=nonlinearity
+            dropout=self.dropout,
+            nonlinearity=self.nonlinearity
         )
 
         # Fully connected layers
-        self.fc_1 = nn.Linear(hidden_size, 128)
-        self.fc_2 = nn.Linear(128, output_size)
+        self.fc_1 = nn.Linear(self.hidden_size, 128)
+        self.fc_2 = nn.Linear(128, self.output_size)
         self.relu = nn.ReLU()
 
         if kwargs:

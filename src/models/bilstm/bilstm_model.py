@@ -27,15 +27,15 @@ class BiLSTM(BaseModel):
 
         # Bi-LSTM model with one dropout layer after BiLSTM
         self.lstm = nn.LSTM(
-            input_size=input_size,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
+            input_size=self.input_size,
+            hidden_size=self.hidden_size,
+            num_layers=self.num_layers,
             batch_first=self.batch_first,
             bidirectional=True
         )
-        self.dropout_lstm = nn.Dropout(p=dropout)
-        self.fc_1 = nn.Linear(hidden_size * 2, 128)  # fully connected, multiply by 2 for bidirectional
-        self.fc_2 = nn.Linear(128, output_size)  # fully connected last layer
+        self.dropout_lstm = nn.Dropout(p=self.dropout)
+        self.fc_1 = nn.Linear(self.hidden_size * 2, 128)  # fully connected, multiply by 2 for bidirectional
+        self.fc_2 = nn.Linear(128, self.output_size)  # fully connected last layer
         self.relu = nn.ReLU()
 
     def forward(self, x):
