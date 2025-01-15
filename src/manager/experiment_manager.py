@@ -50,19 +50,20 @@ class ExperimentManager:
             self.gcs_use = self.env_manager.get_env_variable('USE_GCS', default='False', as_bool=True)
             self.gcs_bucket = self.env_manager.get_env_variable('GCS_BUCKET', default=None)
 
+            self.config_manager = config_manager
+            dataset = self.config_manager.get_main_config().get("dataset")
 
             if self.gcs_use:
                 if not self.gcs_bucket:
                     raise ValueError("GCS_BUCKET must be set when USE_GCS is True")
                 self.sync_manager = ExperimentSync(self.gcs_bucket)
-                self.metadata_gcspath = "experiments/experiment_metadata.json"
+                self.metadata_gcspath = f"experiments/experiment_metadata_{dataset}.json"
             else:
-                self.metadata_path = path_manager.get_path("experiment_dir") / "experiment_metadata.json"
+                self.metadata_path = path_manager.get_path("experiment_dir") / f"experiment_metadata_{dataset}.json"
 
-            self.config_manager = config_manager
+
             self._experiment_name = None
             self._experiment_path = None
-
             self._initialized = True
 
     @property
@@ -83,33 +84,38 @@ class ExperimentManager:
             value = Path(value)  # Convert to Path if not already
         self._experiment_path = value
 
+    def _hash_config(self, main_config_path):
+        """Generate a hash for the YAML configuration files, including dataset config, ignoring key order."""
+        logger.info(f"Hashing main configuration file: {main_config_path}")
 
-    # TODO -> add DATASET Config to the HASH ?!?!?! in case ts_future / ts_past etc. change
-    def _hash_config(self, config_path):
-        """Generate a hash for the YAML configuration file, ignoring key order."""
-        logger.info(f"Hashing configuration file: {config_path}")
+        # Load and log the main configuration content
+        yaml_content_main = file_manager.load_yaml(main_config_path)
+        logger.debug(f"Main config content: \n {yaml.dump(yaml_content_main, sort_keys=True)}")
 
-        with open(config_path, 'r') as f:
-            # Load YAML content as a Python dictionary
-            yaml_content = yaml.safe_load(f)
+        # Determine the dataset config path and load its content
+        dataset = self.config_manager.get_main_config().get("dataset")
+        dataset_config_path = path_manager.get_path_dataset_config(dataset_name=dataset)
+        logger.info(f"Hashing dataset configuration file: {dataset_config_path}")
+        yaml_content_dataset = file_manager.load_yaml(dataset_config_path)
+        logger.debug(f"Dataset config content: {yaml.dump(yaml_content_dataset, sort_keys=True)}")
 
-#TODO ############## ADD THIS WAY OF HASHING ################## TODO #
-        # Remove ignored keys
-#        filtered_content = self._remove_ignored_keys(yaml_content)
-        # Normalize the dictionary by sorting keys
-#        normalized_content = self._sort_dict(filtered_content)
+        # Remove ignored keys and normalize content
+        filtered_main = self._remove_ignored_keys(yaml_content_main)
+        filtered_dataset = self._remove_ignored_keys(yaml_content_dataset)
 
+        normalized_main = self._sort_dict(filtered_main)
+        normalized_dataset = self._sort_dict(filtered_dataset)
 
-        # Normalize the dictionary by sorting keys
-        normalized_content = self._sort_dict(yaml_content)
+        # Combine both configs into a single string for hashing
+        combined_yaml_str = yaml.dump(normalized_main, sort_keys=True) + yaml.dump(normalized_dataset, sort_keys=True)
+        logger.debug(f"Combined YAML for hashing:\n{combined_yaml_str}")
 
-        # Serialize the normalized dictionary back to a string
-        normalized_yaml_str = yaml.dump(normalized_content, sort_keys=True)
+        # Compute hash and log the result
+        config_hash = hashlib.md5(combined_yaml_str.encode("utf-8")).hexdigest()
+        logger.debug(f"Computed configuration hash: {config_hash}")
 
-        # Generate a hash of the normalized string
-        return hashlib.md5(normalized_yaml_str.encode('utf-8')).hexdigest()
+        return config_hash
 
-    # TODO -> move within _hash_config ?? since it is only needed in that function so can be placed in the function itself
     def _sort_dict(self, d):
         """Recursively sort a dictionary to ensure consistent key order."""
         if isinstance(d, dict):
@@ -128,32 +134,26 @@ class ExperimentManager:
             if k not in self.ignored_keys_hash
         }
 
-
-
-# TODO add more information into the metadata file like relevant infromation about experiment dataset, model, ts_past, ts_future etc.
-
     def _load_experiment_metadata(self):
-        """Load experiment metadata from GCS or local file."""
+        """Load experiment metadata from GCS or a dataset-specific local file."""
         if self.gcs_use:
+            logger.info(f"Loading experiment metadata from GCS: {self.metadata_gcspath}")
             return self.sync_manager.load_metadata(self.metadata_gcspath)[0]
         else:
             if file_manager.file_exists(self.metadata_path):
+                logger.info(f"Loading experiment metadata from: {self.metadata_path}")
                 return file_manager.load_json(self.metadata_path)
+            logger.warning(f"Metadata file not found at {self.metadata_path}, returning empty metadata.")
             return {}
 
     def _save_experiment_metadata(self, metadata):
-        """Save experiment metadata to GCS or local file."""
-
+        """Save experiment metadata to GCS or a dataset-specific local file."""
         if self.gcs_use:
             logger.info(f"Saving experiment metadata to GCS: {self.metadata_gcspath}")
             self.sync_manager.save_metadata_with_retries(metadata, self.metadata_gcspath)
         else:
             logger.info(f"Saving experiment metadata to: {self.metadata_path}")
             file_manager.save_json(metadata, self.metadata_path)
-
-
-
-
 
     def manage_experiment(self, phase='undefined'):
         """
@@ -187,12 +187,24 @@ class ExperimentManager:
             phase_info = experiment_info.setdefault("phases", {})
             phase_info[phase] = phase_info.get(phase, 0) + 1
             experiment_info["phases"] = phase_info
+
+            experiment_info["last_updated"] = timestamp
+            metadata[config_hash] = experiment_info
+
         else:
             # New experiment - Generate experiment name
             self.experiment_name = self.generate_experiment_name(main_config, dataset_config, timestamp)
 
-        # Create experiment folder and store path (MUST be done to have correct path for the experiment)
-        # Since hyperparameter tuning could have been done in cloud and training and evaluation is done locally.
+            # Create new metadata entry
+            metadata[config_hash] = {
+                "experiment_name": self.experiment_name,
+                "timestamp": timestamp,
+                "main_config": main_config,
+                "dataset_config": dataset_config,
+                "phases": {phase: 1},
+            }
+
+        # Create experiment folder and store path (for both new and resumed experiments)
         self.experiment_path = path_manager.create_experiment_folder(
             model_type=main_config["model_type"],
             dataset_name=main_config["dataset"],
@@ -201,16 +213,8 @@ class ExperimentManager:
 
         path_manager.create_experiment_subfolders()
 
-        if not resume:
-            # Save metadata for the new experiment
-            metadata[config_hash] = {
-                "experiment_name": self.experiment_name,
-                "experiment_path": str(self.experiment_path),
-                "timestamp": timestamp,
-                "phases": {phase: 1},
-            }
-            self._save_experiment_metadata(metadata)
-
+        # Save updated metadata to ensure consistency in both resume and new experiment cases
+        self._save_experiment_metadata(metadata)
 
         return self.experiment_name, self.experiment_path, resume
 
@@ -325,74 +329,6 @@ class ExperimentManager:
         logger.info(f"Experiment {self.experiment_name} finalized.")
 
 
-    def validate_experiment(self, metadata_entry, config_path, required_files):
-        """
-        Validate an experiment by checking metadata, hash, and required files.
-
-        Args:
-            metadata_entry (dict): Metadata entry for the experiment.
-            config_path (str): Path to the local configuration file.
-            required_files (list): List of required files.
-
-        Returns:
-            dict: Validation results including missing files, hash match, and updated path.
-        """
-        missing_files = []
-
-        # Compute hash
-        expected_hash = metadata_entry.get("hash")
-        computed_hash = self._hash_config(config_path)
-        hash_match = expected_hash == computed_hash
-
-        # Rebuild local path
-        experiment_name = metadata_entry.get("experiment_name")
-        local_experiment_dir = path_manager.get_path("experiment_dir") / experiment_name
-
-        # Check for required files
-        for required_file in required_files:
-            if not (local_experiment_dir / required_file).exists():
-                missing_files.append(required_file)
-
-        return {
-            "experiment_dir": str(local_experiment_dir),
-            "hash_match": hash_match,
-            "missing_files": missing_files,
-        }
-
-    def validate_all_experiments(self, config_path):
-        """
-        Validate all experiments using the metadata file.
-
-        Args:
-            config_path (str): Path to the local configuration file.
-
-        Returns:
-            list: Validation results for all experiments.
-        """
-        metadata = self._load_experiment_metadata()
-        results = []
-
-        required_files = [
-            "all_hyperparameters.json",
-            "best_config.json",
-            "best_trial.json",
-            "dataset_config.yaml",
-            "main_config.yaml",
-            "top_hyperparameters.json",
-            "trial_data.json",
-        ]
-
-        for hash_key, entry in metadata.items():
-            result = self.validate_experiment(entry, config_path, required_files)
-            result["hash"] = hash_key
-            results.append(result)
-
-        return results
-
-
-
-
-
 class ExperimentSync:
     RETRY_DELAY = 1  # Seconds
     MAX_RETRIES = 5  # Number of retries for saving metadata
@@ -467,7 +403,7 @@ class ExperimentSync:
             temp_file_path = temp_file.name
 
         if expected_version:
-            # Verify version before upload
+            # Verify version before upload - optimistic locking
             current_metadata, current_version = self.load_metadata(metadata_path)
             if current_version != expected_version:
                 raise RuntimeError("Metadata file has been updated by another instance. Retry required.")
@@ -493,7 +429,8 @@ class ExperimentSync:
                 logger.info(f"Successfully saved metadata on attempt {attempt + 1}")
                 return
             except RuntimeError as e:
-                logger.warning(f"Conflict detected while saving metadata. Retrying... ({attempt + 1}/{self.MAX_RETRIES})")
+                logger.warning(
+                    f"Conflict detected while saving metadata. Retrying... ({attempt + 1}/{self.MAX_RETRIES})")
                 time.sleep(self.RETRY_DELAY)
 
         raise RuntimeError(f"Failed to save metadata after {self.MAX_RETRIES} attempts due to version conflicts.")
