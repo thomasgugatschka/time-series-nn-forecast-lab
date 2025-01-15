@@ -3,12 +3,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 from src.manager.path_manager import path_manager
+from src.manager.file_manager import file_manager
 
 def load_metrics(file_path):
     """Load metrics from a given JSON file."""
     with open(file_path, "r") as f:
         return json.load(f)
 
+def load_main_config(config_path):
+    """Load the main configuration YAML file."""
+    return file_manager.load_yaml(config_path)
 
 def parse_experiment_folder_name(folder_name):
     """Parse experiment folder name to extract metadata."""
@@ -32,21 +36,20 @@ def parse_experiment_folder_name(folder_name):
         "start_date": start_date,
     }
 
-
-def plot_metrics_by_train_split(condensed_df, output_path, dataset_name):
-    """Generate and save plots for metrics by train split."""
-    metrics = ["normalized_avg_mse", "normalized_avg_mae", "denormalized_avg_mse", "denormalized_avg_mae"]
+def plot_all_metrics(condensed_df, output_path, dataset_name):
+    """Generate and save plots for all metrics by train split."""
+    metrics = [col for col in condensed_df.columns if col.startswith("normalized_") or col.startswith("denormalized_")]
 
     for metric in metrics:
         plt.figure(figsize=(10, 6))
 
-        for model_type in condensed_df["model_type"].unique():
-            model_data = condensed_df[condensed_df["model_type"] == model_type]
+        for model in condensed_df["model_identifier"].unique():
+            model_data = condensed_df[condensed_df["model_identifier"] == model]
             plt.plot(
                 model_data["train_split"],
                 model_data[metric],
                 marker="o",
-                label=model_type
+                label=model
             )
 
         plt.title(f"{metric.replace('_', ' ').title()} by Train Split ({dataset_name})")
@@ -59,37 +62,6 @@ def plot_metrics_by_train_split(condensed_df, output_path, dataset_name):
         metric_plot_path = output_path / f"{metric}_by_train_split.png"
         plt.savefig(metric_plot_path)
         plt.close()
-
-    # Combined plot with color-coded models
-    plt.figure(figsize=(12, 8))
-
-    for model_type in condensed_df["model_type"].unique():
-        model_data = condensed_df[condensed_df["model_type"] == model_type]
-        plt.plot(
-            model_data["train_split"],
-            model_data["normalized_avg_mse"],
-            marker="o",
-            label=f"{model_type} (MSE)"
-        )
-        plt.plot(
-            model_data["train_split"],
-            model_data["normalized_avg_mae"],
-            marker="x",
-            linestyle="--",
-            label=f"{model_type} (MAE)"
-        )
-
-    plt.title(f"Metrics Comparison by Train Split ({dataset_name})")
-    plt.xlabel("Train Split")
-    plt.ylabel("Metric Value")
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
-
-    combined_plot_path = output_path / "metrics_comparison_by_train_split.png"
-    plt.savefig(combined_plot_path)
-    plt.close()
-
 
 def aggregate_metrics(dataset_name, ts_past, ts_future, output_dir, experiment_dir):
     """
@@ -118,12 +90,22 @@ def aggregate_metrics(dataset_name, ts_past, ts_future, output_dir, experiment_d
             continue
 
         eval_results_path = model_dir / "evaluation_results/overall_metrics_summary.json"
+        main_config_path = model_dir / "main_config.yaml"
 
-        if not eval_results_path.exists():
-            print(f"Skipping {model_dir.name}, evaluation file not found.")
+        if not eval_results_path.exists() or not main_config_path.exists():
+            print(f"Skipping {model_dir.name}, required files not found.")
             continue
 
         metrics_data = load_metrics(eval_results_path)
+        main_config = load_main_config(main_config_path)
+
+        # Identify Transformer-specific setting
+        time_series_window = main_config.get("data_params", {}).get("time_series_window", "unknown")
+        metadata["time_series_window"] = time_series_window
+
+        # Create a unique identifier for the model
+        model_identifier = f"{metadata['model_type']}-{time_series_window}"
+        metadata["model_identifier"] = model_identifier
 
         # Expanded results: Include all metrics
         expanded_results.append({
@@ -134,14 +116,18 @@ def aggregate_metrics(dataset_name, ts_past, ts_future, output_dir, experiment_d
 
         # Condensed results: Main metrics (MSE, MAE, etc.)
         condensed_results.append({
-            "model_type": metadata["model_type"],
+            "model_identifier": model_identifier,
             "train_split": metadata["train_split"],
             "val_split": metadata["val_split"],
             "test_split": metadata["test_split"],
-            "normalized_avg_mse": metrics_data["normalized"]["average"]["mse"],
-            "normalized_avg_mae": metrics_data["normalized"]["average"]["mae"],
-            "denormalized_avg_mse": metrics_data["denormalized"]["average"]["mse"],
-            "denormalized_avg_mae": metrics_data["denormalized"]["average"]["mae"],
+            **{
+                f"normalized_avg_{metric}": metrics_data["normalized"]["average"].get(metric, None)
+                for metric in metrics_data["normalized"]["average"].keys()
+            },
+            **{
+                f"denormalized_avg_{metric}": metrics_data["denormalized"]["average"].get(metric, None)
+                for metric in metrics_data["denormalized"]["average"].keys()
+            },
         })
 
     # Save results to files
@@ -185,10 +171,8 @@ def aggregate_metrics(dataset_name, ts_past, ts_future, output_dir, experiment_d
         f.write(f"\\end{{itemize}}\n\n")
         f.write(condensed_df.to_latex(index=False, escape=False))
 
-
-    # Generate plots
-    plot_metrics_by_train_split(condensed_df, output_path, dataset_name)
-
+    # Generate plots for all metrics
+    plot_all_metrics(condensed_df, output_path, dataset_name)
 
     print(f"Aggregated results saved to {output_path}")
 
@@ -199,8 +183,7 @@ def main():
     #       -> Parse from the config the dataset and then the current ts_past and ts_future
     #       -> Have other inputs as well to input the dataset_name and ts_past and ts_future
 
-
-    # TODO -> REFACTOR -> Add special parsing for Transformer (full-sequence / fixed-window)
+    # TODO -> REFACTOR -> Modify to use PlotManager and FileManager
 
     dataset_config = {
         "dataset_name": "exchangerate",
@@ -218,7 +201,6 @@ def main():
         output_dir=output_dir,
         experiment_dir=experiment_dir,
     )
-
 
 if __name__ == "__main__":
     main()

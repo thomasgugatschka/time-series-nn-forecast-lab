@@ -8,6 +8,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-045105",
+        "time_series_window": "full-sequence",
+        "model_identifier": "CNN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.3814566234747569,
@@ -126,6 +128,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-035316",
+        "time_series_window": "full-sequence",
+        "model_identifier": "CNN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.5501098930835724,
@@ -244,6 +248,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-044405",
+        "time_series_window": "full-sequence",
+        "model_identifier": "CNN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.3815195908149083,
@@ -362,6 +368,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-052616",
+        "time_series_window": "full-sequence",
+        "model_identifier": "CNN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.34896812836329144,
@@ -480,6 +488,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-001135",
+        "time_series_window": "full-sequence",
+        "model_identifier": "CNN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.36024343967437744,
@@ -598,6 +608,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-103332",
+        "time_series_window": "full-sequence",
+        "model_identifier": "CNN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.24749660988648733,
@@ -716,6 +728,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-132004",
+        "time_series_window": "full-sequence",
+        "model_identifier": "CNN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.24741125603516897,
@@ -834,6 +848,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-113151",
+        "time_series_window": "full-sequence",
+        "model_identifier": "CNN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.13715759913126627,
@@ -952,6 +968,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-073321",
+        "time_series_window": "fixed-window",
+        "model_identifier": "GRU-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.3095158040523529,
@@ -1070,6 +1088,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-001848",
+        "time_series_window": "fixed-window",
+        "model_identifier": "GRU-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.4809825619061788,
@@ -1188,6 +1208,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-234624",
+        "time_series_window": "fixed-window",
+        "model_identifier": "GRU-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.17473583916823068,
@@ -1306,6 +1328,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-002420",
+        "time_series_window": "fixed-window",
+        "model_identifier": "GRU-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.1873529702425003,
@@ -1424,6 +1448,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-210509",
+        "time_series_window": "fixed-window",
+        "model_identifier": "GRU-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.15077335635821024,
@@ -1542,6 +1568,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-153429",
+        "time_series_window": "fixed-window",
+        "model_identifier": "GRU-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.15095882614453635,
@@ -1660,6 +1688,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-145250",
+        "time_series_window": "fixed-window",
+        "model_identifier": "GRU-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.11279466499884923,
@@ -1778,6 +1808,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-193830",
+        "time_series_window": "fixed-window",
+        "model_identifier": "GRU-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.06838329633076985,
@@ -1896,6 +1928,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-163621",
+        "time_series_window": "fixed-window",
+        "model_identifier": "LSTM-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.4429413477579753,
@@ -2014,6 +2048,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-023158",
+        "time_series_window": "fixed-window",
+        "model_identifier": "LSTM-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.5070787668228149,
@@ -2132,6 +2168,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-024503",
+        "time_series_window": "fixed-window",
+        "model_identifier": "LSTM-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.22615582744280496,
@@ -2250,6 +2288,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-063810",
+        "time_series_window": "fixed-window",
+        "model_identifier": "LSTM-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.3702149937550227,
@@ -2368,6 +2408,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-223533",
+        "time_series_window": "fixed-window",
+        "model_identifier": "LSTM-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.15602615972359976,
@@ -2486,6 +2528,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-082252",
+        "time_series_window": "fixed-window",
+        "model_identifier": "LSTM-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.1783671130736669,
@@ -2604,6 +2648,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-185756",
+        "time_series_window": "fixed-window",
+        "model_identifier": "LSTM-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.19647778073946634,
@@ -2722,6 +2768,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-140841",
+        "time_series_window": "fixed-window",
+        "model_identifier": "LSTM-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.09854540725549062,
@@ -2840,6 +2888,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-031036",
+        "time_series_window": "fixed-window",
+        "model_identifier": "RNN-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.3588431775569916,
@@ -2958,6 +3008,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250113-182633",
+        "time_series_window": "fixed-window",
+        "model_identifier": "RNN-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.4879554907480876,
@@ -3076,6 +3128,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-105343",
+        "time_series_window": "fixed-window",
+        "model_identifier": "RNN-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.3110802372296651,
@@ -3194,6 +3248,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-055457",
+        "time_series_window": "fixed-window",
+        "model_identifier": "RNN-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.22894313434759775,
@@ -3312,6 +3368,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-063803",
+        "time_series_window": "fixed-window",
+        "model_identifier": "RNN-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.26196372012297314,
@@ -3430,6 +3488,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250110-231620",
+        "time_series_window": "fixed-window",
+        "model_identifier": "RNN-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.17548112571239471,
@@ -3548,6 +3608,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-223243",
+        "time_series_window": "fixed-window",
+        "model_identifier": "RNN-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.19968964904546738,
@@ -3666,6 +3728,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250110-231602",
+        "time_series_window": "fixed-window",
+        "model_identifier": "RNN-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.07313133776187897,
@@ -3784,6 +3848,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250114-010630",
+        "time_series_window": "full-sequence",
+        "model_identifier": "TCN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.3246798515319824,
@@ -3902,6 +3968,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250114-035255",
+        "time_series_window": "full-sequence",
+        "model_identifier": "TCN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.4062501788139343,
@@ -4020,6 +4088,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250113-222413",
+        "time_series_window": "full-sequence",
+        "model_identifier": "TCN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.24510017037391663,
@@ -4138,6 +4208,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250113-193715",
+        "time_series_window": "full-sequence",
+        "model_identifier": "TCN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.5220172703266144,
@@ -4256,6 +4328,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250114-025036",
+        "time_series_window": "full-sequence",
+        "model_identifier": "TCN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.4741818606853485,
@@ -4374,6 +4448,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250114-022927",
+        "time_series_window": "full-sequence",
+        "model_identifier": "TCN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.13412711769342422,
@@ -4492,6 +4568,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250114-035218",
+        "time_series_window": "full-sequence",
+        "model_identifier": "TCN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.10814085354407628,
@@ -4610,6 +4688,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250113-182635",
+        "time_series_window": "full-sequence",
+        "model_identifier": "TCN-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.1340856651465098,
@@ -4728,6 +4808,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-175905",
+        "time_series_window": "fixed-window",
+        "model_identifier": "Transformer-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.2973063389460246,
@@ -4846,6 +4928,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-163435",
+        "time_series_window": "full-sequence",
+        "model_identifier": "Transformer-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.5027774771054586,
@@ -4964,6 +5048,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-021544",
+        "time_series_window": "full-sequence",
+        "model_identifier": "Transformer-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.573496401309967,
@@ -5082,6 +5168,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-214904",
+        "time_series_window": "fixed-window",
+        "model_identifier": "Transformer-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.44364697734514874,
@@ -5200,6 +5288,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-012908",
+        "time_series_window": "full-sequence",
+        "model_identifier": "Transformer-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.7479425271352133,
@@ -5318,6 +5408,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-044553",
+        "time_series_window": "fixed-window",
+        "model_identifier": "Transformer-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.8294499119122823,
@@ -5436,6 +5528,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-034650",
+        "time_series_window": "full-sequence",
+        "model_identifier": "Transformer-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.4440625210603078,
@@ -5554,6 +5648,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-134358",
+        "time_series_window": "fixed-window",
+        "model_identifier": "Transformer-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.4173074960708618,
@@ -5672,6 +5768,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-010821",
+        "time_series_window": "full-sequence",
+        "model_identifier": "Transformer-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.2320790390173594,
@@ -5790,6 +5888,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-113216",
+        "time_series_window": "fixed-window",
+        "model_identifier": "Transformer-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.44460737705230713,
@@ -5908,6 +6008,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-115008",
+        "time_series_window": "full-sequence",
+        "model_identifier": "Transformer-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.2397180845340093,
@@ -6026,6 +6128,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-081259",
+        "time_series_window": "fixed-window",
+        "model_identifier": "Transformer-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.1758857568105062,
@@ -6144,6 +6248,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-094709",
+        "time_series_window": "full-sequence",
+        "model_identifier": "Transformer-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.14332416156927744,
@@ -6262,6 +6368,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-121013",
+        "time_series_window": "fixed-window",
+        "model_identifier": "Transformer-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.1539702316125234,
@@ -6380,6 +6488,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250111-074011",
+        "time_series_window": "full-sequence",
+        "model_identifier": "Transformer-full-sequence",
         "normalized": {
             "average": {
                 "mae": 0.10126676162083943,
@@ -6498,6 +6608,8 @@
         "val_split": 0.1,
         "test_split": 0.1,
         "start_date": "20250112-134923",
+        "time_series_window": "fixed-window",
+        "model_identifier": "Transformer-fixed-window",
         "normalized": {
             "average": {
                 "mae": 0.08562316497166951,
