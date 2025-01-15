@@ -44,5 +44,5 @@ _merged_scripts/
 
 
 # TODO - SINGLE FILES - to be removed after files have been deleted
-x_helpful.txt
-_diagrams_to_create.txt
+/docs/_helpful_model_metrics.txt
+/docs/_diagrams_to_create.txt

@@ -14,11 +14,8 @@ taskGroups:
               - "{{CONFIG_PATH}}"
       maxRetryCount: 1
       computeResource:
-#        cpuMilli: 8000  # 8 CPUs
-        cpuMilli: 16000  # 16 CPUs
-#        memoryMib: 8192  # 8 GB Memory
-#        memoryMib: 16384  # 16 GB Memory
-        memoryMib: 32768  # 32 GB Memory
+        cpuMilli: {{CPU_MILLI}}  # Dynamic CPU allocation
+        memoryMib: {{MEMORY_MIB}}  # Dynamic memory allocation
       environment:
         variables:
           SYNC_CONFIG_FROM_GCS: "True"

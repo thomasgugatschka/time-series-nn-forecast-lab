@@ -1,7 +1,7 @@
 # https://github.com/zhouhaoyi/ETDataset
 sources:
   - ETTh1
-  - ETTh2
+#  - ETTh2
 source_forecasted: 0
 feature_list:
   - 'HUFL'    # High UseFul Load
