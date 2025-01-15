@@ -49,6 +49,6 @@ class DataLoaderCreator:
         }
 
 
-# TODO - TBC -> Should this be a Singleton?
+# IMPROVE: Singleton not really necessary for this class
 # Singleton instance
 data_loader = DataLoaderCreator()

@@ -78,7 +78,7 @@ def main():
 
     # --- SETTINGS ---
     operation = "training"  # tuning, training, evaluation, visualizeDS
-    location = "file" # file, script
+    location = "script" # file, script
     prefix_file = "experiment_configs/exchangerate/"
     # ----------------
 
@@ -91,7 +91,8 @@ def main():
     elif location == "script":
         # Define configurations directly in the script (optional)
         config_list = [
-            "experiment_configs/ETTh/config_rnn_ETTh_0.4-0.1-0.1.yaml",
+#            "experiment_configs/ETTh/config_rnn_ETTh_0.4-0.1-0.1.yaml",
+            "config.yaml"
         ]
     else:
         print(f"Invalid location: {location}. Choose from file or script.")
@@ -118,7 +119,9 @@ def main():
 
     # Run the selected script for each configuration
     for config in config_list:
-        run_script(script_to_run, prefix_file + config, optional_params, tracking_file=tracking_file)
+        if location == "file":
+            config = prefix_file + config
+        run_script(script_to_run, config, optional_params, tracking_file=tracking_file)
 
 if __name__ == "__main__":
     main()
