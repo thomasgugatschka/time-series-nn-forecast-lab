@@ -442,4 +442,94 @@ class PlotManager:
         plt.legend()
         self._save_or_show_plot(f"{dataset_name}_data_chunk.png")
 
+    def plot_splits_with_markers(self, cropped_data, metadata):
+        """
+        Plot the dataset with train, validation, and test splits.
+
+        Args:
+            cropped_data (pd.DataFrame): The cropped data to plot.
+            metadata (dict): Metadata containing split fractions and selected feature information.
+        """
+        dataset_name = self.dataset_name
+        selected_feature = metadata["selected_feature"]
+        data_params = self.main_config["data_params"]
+        frac_train = data_params["data_split"]["frac_train"]
+        frac_val = data_params["data_split"]["frac_val"]
+        frac_test = data_params["data_split"]["frac_test"]
+
+        data_length = len(cropped_data)
+        train_end = int(data_length * frac_train)
+        val_end = train_end + int(data_length * frac_val)
+        test_end = val_end + int(data_length * frac_test)
+
+        # maybe a nicer way to do this...
+        offset_crop = metadata.get("crop_start", 0)
+
+        logger.info("Plotting dataset with train, validation, and test splits.")
+
+        plt.figure(figsize=(14, 8))
+        plt.plot(
+            cropped_data.iloc[:, selected_feature],
+            label="Selected Feature",
+            linewidth=2.5
+        )
+        plt.axvline(train_end + offset_crop, color="blue", linestyle="--", label="Train End")
+        plt.axvline(val_end + offset_crop, color="orange", linestyle="--", label="Validation End")
+        plt.axvline(test_end + offset_crop, color="green", linestyle="--", label="Test End")
+
+        plt.title(f"Dataset ({dataset_name}) with Train, Validation, and Test Splits")
+        plt.xlabel("Time Steps")
+        plt.ylabel("Value")
+        plt.legend()
+        plt.grid(True)
+        self._save_or_show_plot(f"{dataset_name}_splits_with_markers.png")
+
+    def plot_splits_with_detailed_markers(self, cropped_data, metadata):
+        """
+        Plot the dataset with detailed train, validation, and test split markers.
+
+        Args:
+            cropped_data (pd.DataFrame): The cropped data to plot.
+            crop_start (int): Start index of the crop.
+            crop_end (int): End index of the crop.
+            metadata (dict): Metadata containing split fractions and selected feature information.
+        """
+        dataset_name = self.dataset_name
+        selected_feature = metadata["selected_feature"]
+        data_params = self.main_config["data_params"]
+        frac_train = data_params["data_split"]["frac_train"]
+        frac_val = data_params["data_split"]["frac_val"]
+        frac_test = data_params["data_split"]["frac_test"]
+
+        data_length = len(cropped_data)
+        train_end = int(data_length * frac_train)
+        val_end = train_end + int(data_length * frac_val)
+        test_end = val_end + int(data_length * frac_test)
+
+        offset_crop = metadata.get("crop_start", 0)
+
+        logger.info("Plotting dataset with detailed train, validation, and test markers.")
+
+        plt.figure(figsize=(14, 8))
+        plt.plot(
+            cropped_data.iloc[:, selected_feature],
+            label="Selected Feature",
+            linewidth=2.5
+        )
+        plt.axvline(train_end + offset_crop, color="blue", linestyle="--", label="Train End")
+        plt.axvline(val_end + offset_crop, color="orange", linestyle="--", label="Validation End")
+        plt.axvline(test_end + offset_crop, color="green", linestyle="--", label="Test End")
+
+        # Add markers every 10% of the train data
+        train_step = train_end // 10
+        for i in range(1, 10):  # Add markers at 10%, 20%, ..., 90% of train data
+            plt.axvline(i * train_step + offset_crop, color="blue", linestyle=":", label=f"Train {i * 10}%")
+
+        plt.title(f"Dataset ({dataset_name}) with Detailed Train, Validation, and Test Splits")
+        plt.xlabel("Time Steps")
+        plt.ylabel("Value")
+        plt.legend()
+        plt.grid(True)
+        self._save_or_show_plot(f"{dataset_name}_splits_with_detailed_markers.png")
+
     # endregion

@@ -44,6 +44,12 @@ def main():
     # Plot 3: Detailed View of Data Chunk (End with Space)
     plot_manager.plot_data_chunk(cropped_data, metadata)
 
+    # Plot 4: Dataset with Train, Validation, and Test Splits
+    plot_manager.plot_splits_with_markers(cropped_data, metadata)
+
+    # Plot 5: Dataset with all Train Splits
+    plot_manager.plot_splits_with_detailed_markers(cropped_data, metadata)
+
 
 if __name__ == "__main__":
     main()
