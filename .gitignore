@@ -40,3 +40,9 @@ service-account-key.json
 _merged_scripts/
 /docs/99_dumb/
 /docs/80_reference/
+
+
+
+# TODO - SINGLE FILES - to be removed after files have been deleted
+x_helpful.txt
+_diagrams_to_create.txt

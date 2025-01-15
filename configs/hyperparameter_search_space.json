@@ -30,7 +30,7 @@
   },
   "LSTM": {
     "model_params": {
-      "hidden_size": [32, 64, 128, 256, 512],
+      "hidden_size": [32, 64, 128, 256],
       "num_layers": [2, 8],
       "dropout": [0.1, 0.5]
     },
@@ -44,7 +44,7 @@
   },
   "BiLSTM": {
     "model_params": {
-      "hidden_size": [32, 64, 128, 256, 512],
+      "hidden_size": [32, 64, 128, 256],
       "num_layers": [2, 4],
       "dropout": [0.1, 0.5]
     },
