@@ -9,9 +9,6 @@
 - [ ] Explore solutions to enable **live TensorBoard logging** by streaming logs to GCS or another cloud-based logging system.
 - [x] Continue from last tuning checkpoint.
 
-## Callbacks Configurable through Config/ENV Variables
-- Make Callbacks Configurable so e.g. TensorBoard Callback can be turned off/on through config file or environment variable.
-- [ ] TODO
 
 ## Abstraction Layer for Cloud Platform
 - Should be able to switch between cloud platforms without changing the code.
@@ -36,5 +33,4 @@
 ## UI for Experiment Management and Configuration setup
 
 ## Complete Refactoring and Design of the Experiment Manager and adjacent classes
-
 

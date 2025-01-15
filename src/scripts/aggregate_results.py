@@ -133,6 +133,8 @@ def aggregate_metrics(dataset_name, ts_past, ts_future, output_dir, experiment_d
     # Save results to files
     output_path = Path(output_dir) / f"{dataset_name}_{ts_past}_{ts_future}"
     output_path.mkdir(parents=True, exist_ok=True)
+    output_path_plots = output_path / "metrics_visualization"
+    output_path_plots.mkdir(parents=True, exist_ok=True)
 
     # Save expanded results
     expanded_json = output_path / "expanded_results.json"
@@ -172,7 +174,7 @@ def aggregate_metrics(dataset_name, ts_past, ts_future, output_dir, experiment_d
         f.write(condensed_df.to_latex(index=False, escape=False))
 
     # Generate plots for all metrics
-    plot_all_metrics(condensed_df, output_path, dataset_name)
+    plot_all_metrics(condensed_df, output_path_plots, dataset_name)
 
     print(f"Aggregated results saved to {output_path}")
 
@@ -185,13 +187,15 @@ def main():
 
     # TODO -> REFACTOR -> Modify to use PlotManager and FileManager
 
+    # TODO -> REFACTOR -> Build Path to Plots in a more generic way -> use ExperimentManager or create a new ResultManager?
+
     dataset_config = {
         "dataset_name": "exchangerate",
         "ts_past": 30,
         "ts_future": 7,
     }
 
-    output_dir = path_manager.get_path("base_dir") / "results"
+    output_dir = path_manager.get_path("result_dir")
     experiment_dir = path_manager.get_path("experiment_dir")
 
     aggregate_metrics(

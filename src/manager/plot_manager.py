@@ -41,7 +41,9 @@ class PlotManager:
             self.plot_path = path_manager.get_path('experiment')
         else:
             if self.phase == "dataset_visualization":
-                self.plot_path = path_manager.get_path_dataset_plots(self.dataset_name)
+                #self.plot_path = path_manager.get_path_dataset_plots(self.dataset_name)
+                self.plot_path = path_manager.get_path("result_dir") / f"{self.dataset_name}_{self.ts_past}_{self.ts_future}" / "dataset_visualization"
+                file_manager.create_directory(self.plot_path)
             else:
                 self.plot_path = path_manager.get_path(f"experiment_plots_{self.phase}")
 
@@ -111,14 +113,16 @@ class PlotManager:
             bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
         )
 
-    def _save_or_show_plot(self, filename):
+    def _save_or_show_plot(self, filename, custom_path=None):
         """
         Save or show the plot based on environment variables.
         Args:
             filename (str): The name of the file to save the plot.
+            custom_path (Path, optional): A custom path to save the plot. If not provided, defaults to self.plot_path.
         """
         try:
-            file_path = self.plot_path / filename
+            # Use custom_path if provided, otherwise default to self.plot_path
+            file_path = (custom_path or self.plot_path) / filename
             if self.plots_save:
                 file_manager.save_plot(plt, file_path)
                 logger.info(f"Saved plot to {file_path}")
@@ -126,7 +130,6 @@ class PlotManager:
                 plt.show()
         finally:
             plt.close()  # Ensure resources are released
-
 
 
     # region TRAINING & TUNING PLOTS

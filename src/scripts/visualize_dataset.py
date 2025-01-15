@@ -1,5 +1,7 @@
 from src.manager.config_manager import ConfigManager
 from src.manager.data_manager import DataManager
+from src.manager.file_manager import file_manager
+from src.manager.path_manager import path_manager
 from src.manager.plot_manager import PlotManager
 from src.utilities.logging_utils import setup_logging, get_logger
 
@@ -32,8 +34,8 @@ def main():
     crop_start = metadata.get("crop_start", 0)
     crop_end = metadata.get("crop_end", len(raw_data))
 
-    print(f"crop_start: {crop_start}, crop_end: {crop_end}")
-    print(metadata)
+    logger.info(f"crop_start: {crop_start}, crop_end: {crop_end}")
+    logger.info(metadata)
 
     # Plot 1: Full Dataset (Selected Feature and All Features)
     plot_manager.plot_full_dataset(raw_data, crop_start, crop_end, metadata)
@@ -50,6 +52,13 @@ def main():
     # Plot 5: Dataset with all Train Splits
     plot_manager.plot_splits_with_detailed_markers(cropped_data, metadata)
 
+    # Save dataset configuration which where the source for the plots
+    dataset = config_manager.get("dataset")
+    ts_past = config_manager.get_dataset_config().get("ts_past")
+    ts_future = config_manager.get_dataset_config().get("ts_future")
+    output_path = path_manager.get_path("result_dir") / f"{dataset}_{ts_past}_{ts_future}" / "dataset_visualization"
+    output_path.mkdir(parents=True, exist_ok=True)
+    file_manager.save_yaml(config_manager.get_dataset_config(), output_path / f"config_data_{dataset}.yaml")
 
 if __name__ == "__main__":
     main()

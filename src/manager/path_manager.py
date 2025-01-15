@@ -45,6 +45,7 @@ class PathManager:
             'base_dir': self.base_dir,
             'data_dir': self.base_dir / 'data',
             'experiment_dir': self.base_dir / 'experiments',
+            'result_dir': self.base_dir / 'results',
             'log_dir': self.base_dir / 'logs',
             'config_dir': self.base_dir / 'configs',
             'dataset_config_dir': self.base_dir / 'configs' / 'dataset_configs',
