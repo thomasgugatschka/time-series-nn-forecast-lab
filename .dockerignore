@@ -32,6 +32,8 @@ experiments/**
 
 /scripts/
 
+/results/
+
 # IMPROVEMENT
 # .ENV must be excluded from .dockerignore since not all settings are overwritten by Dockerfile
 #.env

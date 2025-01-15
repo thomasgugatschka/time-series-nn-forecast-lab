@@ -31,7 +31,8 @@ fostering deeper insights into model behavior under varying conditions.
 - [Configuration Files](#configuration-files)
 - [Use Cases (Scripts)](#use-cases-scripts)
 - [Batch Processing](#batch-processing)
-- [Experiment Results](#experiment-results)
+- [Experiments](#experiments)
+- [Results](#results)
 - [New Models](#new-models)
 - [New Datasets](#new-datasets)
 - [Future Improvements](#future-improvements)
@@ -63,6 +64,7 @@ The design of the **Time Series Neural Network Forecast Lab** is guided by the f
         ├── docs/                                   # Documentation (architecture, sequence, markdown, etc.)
         ├── experiments/                            # Experiment results (e.g., tuning, training, evaluation)
         ├── logs/                                   # Log files for debugging and analysis
+        ├── results/                                # Aggregated results and analysis
         ├── scripts/                                # Scripts for batch execution
             ├── gcp/                                #   Google Cloud Platform (GCP) batch execution scripts
             ├── aws/                                #   Amazon Web Services (AWS) batch execution scripts
@@ -498,7 +500,7 @@ docker logs -f <container-id>  # -f for streaming logs
 
 ---
 
-## Experiment Results
+## Experiments
 
 The `/experiments` directory serves as the central location for all experiment-related outputs, including plots, metadata, trained models, and configuration files. It is designed to organize results systematically for easy tracking, analysis, and reproducibility.
 
@@ -598,6 +600,21 @@ python src/scripts/visualize_dataset.py
    - Saved configurations and metadata facilitate detailed post-experiment analysis.
 4. **Reproducibility**:
    - The inclusion of all configurations and outputs ensures that experiments can be precisely reproduced and extended.
+
+### Notes
+- Many file generation processes can be disabled via environment variables to reduce the amount of stored data. This is highly recommended for large-scale experiments in the cloud.
+(Smaller experiments and local experiments can retain all files for easier debugging and analysis, especially in the early stages.)
+It is recommended to disable the Plotting callbacks and TensorBoard callbacks. Callbacks are already per default disabled through `Dockerfile`
+  - DISABLE_PLOTTINGCALLBACK=True 
+  - DISABLE_TENSORBOARDCALLBACK=True
+
+---
+
+---
+
+## Results
+
+The `/results` directory serves as the central location for all aggregated experiment results and analysis. It contains consolidated outputs, visualizations, and insights from multiple experiments conducted on a specific dataset.
 
 ---
 

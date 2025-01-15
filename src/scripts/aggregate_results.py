@@ -199,6 +199,9 @@ def main():
     #       -> Parse from the config the dataset and then the current ts_past and ts_future
     #       -> Have other inputs as well to input the dataset_name and ts_past and ts_future
 
+
+    # TODO -> REFACTOR -> Add special parsing for Transformer (full-sequence / fixed-window)
+
     dataset_config = {
         "dataset_name": "exchangerate",
         "ts_past": 30,
