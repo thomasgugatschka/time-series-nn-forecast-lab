@@ -56,9 +56,9 @@ The design of the **Time Series Neural Network Forecast Lab** is guided by the f
 
     ├── time-series-nn-forecast-lab/                # Main project directory
         ├── configs/                                # Configuration files
-            ├── dataset_configs/                    # For different datasets (.yaml files)
-            ├── experiment_configs/                 # Experiment-specific configurations (.yaml files)
-            ├── hyperparameter_search_space.json    # Search space for hyperparameter tuning
+            ├── dataset_configs/                    #   For different datasets (.yaml files)
+            ├── experiment_configs/                 #   Experiment-specific configurations (.yaml files)
+            ├── hyperparameter_search_space.json    #   Search space for hyperparameter tuning
         ├── data/                                   # Contains raw datasets in CSV format
         ├── docs/                                   # Documentation (architecture, sequence, markdown, etc.)
         ├── experiments/                            # Experiment results (e.g., tuning, training, evaluation)
