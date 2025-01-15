@@ -3,6 +3,13 @@ import os
 from itertools import product
 
 
+# TODO -> BUG -> For TCN and CNN the time_series_window is set to full-sequence, but it should be fixed-window (default).
+#         Does not affect the the training or forecasting, since the time_series_window is not used in the model.
+#         Generation should still be logical and, they TCN and CNN are trained with fixed-windows.
+#         The time_series_window is only used for the Transformer model.
+#         COMPLETE REFACTOR of this script is needed.
+
+
 def generate_configurations(base_template, dataset_name, target_root):
     # Define model types and data split variations
     model_types = ["RNN", "LSTM", "GRU", "Transformer", "TCN", "CNN"]
