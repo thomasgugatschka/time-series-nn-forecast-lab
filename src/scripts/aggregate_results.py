@@ -180,6 +180,10 @@ def aggregate_metrics(dataset_name, ts_past, ts_future, output_dir, experiment_d
 
 def main():
 
+    # TODO -> IMPORTANT -> from LITERATURE derive the metrics for the "tex" and "md" files
+    #       -> MAE, MSE, RMSE, MAPE ?
+
+
     # TODO -> REFACTOR -> Change so this works with argparse()
     #       -> As all other scripts use a config file as input
     #       -> Parse from the config the dataset and then the current ts_past and ts_future

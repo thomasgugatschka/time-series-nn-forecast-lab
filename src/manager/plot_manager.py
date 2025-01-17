@@ -524,8 +524,10 @@ class PlotManager:
         plt.axvline(test_end + offset_crop, color="green", linestyle="--", label="Test End")
 
         # Add markers every 10% of the train data
-        train_step = train_end // 10
-        for i in range(1, 10):  # Add markers at 10%, 20%, ..., 90% of train data
+        train_split = int(frac_train * 10)
+
+        train_step = train_end // train_split # 8 since only 80% of the data is left for training (10% val and test)
+        for i in range(1, train_split):  # Add markers at 10%, 20%, ..., 90% of train data
             plt.axvline(i * train_step + offset_crop, color="blue", linestyle=":", label=f"Train {i * 10}%")
 
         plt.title(f"Dataset ({dataset_name}) with Detailed Train, Validation, and Test Splits")
