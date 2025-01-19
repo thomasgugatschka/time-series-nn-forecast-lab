@@ -47,9 +47,17 @@ def get_resource_requirements(config_file):
 
     # Resource settings must match the config file in regard to the CPU.
 
+    # TODO -> REFACTOR -> Have somewhere a MASTER Config which links the BATCH GENERATION with this FILE GENERATION
     resource_settings = {
-        "tcn": {"memory_mib": 32768, "cpu_milli": 16000},
-        "transformer": {"memory_mib": 32768, "cpu_milli": 16000},
+#        "tcn": {"memory_mib": 32768, "cpu_milli": 16000},
+#        "transformer": {"memory_mib": 32768, "cpu_milli": 16000},
+        "tcn": {"memory_mib": 131072, "cpu_milli": 32000},          # 4 x concurrent 8 cores & 32GB
+        "transformer": {"memory_mib": 131072, "cpu_milli": 32000},  # 4 x concurrent 8 cores & 32GB
+        "lstm": {"memory_mib": 65536, "cpu_milli": 32000},          # 4 x concurrent 8 cores & 16GB
+        "gru": {"memory_mib": 65536, "cpu_milli": 32000},           # 4 x concurrent 8 cores & 16GB
+
+        # 64B -> 65536
+        # 128GB -> 131072
     }
 
     for key, value in resource_settings.items():

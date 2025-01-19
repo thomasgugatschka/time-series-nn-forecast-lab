@@ -15,6 +15,8 @@ def generate_configurations(base_template, dataset_name, target_root):
     model_types = ["RNN", "LSTM", "GRU", "Transformer", "TCN", "CNN"]
     data_splits = [round(i * 0.1, 1) for i in range(8, 0, -1)]  # 0.8 to 0.1 in steps of 0.1
 
+
+    # TODO -> REFACTOR -> Have somewhere a MASTER Config which links the BATCH GENERATION with this FILE GENERATION
     # Model-specific configurations
     model_configs = {
         "RNN": {"cpu_per_trial": 8, "max_concurrent_trials": 2},
