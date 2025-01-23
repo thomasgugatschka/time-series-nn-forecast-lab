@@ -51,10 +51,10 @@ def get_resource_requirements(config_file):
     resource_settings = {
 #        "tcn": {"memory_mib": 32768, "cpu_milli": 16000},
 #        "transformer": {"memory_mib": 32768, "cpu_milli": 16000},
-        "tcn": {"memory_mib": 131072, "cpu_milli": 32000},          # 4 x concurrent 8 cores & 32GB
-        "transformer": {"memory_mib": 131072, "cpu_milli": 32000},  # 4 x concurrent 8 cores & 32GB
-        "lstm": {"memory_mib": 65536, "cpu_milli": 32000},          # 4 x concurrent 8 cores & 16GB
-        "gru": {"memory_mib": 65536, "cpu_milli": 32000},           # 4 x concurrent 8 cores & 16GB
+        "tcn": {"memory_mib": 65536, "cpu_milli": 16000},          # 2 x concurrent 8 cores & 32GB
+        "transformer": {"memory_mib": 65536, "cpu_milli": 16000},  # 2 x concurrent 8 cores & 32GB
+        "lstm": {"memory_mib": 32768, "cpu_milli": 16000},          # 2 x concurrent 8 cores & 16GB
+        "gru": {"memory_mib": 32768, "cpu_milli": 16000},           # 2 x concurrent 8 cores & 16GB
 
         # 64B -> 65536
         # 128GB -> 131072
@@ -122,3 +122,10 @@ if __name__ == "__main__":
     main()
 
 # TODO -> REFACTOR -> Script should have input query for the dataset
+
+# TODO -> FEATURE -> Add GENERIC interface to the DataManager to load files from Cloud Storage
+#   Needed so TRAINING, EVALUATION and TUNING (resume) can properly done in the Cloud.
+
+# TODO -> FEATURE -> IF this (above) FEATURE is DONE then the CLOUD BATCH JOB can be changed to SPOT provisioned
+#   SPOT is a lot cheaper but can only be done if RESUMING is possible, and this is only possible if the DataManager is
+#   able to load the files from the Cloud Storage for tuning (=restore the state of the experiment).

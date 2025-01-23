@@ -78,8 +78,8 @@ def main():
 
     # --- SETTINGS ---
     operation = "training"  # tuning, training, evaluation, visualizeDS
-    location = "script" # file, script
-    prefix_file = "experiment_configs/exchangerate/"
+    location = "file" # file, script
+    prefix_file = "experiment_configs/weatherstation/"
     # ----------------
 
     # Generate timestamped tracking file name

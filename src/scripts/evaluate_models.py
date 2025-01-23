@@ -338,6 +338,10 @@ def convert_to_python_types(data):
 def main():
     # Load configurations and paths
     args = parse_args()
+
+    # TODO -> FEATURE -> Add GENERIC interface to the DataManager to load files from Cloud Storage
+    #   Needed so TRAINING, EVALUATION and TUNING (resume) can properly done in the Cloud.
+
     config_manager = ConfigManager(args.config_path)
     data_manager = DataManager(config_manager)
     experiment_manager = ExperimentManager(config_manager)
@@ -365,6 +369,9 @@ def main():
     trained_models_path = path_manager.get_path("experiment_trained_models")
     all_metrics = []
     model_metadata = []
+
+    # TODO -> FEATURE -> Add to parse_args() option to specify the model to evaluate (similar to train_models.py)
+    #   So e.g. only train top_N models or only train a specific model.
 
     for model_path in trained_models_path.glob("*.pt"):
         model_name = model_path.stem

@@ -148,6 +148,9 @@ def objective(hyperparameter_config, model_type, dataset_config, data_manager, p
 def main():
     args = parse_args()
 
+    # TODO -> FEATURE -> Add GENERIC interface to the DataManager to load files from Cloud Storage
+    #   Needed so TRAINING, EVALUATION and TUNING (resume) can properly done in the Cloud.
+
     config_manager = ConfigManager(args.config_path)
     data_manager = DataManager(config_manager)
     env_manager = EnvManager()
