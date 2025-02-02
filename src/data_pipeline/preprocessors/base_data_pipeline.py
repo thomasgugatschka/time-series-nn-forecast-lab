@@ -105,6 +105,8 @@ class BaseDataPipeline(ABC):
 
         Returns:
             tuple: Arrays of input sequences (x) and output sequences (y).
+            :param ts_future:
+            :param ts_past:
             :param output_sequence:
             :param input_sequences:
         """

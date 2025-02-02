@@ -51,38 +51,41 @@ class FixedDataSplitter:
             dict: Dictionary containing split arrays for train, validation, and test sets.
         """
         num_samples = x.shape[0]
-        total_frac = self.frac_train + self.frac_val + self.frac_test
-        effective_samples = int(total_frac * num_samples)
 
-        # Handle unused data based on the position
-        if total_frac < 1.0:
-            unused_samples = num_samples - int(total_frac * num_samples)
+        # Ensure the fractions sum up to 1.0 or less
+        total_frac = self.frac_train + self.frac_val + self.frac_test
+        if total_frac > 1.0:
+            raise ValueError("Total of frac_train, frac_val, and frac_test exceeds 1.0.")
+
+        # Compute absolute split sizes based on full dataset
+        num_train = int(self.frac_train * num_samples)
+        num_val = int(self.frac_val * num_samples)
+        num_test = int(self.frac_test * num_samples)
+
+        logger.info(f"total_frac: {total_frac} | frac_train: {self.frac_train} | frac_val: {self.frac_val} | frac_test: {self.frac_test}")
+        logger.info(f"Number of samples: {num_samples} | Train({num_train}), Val({num_val}), Test({num_test})")
+
+        # Ensure the split sum is within the available sample count
+        used_samples = num_train + num_val + num_test
+        unused_samples = num_samples - used_samples
+
+        if unused_samples > 0:
+            logger.info(f"Trimmed {unused_samples} samples from the {self.unused_split} due to fractional mismatch.")
             if self.unused_split == "beginning":
                 x = x[unused_samples:]  # Trim from the beginning
                 if y is not None:
                     y = y[unused_samples:]
             elif self.unused_split == "end":
-                x = x[:effective_samples]  # Trim from the end
+                x = x[:used_samples]  # Trim from the end
                 if y is not None:
-                    y = y[:effective_samples]
+                    y = y[:used_samples]
             else:
                 raise ValueError("Invalid value for 'unused_split'. Choose between 'beginning' or 'end'.")
 
-            logger.info(f"Trimmed {unused_samples} samples from the {self.unused_split} due to fractional mismatch.")
-
-        num_train = int(self.frac_train * effective_samples)
-        num_val = int(self.frac_val * effective_samples)
-        num_test = effective_samples - num_train - num_val
-
-        # Split the features into train/validate/test
+        # Perform the split using the corrected numbers
         x_arr_train = x[:num_train]
         x_arr_val = x[num_train:num_train + num_val]
         x_arr_test = x[num_train + num_val:num_train + num_val + num_test]
-
-        if num_train <= 0 or num_val <= 0 or num_test <= 0:
-            raise ValueError("One or more splits are empty due to insufficient data. Adjust your fractions.")
-
-        logger.info(f"Features split: Train({num_train}), Val({num_val}), Test({num_test})")
 
         split_data = {
             "x_arr_train": x_arr_train,
@@ -90,13 +93,10 @@ class FixedDataSplitter:
             "x_arr_test": x_arr_test
         }
 
-        # Split the labels if provided
         if y is not None:
             y_arr_train = y[:num_train]
             y_arr_val = y[num_train:num_train + num_val]
             y_arr_test = y[num_train + num_val:num_train + num_val + num_test]
-
-            logger.info("Labels split into train, validation, and test sets.")
 
             split_data.update({
                 "y_arr_train": y_arr_train,
@@ -104,5 +104,6 @@ class FixedDataSplitter:
                 "y_arr_test": y_arr_test
             })
 
-        return split_data
+        logger.info(f"Features split: Train({num_train}), Val({num_val}), Test({num_test})")
 
+        return split_data
