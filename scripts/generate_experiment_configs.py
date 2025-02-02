@@ -19,12 +19,12 @@ def generate_configurations(base_template, dataset_name, target_root):
     # TODO -> REFACTOR -> Have somewhere a MASTER Config which links the BATCH GENERATION with this FILE GENERATION
     # Model-specific configurations
     model_configs = {
-        "RNN": {"cpu_per_trial": 8, "max_concurrent_trials": 2},
-        "LSTM": {"cpu_per_trial": 8, "max_concurrent_trials": 2},
-        "GRU": {"cpu_per_trial": 8, "max_concurrent_trials": 2},
-        "Transformer": {"cpu_per_trial": 16, "max_concurrent_trials": 1, "time_series_window": ["fixed-window", "full-sequence"]},
-        "TCN": {"cpu_per_trial": 16, "max_concurrent_trials": 1},
-        "CNN": {"cpu_per_trial": 8, "max_concurrent_trials": 2},
+        "RNN": {"cpu_per_trial": 8, "max_concurrent_trials": 4},
+        "LSTM": {"cpu_per_trial": 8, "max_concurrent_trials": 4},
+        "GRU": {"cpu_per_trial": 8, "max_concurrent_trials": 4},
+        "Transformer": {"cpu_per_trial": 8, "max_concurrent_trials": 4, "time_series_window": ["fixed-window", "full-sequence"]},
+        "TCN": {"cpu_per_trial": 8, "max_concurrent_trials": 4},
+        "CNN": {"cpu_per_trial": 8, "max_concurrent_trials": 4},
     }
 
     # Ensure target directory exists
@@ -92,10 +92,10 @@ def main():
     base_template = {
         "model_type": "",  # Placeholder, will be set dynamically
         "dataset": "",  # Placeholder, will be set dynamically
-        "num_samples": 50,
+        "num_samples": 75,
         "cpu_per_trial": 8,  # Default value
         "gpu_per_trial": 0,
-        "max_concurrent_trials": 2,  # Default value
+        "max_concurrent_trials": 4,  # Default value
         "trial_params": {
             "max_epochs": 100,
             "grace_period": 5,

@@ -8,10 +8,10 @@
     },
     "training_params": {
       "batch_size": [16, 32, 64, 128],
-      "learning_rate": [1e-3, 1e-2, "log"],
+      "learning_rate": [1e-4, 1e-2, "log"],
       "epochs": [20, 100],
       "optimizer": ["Adam", "RMSprop"],
-      "loss_function": ["MSELoss", "MAELoss", "HuberLoss"]
+      "loss_function": ["HuberLoss"]
     }
   },
   "GRU": {
@@ -22,10 +22,10 @@
     },
     "training_params": {
       "batch_size": [16, 32, 64, 128],
-      "learning_rate": [1e-3, 1e-2, "log"],
+      "learning_rate": [1e-4, 1e-2, "log"],
       "epochs": [20, 100],
-      "optimizer": ["Adam", "RMSprop"],
-      "loss_function": ["MSELoss", "MAELoss", "HuberLoss"]
+      "optimizer": ["Adam", "RMSprop", "AdamW"],
+      "loss_function": ["HuberLoss"]
     }
   },
   "LSTM": {
@@ -36,10 +36,10 @@
     },
     "training_params": {
       "batch_size": [16, 32, 64, 128],
-      "learning_rate": [1e-3, 1e-2, "log"],
+      "learning_rate": [1e-4, 1e-2, "log"],
       "epochs": [20, 100],
       "optimizer": ["Adam", "RMSprop"],
-      "loss_function": ["MSELoss", "MAELoss", "HuberLoss"]
+      "loss_function": ["HuberLoss"]
     }
   },
   "BiLSTM": {
@@ -50,7 +50,7 @@
     },
     "training_params": {
       "batch_size": [16, 32, 64, 128],
-      "learning_rate": [1e-3, 1e-2, "log"],
+      "learning_rate": [1e-4, 1e-2, "log"],
       "epochs": [20, 100],
       "optimizer": ["Adam", "RMSprop"],
       "loss_function": ["MSELoss", "MAELoss", "HuberLoss"]
@@ -60,16 +60,16 @@
     "model_params": {
       "embed_dim": [32, 64, 128, 256],
       "num_heads": [2, 4, 8],
-      "num_layers": [2, 10],
+      "num_layers": [2, 8],
       "forward_dim": [128, 256, 512],
-      "dropout": [0.1, 0.5]
+      "dropout": [0.01, 0.5]
     },
     "training_params": {
       "batch_size": [16, 32, 64, 128],
-      "learning_rate": [1e-3, 1e-2, "log"],
-      "epochs": [20, 100],
-      "optimizer": ["Adam", "RMSprop", "AdamW"],
-      "loss_function": ["MSELoss", "MAELoss", "HuberLoss"]
+      "learning_rate": [1e-4, 1e-2, "log"],
+      "epochs": [10, 100],
+      "optimizer": ["AdamW"],
+      "loss_function": ["HuberLoss"]
     }
   },
   "TCN": {
@@ -82,10 +82,10 @@
     },
     "training_params": {
       "batch_size": [16, 32, 64, 128],
-      "learning_rate": [1e-3, 1e-2, "log"],
+      "learning_rate": [1e-4, 1e-2, "log"],
       "epochs": [20, 100],
-      "optimizer": ["Adam", "RMSprop"],
-      "loss_function": ["MSELoss", "MAELoss", "HuberLoss"]
+      "optimizer": ["Adam", "AdamW"],
+      "loss_function": ["HuberLoss"]
     }
   },
   "CNN": {
@@ -97,10 +97,10 @@
     },
     "training_params": {
         "batch_size": [16, 32, 64, 128],
-        "learning_rate": [1e-3, 1e-2, "log"],
+        "learning_rate": [1e-4, 1e-2, "log"],
         "epochs": [20, 100],
-        "optimizer": ["Adam", "RMSprop", "SGD"],
-        "loss_function": ["MSELoss", "MAELoss", "HuberLoss"]
+        "optimizer": ["Adam", "SGD"],
+        "loss_function": ["HuberLoss"]
     }
   }
 }

@@ -1,4 +1,4 @@
-model_type: "LSTM"            # Implemented Models
+model_type: "CNN"            # Implemented Models
 dataset: "weatherstation"
 #dataset: "illness"    # Available Datasets from data folder
 num_samples: 6               # Number of trials to run during hyperparameter tuning
@@ -13,7 +13,7 @@ trial_params:
 
 data_params:
   data_split:
-    frac_train: 0.8
+    frac_train: 0.2
     frac_val: 0.1
     frac_test: 0.1
     unused_split: "beginning"  # "beginning" / "end" | if split does not add to 1 -> decide if unused data is at beginning or end of DS
