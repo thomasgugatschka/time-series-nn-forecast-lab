@@ -77,7 +77,7 @@ def main():
     # Define the operation manually (tuning, training, or evaluation)
 
     # --- SETTINGS ---
-    operation = "evaluation"  # tuning, training, evaluation, visualizeDS
+    operation = "training"  # tuning, training, evaluation, visualizeDS
     location = "file" # file, script
     prefix_file = "experiment_configs/weatherstation/"
     # ----------------
@@ -115,7 +115,7 @@ def main():
     # Add optional parameter for training
     optional_params = []
     if operation == "training":
-        optional_params.append("--num_models 3")
+        optional_params.append("--num_models 2")
 
     # Run the selected script for each configuration
     for config in config_list:

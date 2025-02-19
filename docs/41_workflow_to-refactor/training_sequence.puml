@@ -1,0 +1,46 @@
+@startuml
+
+title Training Sequence Diagram
+
+actor "User" as User
+
+participant "Main Script" as Main
+participant "ConfigManager" as ConfigManager
+participant "ExperimentManager" as ExperimentManager
+participant "DataManager" as DataManager
+participant "Model" as Model
+participant "CallbackManager" as CallbackManager
+participant "TrainingPipelineBuilder" as PipelineBuilder
+participant "TrainingPipeline" as TrainingPipeline
+
+
+
+User -> Main: Start Training
+Main -> Main: parse_args()
+Main -> ConfigManager: Load Configurations
+Main -> ExperimentManager: Load Hyperparameters
+
+loop For each configuration
+    Main -> DataManager: Preprocess Data
+    Main -> Model: Initialize Model
+    Main -> Model: Get Optimizer
+    Main -> Model: Get Loss Function
+    Main -> Model: Wrap Model
+
+    Main -> CallbackManager: Initialize Callbacks
+
+
+    Main -> PipelineBuilder: Build Training Pipeline
+    PipelineBuilder -> TrainingPipeline: Create Pipeline Instance
+
+    loop For Each Epoch
+      TrainingPipeline -> TrainingPipeline: Run Training Loop
+    end
+
+    TrainingPipeline -> ExperimentManager: Save Trained Model
+end
+
+
+Main -> User: Completion
+
+@enduml

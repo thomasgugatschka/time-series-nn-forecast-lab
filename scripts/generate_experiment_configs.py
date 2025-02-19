@@ -92,7 +92,7 @@ def main():
     base_template = {
         "model_type": "",  # Placeholder, will be set dynamically
         "dataset": "",  # Placeholder, will be set dynamically
-        "num_samples": 75,
+        "num_samples": 50,
         "cpu_per_trial": 8,  # Default value
         "gpu_per_trial": 0,
         "max_concurrent_trials": 4,  # Default value

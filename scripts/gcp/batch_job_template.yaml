@@ -1,5 +1,5 @@
 name: hyperparameter-tuning-job-config
-priority: 50
+priority: 30
 
 taskGroups:
   - taskSpec:
@@ -9,9 +9,11 @@ taskGroups:
             commands:
               - "python"
               - "-m"
-              - "src.scripts.hyperparameter_tuning"
+              - "src.scripts.train_models"      # TODO -> should be automatically set
               - "--config_path"
               - "{{CONFIG_PATH}}"
+              - "--num_models"                # TODO additonal parameters should also be automatically be set
+              - "2"
       maxRetryCount: 1
       computeResource:
         cpuMilli: {{CPU_MILLI}}  # Dynamic CPU allocation

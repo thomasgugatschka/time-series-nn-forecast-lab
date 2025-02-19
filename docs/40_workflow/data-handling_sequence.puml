@@ -2,57 +2,37 @@
 
 title Sequence Diagram for Data Handling
 
-participant "User Script" as User
+participant "Script" as User
 participant "DataManager" as DM
 participant "RawDataLoader" as RDL
 participant "DataPipelineFactory" as DPF
-participant "GenericDataPipeline" as GenericPipeline
-participant "TransformerDataPipeline" as TFMPipeline
+participant "DataPipeline" as Pipeline
+participant "DataTransformation" as DT
 participant "DataSplitter" as DS
 participant "DataLoaderCreator" as DLC
-participant "DataTransformation" as DT
+
 
 User -> DM: Request Data Preparation
 DM -> RDL: Load Raw Data
 RDL -> DM: Return Raw Data
 User -> DM: Request Data Preprocessing
 DM -> DPF: Create Data Pipeline (based on Model Type)
-alt Generic Pipeline
-    DPF -> GenericPipeline: Create Generic Data Pipeline
-    GenericPipeline -> DM: Pipeline Instance
-else Transformer Pipeline
-    DPF -> TFMPipeline: Create Transformer Data Pipeline
-    TFMPipeline -> DM: Pipeline Instance
-end
 
-alt Generic Pipeline
-    DM -> GenericPipeline: Preprocess Data
-    GenericPipeline -> GenericPipeline: Crop
-    GenericPipeline -> DT: Normalize
-    GenericPipeline <- DT: Normalized Data
-    GenericPipeline -> GenericPipeline: Calculate Features
-    GenericPipeline -> GenericPipeline: Generate TimeSeries Windows
-    GenericPipeline -> DS: Split Data
-    DS -> GenericPipeline: Return Data
-    GenericPipeline -> GenericPipeline: Convert to Tensors
-    DM <- GenericPipeline: Return Data
-else Transformer Pipeline
-    DM -> TFMPipeline: Preprocess Data
-    TFMPipeline -> TFMPipeline: Crop
-    TFMPipeline -> DT: Normalize
-    DT -> TFMPipeline: Normalized Data
-    TFMPipeline -> TFMPipeline: Calculate Features
-    alt fixed-window
-        TFMPipeline -> TFMPipeline: Generate TimeSeries Windows
-    else full-sequence
-        TFMPipeline -> TFMPipeline: Generate Full Sequence
-    end
-    TFMPipeline -> DS: Split Data
-    DS -> TFMPipeline: Return Data
-    TFMPipeline -> TFMPipeline: Add Positional Encoding
-    TFMPipeline -> TFMPipeline: Convert to Tensors
-    DM <- TFMPipeline: Return Data
-end
+DPF -> Pipeline: Create Pipeline
+Pipeline -> DM: Pipeline Instance
+
+
+DM -> Pipeline: Preprocess Data
+Pipeline -> Pipeline: Crop
+Pipeline -> DT: Normalize
+Pipeline <- DT: Return Normalized Data
+Pipeline -> Pipeline: Calculate Features
+Pipeline -> Pipeline: Generate TimeSeries Windows
+Pipeline -> DS: Split Data
+DS -> Pipeline: Return Split Data
+Pipeline -> Pipeline: Convert to Tensors
+DM <- Pipeline: Return Data
+
 User <- DM: Return Preprocessed Data
 
 User -> User: Read Configuration

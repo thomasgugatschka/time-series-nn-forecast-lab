@@ -30,8 +30,11 @@ experiments/**
 # Allow the .gitkeep file
 !experiments/.gitkeep
 
-/scripts/
+# Allow specific subfolders in experiments
+#!experiments/weatherstation/TCN_weatherstation_168_24_0.30_0.10_0.10_20250202-202941/**
+#!experiments/weatherstation/TCN_weatherstation_168_24_0.60_0.10_0.10_20250203-031139/**
 
+/scripts/
 /results/
 
 # IMPROVEMENT

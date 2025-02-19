@@ -2,7 +2,7 @@
 
 title Training-Loop Sequence
 
-actor "TrainingPipeline" as TP
+participant "TrainingPipeline" as TP
 participant "CallbackManager" as CBM
 participant "Wrapper" as WRAP
 participant "Train DataLoader" as TrainLoader

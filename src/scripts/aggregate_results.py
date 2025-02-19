@@ -194,9 +194,9 @@ def main():
     # TODO -> REFACTOR -> Build Path to Plots in a more generic way -> use ExperimentManager or create a new ResultManager?
 
     dataset_config = {
-        "dataset_name": "exchangerate",
-        "ts_past": 30,
-        "ts_future": 7,
+        "dataset_name": "weatherstation",
+        "ts_past": 168,
+        "ts_future": 24,
     }
 
     output_dir = path_manager.get_path("result_dir")

@@ -49,7 +49,7 @@ def get_resource_requirements(config_file):
 
     # TODO -> REFACTOR -> Have somewhere a MASTER Config which links the BATCH GENERATION with this FILE GENERATION
     resource_settings = {
-        "tcn":          {"memory_mib": 131072, "cpu_milli": 32000},
+        "tcn":          {"memory_mib": 131072, "cpu_milli": 16000},
         "transformer":  {"memory_mib": 131072, "cpu_milli": 32000},
     }
 

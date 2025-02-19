@@ -1,0 +1,61 @@
+@startuml
+title Sequence Diagram for Complete Workflow - Simple
+
+actor User
+
+participant "Script" as Local
+participant "Data Manager" as DataMngr
+participant "Hyperparameter Tuning" as HyperTuning
+participant "Model Training" as Train
+participant "Model Evaluation" as Eval
+participant "Experiment Storage" as Storage
+
+User -> Local : Import Dataset
+User -> Local : Define Configurations
+
+
+User -> Local : Hyperparameter Tuning
+loop tuning
+    Local -> HyperTuning : Tune Model
+    HyperTuning -> DataMngr : Preprocessing
+    DataMngr -> HyperTuning : Preprocessed Data
+    HyperTuning -> HyperTuning : Define Hyperparameter Search Space
+    loop trials
+        HyperTuning -> HyperTuning : Run Tuning Trial
+    end
+    HyperTuning -> Storage : Store Best Hyperparameters
+end
+
+User -> Local : Train Model(s)
+loop training
+    Local -> Train : Train Model
+    Train -> Storage : Get Best Hyperparameters
+    Train -> DataMngr : Preprocessing
+    DataMngr -> Train : Preprocessed Data
+    loop top_n
+        Train -> Train : Train
+        Train -> Storage : Store Trained Model
+    end
+end
+
+User -> Local : Evaluate Model(s)
+loop evaluation
+    Local -> Eval : Evaluate Model
+    Eval -> Storage : Get Trained Models
+    Eval -> DataMngr : Preprocessing
+    DataMngr -> Eval : Preprocessed Data
+    Eval -> Eval : Load Models
+    Eval -> Eval : Evaluate on Test Batches
+    Eval -> Eval : Calculate & Aggregate Metrics
+    Eval -> Storage : Store Evaluation Results
+end
+
+User -> Local : Aggregate Results
+Local -> Storage : Get Evaluation Results
+Local <- Storage : Return Evaluation Results
+Local -> Local : Compare Metrics Across Models
+
+User <- Local : Final Results
+
+@enduml
+

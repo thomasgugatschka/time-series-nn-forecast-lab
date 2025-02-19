@@ -1,0 +1,52 @@
+@startuml
+
+title Hyperparameter Tuning Sequence Diagram - Simple
+
+
+actor User
+participant "Main" as Main
+participant "ConfigManager" as ConfigManager
+participant "DataManager" as DataManager
+participant "StrategyFactory" as StrategyFactory
+participant "Ray Tune" as RayTune
+participant "ExperimentManager" as ExperimentManager
+participant "Objective Function" as Objective
+participant "Model" as Model
+participant "CallbackManager" as CallbackManager
+participant "TrainingPipelineBuilder" as Builder
+participant "TrainingPipeline" as TrainingPipeline
+
+
+User -> Main: Run Tuning
+Main -> ConfigManager: Load Configurations
+
+Main -> StrategyFactory : Create Search and Scheduler Strategies
+Main -> RayTune: Perform Hyperparameter Tuning (tune.run)
+
+
+loop For each trial (Ray Tune Iteration)
+  RayTune -> Objective: Call Objective Function
+
+  Objective -> DataManager: Preprocess
+  Objective <- DataManager: Preprocessed Data
+
+  Objective -> Model: Create Model
+  Objective -> CallbackManager: Initialize Callbacks
+
+  Objective -> Builder: Create TrainingPipeline
+
+  Builder -> Objective: Return TrainingPipeline
+  Objective -> TrainingPipeline: Run Training
+    loop For Each Epoch
+      TrainingPipeline -> TrainingPipeline: Run Training Loop
+    end
+
+  Objective -> RayTune: Trial Results
+end
+
+RayTune -> Main: Hyperparameter Search Results
+Main -> ExperimentManager: Save Tuning Results
+
+Main -> User: Completion Tuning
+
+@enduml
