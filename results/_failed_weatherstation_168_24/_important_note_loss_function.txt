@@ -1,0 +1,4 @@
+
+Both had only MSE Loss function, but not MAE and Huber Loss functions.
+RNN config 0.8-0.1-0.1
+RNN config 0.5-0.1-0.1

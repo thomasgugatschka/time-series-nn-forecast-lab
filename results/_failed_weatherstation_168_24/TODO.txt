@@ -1,0 +1,9 @@
+
+CHECK IF ALL TRAINED MODELS are have actual some degree of PERFORMANCE...
+-> Transformer model does not have it.. only the top one does...
+
+
+
+RNN 0.7 -> model 2  -> looks strange -> check eval
+
+Transformer 0.1 -> all models did not work

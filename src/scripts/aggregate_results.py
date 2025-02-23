@@ -36,25 +36,68 @@ def parse_experiment_folder_name(folder_name):
         "start_date": start_date,
     }
 
+
+def setup_plot_style():
+    plt.rcParams['figure.figsize'] = (14, 8)
+    plt.rcParams['axes.titlesize'] = 16
+    plt.rcParams['axes.labelsize'] = 14
+    plt.rcParams['xtick.labelsize'] = 12
+    plt.rcParams['ytick.labelsize'] = 12
+    plt.rcParams['legend.fontsize'] = 12
+    plt.rcParams['lines.linewidth'] = 2.5
+
+
+# Define custom colors for each model
+MODEL_COLORS = {
+    "CNN": "#1f77b4",  # Blue
+    "GRU": "#ff7f0e",  # Orange
+    "LSTM": "#2ca02c",  # Green
+    "RNN": "#d62728",  # Red
+    "TCN": "#9467bd",  # Purple
+    "Transformer FS": "#8c564b",  # Brown (Full-Sequence)
+    "Transformer FW": "#e377c2",  # Pink (Fixed-Window)
+}
+
+def format_model_name(model):
+    """Format model names for legend:
+    - Remove '-full-sequence' and '-fixed-window' for all except Transformer
+    - Replace '-full-sequence' with 'FS' and '-fixed-window' with 'FW' for Transformer
+    """
+    if "transformer" in model.lower():
+        return model.replace("-full-sequence", " FS").replace("-fixed-window", " FW")
+    return model.replace("-full-sequence", "").replace("-fixed-window", "")
+
+def format_title(metric):
+    """Format title: Uppercase key metric parts"""
+    metric = metric.replace('_', ' ').title()
+    words = metric.split()
+    uppercase_words = {"Mae", "Mse", "Rmse", "Mape", "Corr"}  # Define words to be uppercase
+    formatted_words = [word.upper() if word in uppercase_words else word for word in words]
+    return " ".join(formatted_words)
+
 def plot_all_metrics(condensed_df, output_path, dataset_name):
+
+    setup_plot_style()
+
     """Generate and save plots for all metrics by train split."""
     metrics = [col for col in condensed_df.columns if col.startswith("normalized_") or col.startswith("denormalized_")]
 
     for metric in metrics:
-        plt.figure(figsize=(10, 6))
-
         for model in condensed_df["model_identifier"].unique():
+            formatted_model = format_model_name(model)  # Format model name
             model_data = condensed_df[condensed_df["model_identifier"] == model]
+
             plt.plot(
                 model_data["train_split"],
                 model_data[metric],
                 marker="o",
-                label=model
+                label=formatted_model,
+                color=MODEL_COLORS.get(formatted_model, "#7f7f7f")  # Default to grey if not in dictionary
             )
 
-        plt.title(f"{metric.replace('_', ' ').title()} by Train Split ({dataset_name})")
+        plt.title(f"{format_title(metric)} by Train Split ({dataset_name})")
         plt.xlabel("Train Split")
-        plt.ylabel(metric.replace('_', ' ').title())
+        plt.ylabel(format_title(metric))
         plt.legend()
         plt.grid(True)
         plt.tight_layout()
@@ -62,6 +105,8 @@ def plot_all_metrics(condensed_df, output_path, dataset_name):
         metric_plot_path = output_path / f"{metric}_by_train_split.png"
         plt.savefig(metric_plot_path)
         plt.close()
+
+
 
 def aggregate_metrics(dataset_name, ts_past, ts_future, output_dir, experiment_dir):
     """
