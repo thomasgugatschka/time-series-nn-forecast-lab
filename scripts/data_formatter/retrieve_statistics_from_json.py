@@ -4,13 +4,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
+#ds = "weatherstation_168_24"
+#ds = "exchangerate_30_7"
+#ds = "ETTh_96_24"
+ds = "illness_96_24"
 
 # Load JSON file
-file_path =  "C:\\Users\\Thomas\\localgit\\time-series-nn-forecast-lab\\results\\weatherstation_168_24\\expanded_results.json"
+file_path =  "C:\\Users\\Thomas\\localgit\\time-series-nn-forecast-lab\\results\\" + ds + "\\expanded_results.json"
 
-csv_output_path = "C:\\Users\\Thomas\\localgit\\time-series-nn-forecast-lab\\results\\weatherstation_168_24\\formatted\\experiment_results.csv"
-latex_output_path = "C:\\Users\\Thomas\\localgit\\time-series-nn-forecast-lab\\results\\weatherstation_168_24\\formatted\\experiment_results.tex"
-plot_path =  "C:\\Users\\Thomas\\localgit\\time-series-nn-forecast-lab\\results\\weatherstation_168_24\\formatted\\"
+csv_output_path = "C:\\Users\\Thomas\\localgit\\time-series-nn-forecast-lab\\results\\" + ds + "\\formatted\\experiment_results.csv"
+latex_output_path = "C:\\Users\\Thomas\\localgit\\time-series-nn-forecast-lab\\results\\" + ds + "\\formatted\\experiment_results.tex"
+plot_path =  "C:\\Users\\Thomas\\localgit\\time-series-nn-forecast-lab\\results\\" + ds + "\\formatted\\"
 
 with open(file_path, "r") as f:
     data = json.load(f)

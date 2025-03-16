@@ -1,8 +1,15 @@
 import json
 
+
+#ds = "weatherstation_168_24"
+#ds = "exchangerate_30_7"
+#ds = "ETTh_96_24"
+ds = "illness_96_24"
+
+
 # Load the JSON data
-input_file = "C:\\Users\\Thomas\\localgit\\time-series-nn-forecast-lab\\results\\weatherstation_168_24\\condensed_results.json"
-output_tex_file = "C:\\Users\\Thomas\\localgit\\time-series-nn-forecast-lab\\results\\weatherstation_168_24\\formatted\\condensed_results_formatted.tex"
+input_file = "C:\\Users\\Thomas\\localgit\\time-series-nn-forecast-lab\\results\\" + ds + "\\condensed_results.json"
+output_tex_file = "C:\\Users\\Thomas\\localgit\\time-series-nn-forecast-lab\\results\\" + ds + "\\formatted\\condensed_results_formatted.tex"
 
 with open(input_file, "r") as f:
     data = json.load(f)

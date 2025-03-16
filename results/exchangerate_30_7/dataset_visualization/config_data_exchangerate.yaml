@@ -1,0 +1,19 @@
+columns_to_drop:
+- date
+crop_end: null
+crop_start: null
+feature_forecasted: 7
+feature_list:
+- '0'
+- '1'
+- '2'
+- '3'
+- '4'
+- '5'
+- '6'
+- OT
+source_forecasted: 0
+sources:
+- exchange_rate
+ts_future: 7
+ts_past: 30

@@ -239,8 +239,8 @@ def main():
     # TODO -> REFACTOR -> Build Path to Plots in a more generic way -> use ExperimentManager or create a new ResultManager?
 
     dataset_config = {
-        "dataset_name": "weatherstation",
-        "ts_past": 168,
+        "dataset_name": "illness",
+        "ts_past": 96,
         "ts_future": 24,
     }
 

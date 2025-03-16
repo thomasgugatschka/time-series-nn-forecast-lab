@@ -1,0 +1,19 @@
+cpu_per_trial: 8
+data_params:
+  data_split:
+    frac_test: 0.1
+    frac_train: 0.3
+    frac_val: 0.1
+    unused_split: beginning
+  time_series_window: fixed-window
+dataset: exchangerate
+gpu_per_trial: 0
+max_concurrent_trials: 2
+model_type: LSTM
+num_samples: 100
+scheduler: asha
+search_algorithm: optuna
+trial_params:
+  grace_period: 5
+  max_epochs: 75
+  reduction_factor: 2

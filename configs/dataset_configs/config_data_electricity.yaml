@@ -322,11 +322,11 @@ feature_list:
   - '317'
   - '318'
   - '319'
-  - '0T'
-feature_forecasted: 0
+  - 'OT'
+feature_forecasted: 320
 columns_to_drop:
   - date
 crop_start: null
 crop_end: null
-ts_past: 120
-ts_future: 24
+ts_past: 240    # 10 days
+ts_future: 96   # 4 days

@@ -49,19 +49,21 @@ def get_resource_requirements(config_file):
 
     # TODO -> REFACTOR -> Have somewhere a MASTER Config which links the BATCH GENERATION with this FILE GENERATION
     resource_settings = {
-        "tcn":          {"memory_mib": 131072, "cpu_milli": 16000},
-        "transformer":  {"memory_mib": 131072, "cpu_milli": 32000},
+#        "tcn":          {"memory_mib": 131072, "cpu_milli": 32000},
+#        "transformer":  {"memory_mib": 131072, "cpu_milli": 32000},
+        "tcn": {"memory_mib": 65536, "cpu_milli": 16000},
+        "transformer": {"memory_mib": 65536, "cpu_milli": 16000},
     }
 
     for key, value in resource_settings.items():
         if key in config_file:
             return value
-    return {"memory_mib": 65536, "cpu_milli": 32000}  # Default resource settings
+    return {"memory_mib": 65536, "cpu_milli": 16000}  # Default resource settings
 
 
 def main():
     # Define paths and parameters
-    datasets = ["weatherstation"]  # List of datasets
+    datasets = ["illness"]  # List of datasets
     target_root = "../../configs/experiment_configs"  # Root directory for configurations
     batch_template_path = "batch_job_template.yaml"  # Path to the batch job YAML template
     batch_output_dir = "batch_jobs"  # Directory to store batch job YAML files

@@ -9,10 +9,10 @@ feature_list:
   - 'ILITOTAL'
   - 'NUM. OF PROVIDERS'
   - '0T'
-feature_forecasted: 0
+feature_forecasted: 4
 columns_to_drop:
   - 'date'
 crop_start: null
 crop_end: null
-ts_past: 52 # 52 weeks / 1 year  | OPTION: 13 weeks / 1 quarter
-ts_future: 13 # 13 weeks / 1 quarter | OPTION: 4 weeks / 1 month
+ts_past: 96 # 52 weeks / 1 year  | OPTION: 13 weeks / 1 quarter
+ts_future: 24 # 13 weeks / 1 quarter | OPTION: 4 weeks / 1 month

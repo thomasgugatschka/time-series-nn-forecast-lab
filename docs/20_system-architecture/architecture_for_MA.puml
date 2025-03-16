@@ -1,0 +1,89 @@
+@startuml
+
+package "Experiment Management" {
+  class ExperimentManager
+  class PathManager
+  class FileManager
+}
+
+package "Configuration & Environment Management" {
+  class ConfigManager
+  class EnvManager
+}
+
+package "Data Handling" {
+  class DataManager
+  class DataPipeline
+  class DatasetVisualizer
+}
+
+package "Model Training & Tuning" {
+  class TrainingPipeline
+  class TrainingPipelineBuilder
+  class HyperparameterManager
+  class HyperparameterTuning
+}
+
+package "Model & Wrapper Management" {
+  class ModelFactory
+  class WrapperFactory
+  class BaseModel
+  class BaseWrapper
+}
+
+package "Evaluation & Metrics" {
+  class ModelEvaluation
+  class MetricsUtility
+  class PlotManager
+}
+
+package "Callbacks & Logging" {
+  class CallbackManager
+}
+
+package "Experiment Execution" {
+  class HyperparameterTuningScript
+  class TrainModelsScript
+  class EvaluateModelsScript
+  class AggregateResultsScript
+}
+
+ExperimentManager --> ConfigManager : Uses
+PathManager --> ConfigManager : Uses
+FileManager --> PathManager : Manages
+
+DataManager --> ConfigManager : Uses
+DataPipeline --> DataManager : Processes
+DatasetVisualizer --> DataManager : Visualizes
+
+TrainingPipeline --> DataManager : Loads Data
+TrainingPipeline --> ModelFactory : Uses
+TrainingPipeline --> WrapperFactory : Uses
+TrainingPipelineBuilder --> TrainingPipeline : Builds
+HyperparameterManager --> TrainingPipeline : Manages Params
+HyperparameterTuning --> TrainingPipeline : Optimizes
+
+ModelEvaluation --> MetricsUtility : Computes Metrics
+ModelEvaluation --> PlotManager : Generates Plots
+
+CallbackManager --> TrainingPipeline : Handles Events
+CallbackManager --> PlotManager : Logs Results
+
+ExperimentExecution --> HyperparameterTuningScript
+ExperimentExecution --> TrainModelsScript
+ExperimentExecution --> EvaluateModelsScript
+ExperimentExecution --> AggregateResultsScript
+
+HyperparameterTuningScript --> HyperparameterTuning
+TrainModelsScript --> TrainingPipeline
+EvaluateModelsScript --> ModelEvaluation
+AggregateResultsScript --> MetricsUtility
+
+' Experiment- und Result-Ordner als Packages hinzufügen (ohne Linien)
+package "Experiment Folder" {
+}
+
+package "Result Folder" {
+}
+
+@enduml

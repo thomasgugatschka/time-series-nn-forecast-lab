@@ -77,9 +77,9 @@ def main():
     # Define the operation manually (tuning, training, or evaluation)
 
     # --- SETTINGS ---
-    operation = "training"  # tuning, training, evaluation, visualizeDS
+    operation = "evaluation"  # tuning, training, evaluation, visualizeDS
     location = "file" # file, script
-    prefix_file = "experiment_configs/weatherstation/"
+    prefix_file = "experiment_configs/illness/"
     # ----------------
 
     # Generate timestamped tracking file name

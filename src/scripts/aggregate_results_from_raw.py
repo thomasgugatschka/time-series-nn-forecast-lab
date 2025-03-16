@@ -117,8 +117,8 @@ def plot_confidence_band_per_model_type(results_df, output_dir, metric_name):
 
 def main():
     dataset_config = {
-        "dataset_name": "weatherstation",
-        "ts_past": 168,
+        "dataset_name": "illness",
+        "ts_past": 96,
         "ts_future": 24,
     }
 

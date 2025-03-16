@@ -82,6 +82,7 @@ def evaluate_model(wrapper, hyperparameters, test_data, ts_past, ts_future, data
 
     # IMPROVEMENT: Option to use DataLoader (test data loader) for evaluation or manual iteration
     for i in range(0, x_test.size(0), ts_future):  # Shift by ts_future instead of 1
+ #   for i in range(0, x_test.size(0), 1):  # Shift by 1 instead of ts_future
 
 
         # Extract the context for all features

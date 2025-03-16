@@ -1,0 +1,83 @@
+@startuml
+
+title Hyperparameter Tuning Sequence Diagram
+
+
+actor User
+participant "Main" as Main
+participant "ConfigManager" as ConfigManager
+participant "DataManager" as DataManager
+participant "ExperimentManager" as ExperimentManager
+participant "HyperparameterManager" as HyperparameterManager
+participant "EnvManager" as EnvManager
+participant "StrategyFactory" as StrategyFactory
+participant "Ray Tune" as RayTune
+participant "Objective Function" as Objective
+participant "CallbackManager" as CallbackManager
+participant "TrainingPipelineBuilder" as Builder
+participant "TrainingPipeline" as TrainingPipeline
+participant "DataLoader" as DataLoader
+participant "Model" as Model
+
+User -> Main: Run Script
+Main -> Main: parse_args()
+Main -> ConfigManager: Load Configurations
+Main -> DataManager: Initialize DataManager
+Main -> ExperimentManager: Manage Experiment
+Main -> HyperparameterManager: Load Hyperparameter Search Space
+Main -> EnvManager: Get Environment Variables
+Main -> StrategyFactory: Create Search and Scheduler Strategies
+Main -> RayTune: Initialize Ray
+Main -> RayTune: Perform Hyperparameter Tuning (tune.run)
+
+
+loop For each trial (Ray Tune Iteration)
+  RayTune -> Objective: Call Objective Function
+  Objective -> DataManager: Load Raw Data
+  Objective -> DataManager: Preprocess Data (Crop, Normalize, Split)
+  Objective -> DataManager: Create DataLoaders
+
+  Objective -> Model: Create Model (ModelFactory)
+  Objective -> Model: Get Optimizer
+  Objective -> Model: Get Loss Function
+  Objective -> Model: Wrap Model (WrapperFactory)
+
+
+  Objective -> CallbackManager: Initialize Callbacks (Logging, Plotting, EarlyStopping, TensorBoard)
+
+  Objective -> Builder: Create TrainingPipeline
+  Builder -> Builder: Set Model
+  Builder -> Builder: Set DataLoaders
+  Builder -> Builder: Set Callbacks
+  Builder -> Builder: Set Epochs
+  Builder -> Objective: Return TrainingPipeline
+  Objective -> TrainingPipeline: Run Training
+    loop For Each Epoch
+      TrainingPipeline -> DataLoader: Fetch Batches (Train)
+      TrainingPipeline -> TrainingPipeline: Train
+      TrainingPipeline -> TrainingPipeline: Calculate train_loss
+      TrainingPipeline -> DataLoader: Fetch Batches (Validation)
+      TrainingPipeline -> TrainingPipeline: Validate
+      TrainingPipeline -> TrainingPipeline: Calculate val_loss
+      TrainingPipeline -> CallbackManager: Execute Callbacks
+
+
+    end
+
+
+
+  TrainingPipeline -> CallbackManager: Trigger Callbacks (on_epoch_begin, on_batch_end, etc.)
+  TrainingPipeline -> DataLoader: Fetch Batches (Train, Validation)
+  TrainingPipeline -> Model: Forward/Backward Pass
+
+  Objective -> RayTune: Return Trial Results
+end
+
+
+
+Main -> ExperimentManager: Save Tuning Results
+Main -> ExperimentManager: Finalize Experiment
+Main -> RayTune: Shutdown Ray
+Main -> User: Completion Message
+
+@enduml

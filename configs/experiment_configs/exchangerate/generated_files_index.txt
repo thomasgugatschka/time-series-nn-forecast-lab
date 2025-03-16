@@ -1,0 +1,2 @@
+config_gru_exchangerate_0.1-0.1-0.1.yaml
+config_transformer_exchangerate_0.8-0.1-0.1_fixed-window.yaml
