@@ -1,0 +1,66 @@
+{\small
+\begin{longtable}{l l c c c c c c c c}
+    \toprule
+    \textbf{Modell} & \textbf{Metrik} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} & \textbf{40\%} & \textbf{50\%} & \textbf{60\%} & \textbf{70\%} & \textbf{80\%} \\
+    \midrule
+    \endfirsthead
+    \multicolumn{10}{c}{\textit{Fortsetzung von vorheriger Seite}} \\
+    \toprule
+    \textbf{Modell} & \textbf{Metrik} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} & \textbf{40\%} & \textbf{50\%} & \textbf{60\%} & \textbf{70\%} & \textbf{80\%} \\
+    \midrule
+    \endhead
+    \midrule
+    \multicolumn{10}{r}{\textit{Fortsetzung auf der nächsten Seite}} \\
+    \midrule
+    \endfoot
+    \bottomrule
+    \caption{weatherstation_168_24 -- Normalized Metriken für Transformer-FS}
+    \label{tab:weatherstation_168_24_normalized_transformer-fs}
+    \endlastfoot
+\multirow{4}{*}{Transformer-FS} & MAE\textsubscript{average} & 0.2275 & 0.1974 & 0.1856 & 0.1813 & 0.1739 & 0.1856 & 0.1760 & 0.1804 \\
+ & MAE\textsubscript{stddev} & 0.0127 & 0.0026 & 0.0047 & 0.0021 & 0.0007 & 0.0062 & 0.0050 & 0.0108 \\
+ & MAE\textsubscript{best} & 0.2148 & 0.1947 & 0.1810 & 0.1792 & 0.1731 & 0.1794 & 0.1710 & 0.1697 \\
+ & MAE\textsubscript{worst} & 0.2403 & 0.2000 & 0.1903 & 0.1835 & 0.1746 & 0.1919 & 0.1810 & 0.1912 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{Transformer-FS} & MSE\textsubscript{average} & 0.0867 & 0.0691 & 0.0588 & 0.0584 & 0.0544 & 0.0600 & 0.0558 & 0.0624 \\
+ & MSE\textsubscript{stddev} & 0.0071 & 0.0012 & 0.0023 & 0.0021 & 0.0005 & 0.0023 & 0.0041 & 0.0091 \\
+ & MSE\textsubscript{best} & 0.0795 & 0.0679 & 0.0565 & 0.0563 & 0.0539 & 0.0576 & 0.0517 & 0.0532 \\
+ & MSE\textsubscript{worst} & 0.0938 & 0.0703 & 0.0610 & 0.0605 & 0.0549 & 0.0623 & 0.0599 & 0.0715 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{Transformer-FS} & RMSE\textsubscript{average} & 0.2611 & 0.2311 & 0.2173 & 0.2119 & 0.2049 & 0.2176 & 0.2082 & 0.2130 \\
+ & RMSE\textsubscript{stddev} & 0.0125 & 0.0024 & 0.0038 & 0.0020 & 0.0005 & 0.0058 & 0.0053 & 0.0127 \\
+ & RMSE\textsubscript{best} & 0.2487 & 0.2287 & 0.2135 & 0.2099 & 0.2044 & 0.2118 & 0.2030 & 0.2003 \\
+ & RMSE\textsubscript{worst} & 0.2736 & 0.2336 & 0.2211 & 0.2139 & 0.2053 & 0.2234 & 0.2135 & 0.2257 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{Transformer-FS} & MAPE\textsubscript{average} & 141.10 & 110.57 & 117.66 & 118.33 & 126.22 & 125.03 & 119.65 & 123.44 \\
+ & MAPE\textsubscript{stddev} & 0.7558 & 8.6831 & 0.3215 & 2.5387 & 4.6388 & 1.5995 & 1.2265 & 7.5598 \\
+ & MAPE\textsubscript{best} & 141.85 & 101.89 & 117.34 & 115.80 & 121.58 & 123.43 & 118.42 & 115.88 \\
+ & MAPE\textsubscript{worst} & 140.34 & 119.25 & 117.98 & 120.87 & 130.86 & 126.63 & 120.87 & 131.00 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{Transformer-FS} & SMAPE\textsubscript{average} & 48.270 & 44.068 & 42.266 & 42.331 & 40.507 & 42.658 & 40.916 & 41.044 \\
+ & SMAPE\textsubscript{stddev} & 1.7706 & 0.6028 & 0.6857 & 0.1379 & 0.1953 & 1.6708 & 0.8940 & 1.5056 \\
+ & SMAPE\textsubscript{best} & 46.499 & 43.465 & 41.580 & 42.193 & 40.312 & 40.988 & 40.022 & 39.538 \\
+ & SMAPE\textsubscript{worst} & 50.040 & 44.671 & 42.951 & 42.468 & 40.703 & 44.329 & 41.810 & 42.550 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{Transformer-FS} & WAPE\textsubscript{average} & 0.4712 & 0.4013 & 0.3901 & 0.3899 & 0.3800 & 0.3962 & 0.3847 & 0.3987 \\
+ & WAPE\textsubscript{stddev} & 0.0214 & 0.0120 & 0.0079 & 0.0041 & 0.0051 & 0.0080 & 0.0125 & 0.0260 \\
+ & WAPE\textsubscript{best} & 0.4498 & 0.3893 & 0.3823 & 0.3858 & 0.3749 & 0.3882 & 0.3722 & 0.3728 \\
+ & WAPE\textsubscript{worst} & 0.4925 & 0.4133 & 0.3980 & 0.3940 & 0.3851 & 0.4042 & 0.3972 & 0.4247 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{Transformer-FS} & CORR\textsubscript{average} & 0.6361 & 0.6935 & 0.6914 & 0.7133 & 0.7063 & 0.6451 & 0.6999 & 0.7178 \\
+ & CORR\textsubscript{stddev} & 0.0127 & 0.0003 & 0.0257 & 0.0026 & 0.0032 & 0.0274 & 0.0014 & 0.0096 \\
+ & CORR\textsubscript{best} & 0.6488 & 0.6937 & 0.6656 & 0.7159 & 0.7032 & 0.6725 & 0.7014 & 0.7274 \\
+ & CORR\textsubscript{worst} & 0.6234 & 0.6932 & 0.7171 & 0.7108 & 0.7095 & 0.6177 & 0.6985 & 0.7081 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{Transformer-FS} & NRMSE\textsubscript{average} & 0.4464 & 0.3908 & 0.3621 & 0.3619 & 0.3433 & 0.3600 & 0.3537 & 0.3779 \\
+ & NRMSE\textsubscript{stddev} & 0.0095 & 0.0016 & 0.0087 & 0.0020 & 0.0019 & 0.0099 & 0.0142 & 0.0244 \\
+ & NRMSE\textsubscript{best} & 0.4369 & 0.3892 & 0.3534 & 0.3599 & 0.3414 & 0.3501 & 0.3395 & 0.3535 \\
+ & NRMSE\textsubscript{worst} & 0.4559 & 0.3924 & 0.3709 & 0.3638 & 0.3451 & 0.3700 & 0.3679 & 0.4023 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{Transformer-FS} & RRSE\textsubscript{average} & 1.4939 & 1.2990 & 1.1991 & 1.2050 & 1.1513 & 1.1972 & 1.1838 & 1.2716 \\
+ & RRSE\textsubscript{stddev} & 0.0152 & 0.0011 & 0.0277 & 0.0058 & 0.0088 & 0.0356 & 0.0510 & 0.0770 \\
+ & RRSE\textsubscript{best} & 1.4788 & 1.3001 & 1.1714 & 1.1992 & 1.1425 & 1.1616 & 1.1328 & 1.1946 \\
+ & RRSE\textsubscript{worst} & 1.5091 & 1.2979 & 1.2268 & 1.2108 & 1.1601 & 1.2328 & 1.2348 & 1.3486 \\
+\cmidrule(lr){2-10}
+\end{longtable}
+}

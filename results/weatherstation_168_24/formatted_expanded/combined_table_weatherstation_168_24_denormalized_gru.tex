@@ -1,0 +1,66 @@
+{\small
+\begin{longtable}{l l c c c c c c c c}
+    \toprule
+    \textbf{Modell} & \textbf{Metrik} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} & \textbf{40\%} & \textbf{50\%} & \textbf{60\%} & \textbf{70\%} & \textbf{80\%} \\
+    \midrule
+    \endfirsthead
+    \multicolumn{10}{c}{\textit{Fortsetzung von vorheriger Seite}} \\
+    \toprule
+    \textbf{Modell} & \textbf{Metrik} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} & \textbf{40\%} & \textbf{50\%} & \textbf{60\%} & \textbf{70\%} & \textbf{80\%} \\
+    \midrule
+    \endhead
+    \midrule
+    \multicolumn{10}{r}{\textit{Fortsetzung auf der nächsten Seite}} \\
+    \midrule
+    \endfoot
+    \bottomrule
+    \caption{weatherstation_168_24 -- Denormalized Metriken für GRU}
+    \label{tab:weatherstation_168_24_denormalized_gru}
+    \endlastfoot
+\multirow{4}{*}{GRU} & MAE\textsubscript{average} & 2.8143 & 2.5975 & 2.1301 & 1.9036 & 1.8706 & 2.1265 & 2.2637 & 1.9086 \\
+ & MAE\textsubscript{stddev} & 0.0482 & 0.0527 & 0.0341 & 0.0370 & 0.0216 & 0.2756 & 0.4096 & 0.0012 \\
+ & MAE\textsubscript{best} & 2.7661 & 2.5449 & 2.0960 & 1.8667 & 1.8490 & 1.8509 & 1.8541 & 1.9074 \\
+ & MAE\textsubscript{worst} & 2.8625 & 2.6502 & 2.1642 & 1.9406 & 1.8922 & 2.4020 & 2.6734 & 1.9098 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{GRU} & MSE\textsubscript{average} & 13.083 & 12.762 & 7.9205 & 6.9047 & 6.5899 & 9.1427 & 10.471 & 7.3419 \\
+ & MSE\textsubscript{stddev} & 0.3587 & 0.3186 & 0.2807 & 0.2000 & 0.1745 & 2.6728 & 3.8245 & 0.2859 \\
+ & MSE\textsubscript{best} & 12.724 & 13.081 & 7.6398 & 6.7047 & 6.4154 & 6.4698 & 6.6462 & 7.6278 \\
+ & MSE\textsubscript{worst} & 13.442 & 12.443 & 8.2013 & 7.1047 & 6.7643 & 11.815 & 14.295 & 7.0560 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{GRU} & RMSE\textsubscript{average} & 3.3130 & 3.0368 & 2.5108 & 2.3001 & 2.2616 & 2.5520 & 2.6884 & 2.3187 \\
+ & RMSE\textsubscript{stddev} & 0.0593 & 0.0282 & 0.0378 & 0.0363 & 0.0226 & 0.3125 & 0.4423 & 0.0002 \\
+ & RMSE\textsubscript{best} & 3.2537 & 3.0085 & 2.4731 & 2.2638 & 2.2389 & 2.2395 & 2.2461 & 2.3185 \\
+ & RMSE\textsubscript{worst} & 3.3723 & 3.0650 & 2.5486 & 2.3363 & 2.2842 & 2.8646 & 3.1308 & 2.3189 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{GRU} & MAPE\textsubscript{average} & 108298358 & 97429691 & 84712850 & 88041523 & 78647554 & 97446246 & 85252388 & 61380585 \\
+ & MAPE\textsubscript{stddev} & 5035104 & 22258930 & 8032408 & 8941295 & 2844779 & 24013543 & 17176235 & 15656980 \\
+ & MAPE\textsubscript{best} & 103263255 & 119688620 & 76680443 & 79100228 & 81492333 & 73432703 & 68076152 & 77037565 \\
+ & MAPE\textsubscript{worst} & 113333462 & 75170761 & 92745258 & 96982818 & 75802775 & 121459789 & 102428623 & 45723606 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{GRU} & SMAPE\textsubscript{average} & 32.527 & 32.277 & 27.794 & 25.277 & 24.615 & 28.015 & 28.756 & 24.810 \\
+ & SMAPE\textsubscript{stddev} & 0.3684 & 0.8357 & 0.1440 & 0.5493 & 0.4768 & 3.3843 & 4.4448 & 0.2836 \\
+ & SMAPE\textsubscript{best} & 32.159 & 31.441 & 27.650 & 24.727 & 24.138 & 24.631 & 24.311 & 24.526 \\
+ & SMAPE\textsubscript{worst} & 32.896 & 33.112 & 27.938 & 25.826 & 25.092 & 31.399 & 33.200 & 25.093 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{GRU} & WAPE\textsubscript{average} & 0.3146 & 0.3512 & 0.2667 & 0.2394 & 0.2344 & 0.2829 & 0.2979 & 0.2399 \\
+ & WAPE\textsubscript{stddev} & 0.0054 & 0.0027 & 0.0065 & 0.0016 & 0.0017 & 0.0495 & 0.0649 & 0.0048 \\
+ & WAPE\textsubscript{best} & 0.3092 & 0.3538 & 0.2602 & 0.2378 & 0.2328 & 0.2334 & 0.2330 & 0.2447 \\
+ & WAPE\textsubscript{worst} & 0.3200 & 0.3485 & 0.2732 & 0.2409 & 0.2361 & 0.3324 & 0.3628 & 0.2351 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{GRU} & CORR\textsubscript{average} & 0.3717 & 0.7218 & 0.7073 & 0.7517 & 0.7621 & 0.7411 & 0.7433 & 0.7625 \\
+ & CORR\textsubscript{stddev} & 0.0076 & 0.0086 & 0.0055 & 0.0276 & 0.0017 & 0.0339 & 0.0257 & 0.0020 \\
+ & CORR\textsubscript{best} & 0.3792 & 0.7132 & 0.7127 & 0.7793 & 0.7638 & 0.7751 & 0.7690 & 0.7605 \\
+ & CORR\textsubscript{worst} & 0.3641 & 0.7305 & 0.7018 & 0.7241 & 0.7604 & 0.7072 & 0.7175 & 0.7645 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{GRU} & NRMSE\textsubscript{average} & 0.4232 & 0.4404 & 0.3374 & 0.3141 & 0.3101 & 0.3577 & 0.3793 & 0.3182 \\
+ & NRMSE\textsubscript{stddev} & 0.0010 & 0.0117 & 0.0056 & 0.0015 & 0.0001 & 0.0469 & 0.0687 & 0.0007 \\
+ & NRMSE\textsubscript{best} & 0.4222 & 0.4287 & 0.3319 & 0.3156 & 0.3100 & 0.3108 & 0.3106 & 0.3175 \\
+ & NRMSE\textsubscript{worst} & 0.4242 & 0.4520 & 0.3430 & 0.3125 & 0.3102 & 0.4045 & 0.4480 & 0.3190 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{GRU} & RRSE\textsubscript{average} & 1.3861 & 1.4457 & 1.1169 & 1.0389 & 1.0243 & 1.1794 & 1.2503 & 1.0456 \\
+ & RRSE\textsubscript{stddev} & 0.0019 & 0.0380 & 0.0193 & 0.0022 & 0.0008 & 0.1516 & 0.2283 & 0.0011 \\
+ & RRSE\textsubscript{best} & 1.3880 & 1.4077 & 1.0975 & 1.0412 & 1.0250 & 1.0277 & 1.0221 & 1.0445 \\
+ & RRSE\textsubscript{worst} & 1.3843 & 1.4838 & 1.1362 & 1.0367 & 1.0235 & 1.3310 & 1.4786 & 1.0467 \\
+\cmidrule(lr){2-10}
+\end{longtable}
+}

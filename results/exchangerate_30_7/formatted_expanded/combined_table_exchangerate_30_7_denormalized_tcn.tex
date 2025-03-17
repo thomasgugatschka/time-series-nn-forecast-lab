@@ -1,0 +1,66 @@
+{\small
+\begin{longtable}{l l c c c c c c c c}
+    \toprule
+    \textbf{Modell} & \textbf{Metrik} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} & \textbf{40\%} & \textbf{50\%} & \textbf{60\%} & \textbf{70\%} & \textbf{80\%} \\
+    \midrule
+    \endfirsthead
+    \multicolumn{10}{c}{\textit{Fortsetzung von vorheriger Seite}} \\
+    \toprule
+    \textbf{Modell} & \textbf{Metrik} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} & \textbf{40\%} & \textbf{50\%} & \textbf{60\%} & \textbf{70\%} & \textbf{80\%} \\
+    \midrule
+    \endhead
+    \midrule
+    \multicolumn{10}{r}{\textit{Fortsetzung auf der nächsten Seite}} \\
+    \midrule
+    \endfoot
+    \bottomrule
+    \caption{exchangerate_30_7 -- Denormalized Metriken für TCN}
+    \label{tab:exchangerate_30_7_denormalized_tcn}
+    \endlastfoot
+\multirow{4}{*}{TCN} & MAE\textsubscript{average} & 0.0486 & 0.0254 & 0.0322 & 0.0254 & 0.0215 & 0.0259 & 0.0301 & 0.0161 \\
+ & MAE\textsubscript{stddev} & 0.0128 & 0.0069 & 0.0116 & 0.0135 & 0.0024 & 0.0036 & 0.0038 & 0.0021 \\
+ & MAE\textsubscript{best} & 0.0358 & 0.0185 & 0.0206 & 0.0120 & 0.0191 & 0.0222 & 0.0263 & 0.0140 \\
+ & MAE\textsubscript{worst} & 0.0614 & 0.0323 & 0.0438 & 0.0389 & 0.0239 & 0.0295 & 0.0339 & 0.0182 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{TCN} & MSE\textsubscript{average} & 0.0029 & 0.0009 & 0.0014 & 0.0011 & 0.0006 & 0.0009 & 0.0011 & 0.0004 \\
+ & MSE\textsubscript{stddev} & 0.0012 & 0.0004 & 0.0008 & 0.0009 & 0.0001 & 0.0003 & 0.0003 & 0.0001 \\
+ & MSE\textsubscript{best} & 0.0017 & 0.0005 & 0.0006 & 0.0002 & 0.0005 & 0.0006 & 0.0008 & 0.0003 \\
+ & MSE\textsubscript{worst} & 0.0041 & 0.0013 & 0.0022 & 0.0020 & 0.0007 & 0.0012 & 0.0013 & 0.0004 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{TCN} & RMSE\textsubscript{average} & 0.0491 & 0.0261 & 0.0328 & 0.0261 & 0.0223 & 0.0265 & 0.0306 & 0.0169 \\
+ & RMSE\textsubscript{stddev} & 0.0127 & 0.0067 & 0.0114 & 0.0134 & 0.0022 & 0.0036 & 0.0038 & 0.0021 \\
+ & RMSE\textsubscript{best} & 0.0364 & 0.0194 & 0.0214 & 0.0127 & 0.0202 & 0.0229 & 0.0268 & 0.0148 \\
+ & RMSE\textsubscript{worst} & 0.0618 & 0.0328 & 0.0442 & 0.0395 & 0.0245 & 0.0301 & 0.0344 & 0.0190 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{TCN} & MAPE\textsubscript{average} & 7.0488 & 3.6832 & 4.6051 & 3.7091 & 3.0747 & 3.7491 & 4.3436 & 2.3278 \\
+ & MAPE\textsubscript{stddev} & 1.8415 & 1.0235 & 1.6722 & 1.9934 & 0.3482 & 0.5394 & 0.5628 & 0.2904 \\
+ & MAPE\textsubscript{best} & 5.2073 & 2.6597 & 2.9328 & 1.7157 & 2.7264 & 3.2097 & 3.7808 & 2.0374 \\
+ & MAPE\textsubscript{worst} & 8.8903 & 4.7068 & 6.2773 & 5.7024 & 3.4229 & 4.2884 & 4.9065 & 2.6182 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{TCN} & SMAPE\textsubscript{average} & 6.7568 & 3.7329 & 4.4696 & 3.8202 & 3.0628 & 3.6563 & 4.2359 & 2.3181 \\
+ & SMAPE\textsubscript{stddev} & 1.7192 & 1.1210 & 1.5921 & 2.1172 & 0.2901 & 0.5125 & 0.5362 & 0.2548 \\
+ & SMAPE\textsubscript{best} & 5.0377 & 2.6120 & 2.8775 & 1.7029 & 2.7727 & 3.1437 & 3.6997 & 2.0633 \\
+ & SMAPE\textsubscript{worst} & 8.4760 & 4.8539 & 6.0617 & 5.9374 & 3.3528 & 4.1688 & 4.7721 & 2.5729 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{TCN} & WAPE\textsubscript{average} & 0.0704 & 0.0368 & 0.0460 & 0.0371 & 0.0307 & 0.0374 & 0.0434 & 0.0233 \\
+ & WAPE\textsubscript{stddev} & 0.0184 & 0.0103 & 0.0167 & 0.0200 & 0.0034 & 0.0054 & 0.0056 & 0.0029 \\
+ & WAPE\textsubscript{best} & 0.0520 & 0.0266 & 0.0293 & 0.0171 & 0.0273 & 0.0320 & 0.0378 & 0.0204 \\
+ & WAPE\textsubscript{worst} & 0.0889 & 0.0471 & 0.0627 & 0.0571 & 0.0342 & 0.0428 & 0.0490 & 0.0261 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{TCN} & CORR\textsubscript{average} & -0.0272 & -0.0390 & 0.0563 & 0.0287 & 0.0240 & 0.0285 & 0.0015 & 0.0257 \\
+ & CORR\textsubscript{stddev} & 0.0197 & 0.0090 & 0.0297 & 0.0673 & 0.0104 & 0.0139 & 0.0153 & 0.0673 \\
+ & CORR\textsubscript{best} & -0.0469 & -0.0300 & 0.0266 & 0.0960 & 0.0344 & 0.0146 & -0.0138 & -0.0416 \\
+ & CORR\textsubscript{worst} & -0.0076 & -0.0480 & 0.0860 & -0.0386 & 0.0136 & 0.0424 & 0.0169 & 0.0929 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{TCN} & NRMSE\textsubscript{average} & 4.9885 & 2.6393 & 3.3614 & 2.5868 & 2.2636 & 2.6018 & 3.0981 & 1.6379 \\
+ & NRMSE\textsubscript{stddev} & 1.2163 & 0.6716 & 1.2197 & 1.3444 & 0.1866 & 0.3540 & 0.3866 & 0.2595 \\
+ & NRMSE\textsubscript{best} & 3.7722 & 1.9677 & 2.1417 & 1.2424 & 2.0770 & 2.2478 & 2.7114 & 1.3784 \\
+ & NRMSE\textsubscript{worst} & 6.2048 & 3.3110 & 4.5811 & 3.9311 & 2.4503 & 2.9558 & 3.4847 & 1.8974 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{TCN} & RRSE\textsubscript{average} & 14.799 & 7.8216 & 9.9559 & 7.6350 & 6.6829 & 7.6796 & 9.1724 & 4.8276 \\
+ & RRSE\textsubscript{stddev} & 3.5764 & 1.9807 & 3.6470 & 3.9535 & 0.5723 & 0.9937 & 1.1469 & 0.7839 \\
+ & RRSE\textsubscript{best} & 11.223 & 5.8409 & 6.3088 & 3.6816 & 6.1106 & 6.6859 & 8.0255 & 4.0437 \\
+ & RRSE\textsubscript{worst} & 18.375 & 9.8023 & 13.603 & 11.589 & 7.2552 & 8.6733 & 10.319 & 5.6115 \\
+\cmidrule(lr){2-10}
+\end{longtable}
+}

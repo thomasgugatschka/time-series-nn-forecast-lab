@@ -1,0 +1,66 @@
+{\small
+\begin{longtable}{l l c c c c c c}
+    \toprule
+    \textbf{Modell} & \textbf{Metrik} & \textbf{10\%} & \textbf{20\%} & \textbf{40\%} & \textbf{50\%} & \textbf{70\%} & \textbf{80\%} \\
+    \midrule
+    \endfirsthead
+    \multicolumn{8}{c}{\textit{Fortsetzung von vorheriger Seite}} \\
+    \toprule
+    \textbf{Modell} & \textbf{Metrik} & \textbf{10\%} & \textbf{20\%} & \textbf{40\%} & \textbf{50\%} & \textbf{70\%} & \textbf{80\%} \\
+    \midrule
+    \endhead
+    \midrule
+    \multicolumn{8}{r}{\textit{Fortsetzung auf der nächsten Seite}} \\
+    \midrule
+    \endfoot
+    \bottomrule
+    \caption{weatherstation_168_24 -- Denormalized Metriken für TCN}
+    \label{tab:weatherstation_168_24_denormalized_tcn}
+    \endlastfoot
+\multirow{4}{*}{TCN} & MAE\textsubscript{average} & 2.3571 & 2.1558 & 2.0615 & 1.9089 & 1.8259 & 1.8834 \\
+ & MAE\textsubscript{stddev} & 0.0495 & 0.0165 & 0.1301 & 0.0045 & 0.0351 & 0.0221 \\
+ & MAE\textsubscript{best} & 2.3076 & 2.1393 & 1.9314 & 1.9044 & 1.7908 & 1.8614 \\
+ & MAE\textsubscript{worst} & 2.4066 & 2.1723 & 2.1915 & 1.9133 & 1.8610 & 1.9055 \\
+\cmidrule(lr){2-8}
+\multirow{4}{*}{TCN} & MSE\textsubscript{average} & 9.7697 & 8.0298 & 7.5620 & 7.0115 & 6.3518 & 6.7991 \\
+ & MSE\textsubscript{stddev} & 0.3242 & 0.0625 & 0.9605 & 0.0050 & 0.1490 & 0.0034 \\
+ & MSE\textsubscript{best} & 9.4455 & 7.9673 & 6.6015 & 7.0165 & 6.2028 & 6.8025 \\
+ & MSE\textsubscript{worst} & 10.094 & 8.0923 & 8.5225 & 7.0066 & 6.5008 & 6.7957 \\
+\cmidrule(lr){2-8}
+\multirow{4}{*}{TCN} & RMSE\textsubscript{average} & 2.8176 & 2.5387 & 2.4699 & 2.3236 & 2.2178 & 2.2836 \\
+ & RMSE\textsubscript{stddev} & 0.0549 & 0.0063 & 0.1649 & 0.0005 & 0.0397 & 0.0134 \\
+ & RMSE\textsubscript{best} & 2.7627 & 2.5324 & 2.3051 & 2.3232 & 2.1781 & 2.2701 \\
+ & RMSE\textsubscript{worst} & 2.8725 & 2.5450 & 2.6348 & 2.3241 & 2.2576 & 2.2970 \\
+\cmidrule(lr){2-8}
+\multirow{4}{*}{TCN} & MAPE\textsubscript{average} & 104110486 & 94152595 & 84043925 & 65661814 & 70865514 & 79273198 \\
+ & MAPE\textsubscript{stddev} & 30051 & 7698405 & 22568708 & 1734295 & 2660612 & 2789094 \\
+ & MAPE\textsubscript{best} & 104140537 & 101850999 & 61475217 & 67396109 & 73526126 & 76484104 \\
+ & MAPE\textsubscript{worst} & 104080434 & 86454190 & 106612634 & 63927519 & 68204902 & 82062292 \\
+\cmidrule(lr){2-8}
+\multirow{4}{*}{TCN} & SMAPE\textsubscript{average} & 30.049 & 27.823 & 27.383 & 25.257 & 24.339 & 25.004 \\
+ & SMAPE\textsubscript{stddev} & 0.5055 & 0.1127 & 1.5309 & 0.2783 & 0.7011 & 0.2920 \\
+ & SMAPE\textsubscript{best} & 29.543 & 27.710 & 25.852 & 25.535 & 23.637 & 24.712 \\
+ & SMAPE\textsubscript{worst} & 30.554 & 27.936 & 28.914 & 24.978 & 25.040 & 25.296 \\
+\cmidrule(lr){2-8}
+\multirow{4}{*}{TCN} & WAPE\textsubscript{average} & 0.2849 & 0.2630 & 0.2483 & 0.2415 & 0.2295 & 0.2411 \\
+ & WAPE\textsubscript{stddev} & 0.0005 & 0.0046 & 0.0113 & 0.0020 & 0.0078 & 0.0024 \\
+ & WAPE\textsubscript{best} & 0.2854 & 0.2677 & 0.2371 & 0.2435 & 0.2217 & 0.2388 \\
+ & WAPE\textsubscript{worst} & 0.2844 & 0.2584 & 0.2596 & 0.2395 & 0.2372 & 0.2435 \\
+\cmidrule(lr){2-8}
+\multirow{4}{*}{TCN} & CORR\textsubscript{average} & 0.5719 & 0.7230 & 0.6807 & 0.7396 & 0.7565 & 0.7583 \\
+ & CORR\textsubscript{stddev} & 0.0179 & 0.0071 & 0.0714 & 0.0156 & 0.0060 & 0.0058 \\
+ & CORR\textsubscript{best} & 0.5897 & 0.7159 & 0.7521 & 0.7241 & 0.7625 & 0.7640 \\
+ & CORR\textsubscript{worst} & 0.5540 & 0.7302 & 0.6093 & 0.7552 & 0.7505 & 0.7525 \\
+\cmidrule(lr){2-8}
+\multirow{4}{*}{TCN} & NRMSE\textsubscript{average} & 0.3715 & 0.3414 & 0.3222 & 0.3043 & 0.2938 & 0.3050 \\
+ & NRMSE\textsubscript{stddev} & 0.0038 & 0.0008 & 0.0141 & 0.0016 & 0.0054 & 0.0018 \\
+ & NRMSE\textsubscript{best} & 0.3676 & 0.3406 & 0.3082 & 0.3027 & 0.2884 & 0.3068 \\
+ & NRMSE\textsubscript{worst} & 0.3753 & 0.3423 & 0.3363 & 0.3058 & 0.2991 & 0.3032 \\
+\cmidrule(lr){2-8}
+\multirow{4}{*}{TCN} & RRSE\textsubscript{average} & 1.2158 & 1.1242 & 1.0596 & 1.0013 & 0.9693 & 1.0055 \\
+ & RRSE\textsubscript{stddev} & 0.0131 & 0.0007 & 0.0409 & 0.0066 & 0.0187 & 0.0097 \\
+ & RRSE\textsubscript{best} & 1.2027 & 1.1235 & 1.0187 & 0.9948 & 0.9505 & 1.0152 \\
+ & RRSE\textsubscript{worst} & 1.2289 & 1.1249 & 1.1005 & 1.0079 & 0.9880 & 0.9959 \\
+\cmidrule(lr){2-8}
+\end{longtable}
+}

@@ -1,0 +1,66 @@
+{\small
+\begin{longtable}{l l c c c c c c c c}
+    \toprule
+    \textbf{Modell} & \textbf{Metrik} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} & \textbf{40\%} & \textbf{50\%} & \textbf{60\%} & \textbf{70\%} & \textbf{80\%} \\
+    \midrule
+    \endfirsthead
+    \multicolumn{10}{c}{\textit{Fortsetzung von vorheriger Seite}} \\
+    \toprule
+    \textbf{Modell} & \textbf{Metrik} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} & \textbf{40\%} & \textbf{50\%} & \textbf{60\%} & \textbf{70\%} & \textbf{80\%} \\
+    \midrule
+    \endhead
+    \midrule
+    \multicolumn{10}{r}{\textit{Fortsetzung auf der nächsten Seite}} \\
+    \midrule
+    \endfoot
+    \bottomrule
+    \caption{weatherstation_168_24 -- Denormalized Metriken für CNN}
+    \label{tab:weatherstation_168_24_denormalized_cnn}
+    \endlastfoot
+\multirow{4}{*}{CNN} & MAE\textsubscript{average} & 2.7724 & 2.8170 & 2.7375 & 2.8924 & 2.6214 & 2.5091 & 2.5071 & 2.7671 \\
+ & MAE\textsubscript{stddev} & 0.0670 & 0.0171 & 0.0217 & 0.0107 & 0.1258 & 0.0482 & 0.0081 & 0.0993 \\
+ & MAE\textsubscript{best} & 2.7054 & 2.7999 & 2.7157 & 2.8817 & 2.4955 & 2.4609 & 2.4990 & 2.6679 \\
+ & MAE\textsubscript{worst} & 2.8394 & 2.8341 & 2.7592 & 2.9031 & 2.7472 & 2.5574 & 2.5152 & 2.8664 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{CNN} & MSE\textsubscript{average} & 12.692 & 12.849 & 12.560 & 13.608 & 11.845 & 11.155 & 11.231 & 12.610 \\
+ & MSE\textsubscript{stddev} & 0.6783 & 0.0543 & 0.1396 & 0.1885 & 0.7581 & 0.2452 & 0.0655 & 0.7198 \\
+ & MSE\textsubscript{best} & 12.014 & 12.795 & 12.421 & 13.419 & 11.087 & 10.910 & 11.166 & 11.890 \\
+ & MSE\textsubscript{worst} & 13.370 & 12.904 & 12.700 & 13.796 & 12.604 & 11.401 & 11.297 & 13.330 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{CNN} & RMSE\textsubscript{average} & 3.2706 & 3.3034 & 3.2274 & 3.3834 & 3.1368 & 3.0081 & 3.0128 & 3.2412 \\
+ & RMSE\textsubscript{stddev} & 0.0693 & 0.0201 & 0.0150 & 0.0150 & 0.1260 & 0.0327 & 0.0121 & 0.1070 \\
+ & RMSE\textsubscript{best} & 3.2013 & 3.2834 & 3.2124 & 3.3684 & 3.0107 & 2.9754 & 3.0007 & 3.1342 \\
+ & RMSE\textsubscript{worst} & 3.3399 & 3.3235 & 3.2424 & 3.3985 & 3.2628 & 3.0408 & 3.0248 & 3.3482 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{CNN} & MAPE\textsubscript{average} & 92846997 & 102011512 & 104510923 & 103135083 & 93591383 & 98968139 & 103181090 & 101999983 \\
+ & MAPE\textsubscript{stddev} & 4350747 & 2579897 & 6648374 & 3933715 & 1628842 & 4301767 & 2542943 & 1369376 \\
+ & MAPE\textsubscript{best} & 88496251 & 104591409 & 97862550 & 99201368 & 91962540 & 94666372 & 100638147 & 103369359 \\
+ & MAPE\textsubscript{worst} & 97197744 & 99431614 & 111159297 & 107068798 & 95220225 & 103269906 & 105724033 & 100630607 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{CNN} & SMAPE\textsubscript{average} & 33.876 & 34.240 & 33.381 & 34.080 & 32.528 & 30.573 & 31.291 & 33.599 \\
+ & SMAPE\textsubscript{stddev} & 0.3227 & 0.4037 & 0.3204 & 0.2430 & 1.4279 & 0.2973 & 0.4225 & 0.9098 \\
+ & SMAPE\textsubscript{best} & 33.554 & 33.836 & 33.060 & 33.837 & 31.101 & 30.276 & 30.869 & 32.689 \\
+ & SMAPE\textsubscript{worst} & 34.199 & 34.644 & 33.701 & 34.323 & 33.956 & 30.871 & 31.714 & 34.508 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{CNN} & WAPE\textsubscript{average} & 0.3189 & 0.3230 & 0.3207 & 0.3284 & 0.3048 & 0.2904 & 0.2999 & 0.3197 \\
+ & WAPE\textsubscript{stddev} & 0.0063 & 0.0022 & 0.0051 & 0.0001 & 0.0140 & 0.0018 & 0.0060 & 0.0062 \\
+ & WAPE\textsubscript{best} & 0.3125 & 0.3209 & 0.3156 & 0.3285 & 0.2908 & 0.2886 & 0.2940 & 0.3135 \\
+ & WAPE\textsubscript{worst} & 0.3252 & 0.3252 & 0.3257 & 0.3283 & 0.3188 & 0.2922 & 0.3059 & 0.3258 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{CNN} & CORR\textsubscript{average} & 0.3555 & 0.3577 & 0.3828 & 0.3251 & 0.3975 & 0.4483 & 0.4416 & 0.3753 \\
+ & CORR\textsubscript{stddev} & 0.0291 & 0.0184 & 0.0203 & 0.0108 & 0.0524 & 0.0027 & 0.0045 & 0.0147 \\
+ & CORR\textsubscript{best} & 0.3263 & 0.3393 & 0.3625 & 0.3360 & 0.4499 & 0.4510 & 0.4461 & 0.3900 \\
+ & CORR\textsubscript{worst} & 0.3846 & 0.3760 & 0.4032 & 0.3143 & 0.3450 & 0.4456 & 0.4371 & 0.3606 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{CNN} & NRMSE\textsubscript{average} & 0.4108 & 0.4163 & 0.4096 & 0.4179 & 0.3992 & 0.3883 & 0.3931 & 0.4085 \\
+ & NRMSE\textsubscript{stddev} & 0.0037 & 0.0021 & 0.0040 & 0.0008 & 0.0123 & 0.0021 & 0.0057 & 0.0094 \\
+ & NRMSE\textsubscript{best} & 0.4071 & 0.4142 & 0.4057 & 0.4171 & 0.3869 & 0.3862 & 0.3874 & 0.3991 \\
+ & NRMSE\textsubscript{worst} & 0.4145 & 0.4184 & 0.4136 & 0.4187 & 0.4115 & 0.3904 & 0.3987 & 0.4180 \\
+\cmidrule(lr){2-10}
+\multirow{4}{*}{CNN} & RRSE\textsubscript{average} & 1.3351 & 1.3532 & 1.3324 & 1.3548 & 1.2956 & 1.2643 & 1.2842 & 1.3275 \\
+ & RRSE\textsubscript{stddev} & 0.0112 & 0.0085 & 0.0173 & 0.0028 & 0.0371 & 0.0046 & 0.0218 & 0.0292 \\
+ & RRSE\textsubscript{best} & 1.3239 & 1.3447 & 1.3151 & 1.3520 & 1.2585 & 1.2597 & 1.2624 & 1.2983 \\
+ & RRSE\textsubscript{worst} & 1.3464 & 1.3616 & 1.3496 & 1.3576 & 1.3327 & 1.2690 & 1.3061 & 1.3567 \\
+\cmidrule(lr){2-10}
+\end{longtable}
+}
